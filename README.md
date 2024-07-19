@@ -1,6 +1,6 @@
 # Library cluster of automation facilities
 
-![logo](docs/autobahn.png)
+![logo](docs/classico.jpg)
 
 [bin](docs/bin.md): Utilities
 

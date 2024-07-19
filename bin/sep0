@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+import os
+
+try:
+    rows, cols = os.popen('stty size 2> /dev/null', 'r').read().split()
+except:
+    try:
+        rows, cols = os.environ.get("STTY_SIZE", "24 80").split()
+    except:
+        cols = 80
+
+print("-" * (int(cols) - 1) + "\n")

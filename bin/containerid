@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cat /proc/self/mountinfo | grep /containers/ | cut -d/ -f6 | head -1
+

@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import argparse
+import re
+import tempfile
+import urllib.request
+
+HERE = os.path.dirname(__file__)
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
+sys.path.insert(0, ROOT)
+import paella
+
+SSHFS_VERSION = "3.7.3"
+SSHFS_URL = f"https://github.com/libfuse/sshfs/releases/download/sshfs-{SSHFS_VERSION}/sshfs-{SSHFS_VERSION}.tar.xz"
+
+#----------------------------------------------------------------------------------------------
+
+class SSHFSSetup(paella.Setup):
+    def __init__(self, args):
+        paella.Setup.__init__(self, nop=args.nop)
+
+    def common_first(self):
+        self.install("sshfs")
+
+#----------------------------------------------------------------------------------------------
+
+class SSHFSSetupModern(paella.Setup):
+    def __init__(self, args):
+        paella.Setup.__init__(self, nop=args.nop)
+        self.modern = args.modern
+        self.keep = args.keep
+        self.prefix = "/usr/local"
+
+    def download(self):
+        self.base_dir = tempfile.mkdtemp(prefix='sshfs.')
+        print(f'# work dir: {self.base_dir}')
+        print(f'# getting sshfs from {SSHFS_URL}')
+        tar = paella.wget(SSHFS_URL, destdir=f'{self.base_dir}')
+        self.run(f'tar -C {self.base_dir} -xf {tar}')
+    
+    def common_first(self):
+        self.install_downloaders()
+        self.download()
+        self.install("meson ninja-build fuse3 pkg-config")
+
+    def debian_compat(self):
+        self.run(f"{HERE}/getgcc")
+        self.install("libfuse3-3 libfuse3-dev libglib2.0-0 libglib2.0-dev")
+
+    def redhat_compat(self):
+        self.run("{pwd}/getgcc --modern".format(pwd=HERE))
+        self.install("libfuse3-3 libfuse3-devel libglib2.0-0 libglib2.0-devel")
+
+    def fedora(self):
+        self.redhat_compat()
+
+    def archlinux(self):
+        self.run(f"{HERE}/getgcc")
+        self.install("libfuse3-3 libfuse3-dev libglib2.0-0 libglib2.0-dev")
+
+    def macos(self):
+        self.prefix = os.path.abspath(os.path.expanduser("~/.local"))
+        self.run(f"{HERE}/getgcc")
+        self.install("libfuse3-3 libfuse3-dev libglib2.0-0 libglib2.0-dev")
+
+    def common_last(self):
+        self.run(f"""
+            cd {self.base_dir}/sshfs-{SSHFS_VERSION}
+            mkdir -p build
+            cd build
+            meson ..
+            ninja
+            ninja install
+            """)
+        if not self.keep:
+            paella.rm_rf(self.base_dir)
+
+#----------------------------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser(description='Install SSHFS')
+parser.add_argument('-n', '--nop', action="store_true", help='No operation')
+parser.add_argument('--modern', action="store_true", help='Install latest gdb')
+parser.add_argument('--keep', action="store_true", help="Do not remove source files and build artifacts")
+args = parser.parse_args()
+
+if args.modern:
+    SSHFSSetupModern(args).setup()
+else:
+    SSHFSSetup(args).setup()

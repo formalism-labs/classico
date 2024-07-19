@@ -1,0 +1,413 @@
+#!/usr/bin/env bash
+
+# Check that Python 3 is installed (by checking for python and python3 commands).
+# If so, verify that python3 command is present.
+# If Python 3 is not found on the system, try to install it and repeat the abose checks.
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO="$(cd $HERE/.. && pwd)"
+. $CLASSICO/shibumi/defs
+
+export DEBIAN_FRONTEND=noninteractive
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+#----------------------------------------------------------------------------------------------
+
+if [[ $1 == --help || $1 == help || $HELP == 1 ]]; then
+	cat <<-'END'
+		[ARGVARS...] getpy3 [--help|help]
+
+		Argument variables:
+		MODERN=0|1|force        Whether to install a modern Python (>3.6)
+		MODERN_VERSION=ver      Install given modern (i.e. pyenv) Python version
+		SYSTEM_PYENV=1          Install system-wide pyenv (in /opt/pyenv)
+		MYPY=path               Use specific Python interpreter (install pip & requirements)
+		CHECK=1                 Only check and report, do not install
+		PIP=0                   Avoid installing pip
+		PIP=version             Also install pip of the specified version
+		VENV=1                  Install virtualenv
+		VENV=dir                Install virtualenv, create one in `dir`
+		FORCE=1                 Install even if present
+		FIX=1                   Create /usr/local/bin/python3 symlink (default on macOS)
+		VERBOSE=n               Verbosity level (1: print commands, 2: print results)
+		NOP=1                   Print commands, don't execute
+		HELP=1                  Print help
+
+	END
+	exit 0
+fi
+
+note() {
+	if (( VERBOSE >= 1 )); then
+		echo "# $@"
+	fi
+}
+
+#----------------------------------------------------------------------------------------------
+
+OP=""
+[[ $NOP == 1 ]] && OP=echo
+
+if [[ $MODERN == force ]]; then
+	MODERN=1
+	FORCE_MODERN=1
+fi
+MODERN_VERSION=${MODERN_VERSION:-3.12.1}
+
+SYSTEM_PYENV=${SYSTEM_PYENV:-0}
+
+DEFAULT_VENV_DIR="$HOME/.venv"
+[[ -z $VENV ]] && VENV="$DEFAULT_VENV_DIR"
+
+# [[ $VERBOSE == 1 ]] && { set -x; PS4='$LINENO: '; }
+V="$VERBOSE"
+[[ -z $PIP ]] && PIP=1
+
+[[ $CHECK == 1 ]] && VERBOSE=0
+
+USER_MYPY="$MYPY"
+
+#----------------------------------------------------------------------------------------------
+
+if [[ -f /etc/os-release ]]; then
+	os=$(source /etc/os-release; echo "${ID}")
+	osverid=$(source /etc/os-release; echo "${VERSION_ID}")
+	osver=$(source /etc/os-release; echo "${ID}${VERSION_ID}")
+fi
+arch=$(uname -m)
+
+SUDO=
+if [[ $(id -u) != 0 ]]; then
+	if is_command sudo; then
+		SUDO=sudo
+	fi
+fi
+
+[[ $os == mariner ]] && tdnf install -q -y awk
+
+#----------------------------------------------------------------------------------------------
+
+# the end state should be:
+# in a python2 venv: `python` command (don't fix)
+# in a non-python2 venv or outside venv:
+#   mandatory: `python3` command (fix)
+#   optional: `python` command (don't fix)
+
+fix_variants() {
+	if [[ -n $VIRTUAL_ENV ]]; then
+		[[ -n $PYTHON && "$PYTHON_VER" == "3"  ]] && return
+	fi
+
+	if [[ -z $PYTHON3 ]]; then
+		if [[ -n $PYTHON && "$PYTHON_VER" == "3"  ]]; then
+			note "create /usr/local/bin/python3 -> $PYTHON"
+			runn ln -sf $PYTHON /usr/local/bin/python3
+		fi
+	fi
+}
+
+check_variants() {
+	if [[ -n $USER_MYPY ]]; then
+		note "using Python $USER_MYPY"
+		PYTHON="$USER_MYPY"
+		PYTHON3="$USER_MYPY"
+		return
+	fi
+	
+	PYTHON=$(command -v python)
+	PYTHON3=$(command -v python3)
+
+	MYPY=""
+	PYTHON_VER=""
+
+	if [[ -n $PYTHON ]]; then
+		PYTHON_VER="$(python --version 2>&1 | awk '{print $2}' | cut -d. -f1)"
+		[[ $PYTHON_VER == 3 ]] && MYPY=$PYTHON
+	fi
+
+	if [[ -n $PYTHON3 ]]; then
+		MYPY="$PYTHON3"
+		note "using $MYPY"
+	fi
+
+	if [[ -n $MYPY ]]; then
+		MINOR="$($MYPY --version 2>&1 | awk '{print $2}' | cut -d. -f2)"
+		note "minor version is $MINOR"
+		
+		# Python3 <= 3.4 breaks contemporary pip
+		if (( MINOR <= 5 )); then
+			note "minor version < 6: forcing installation"
+			FORCE=1
+		fi
+		if (( MINOR <= 6 )); then
+			note "minor version <= 6: forcing modern version installation"
+			FORCE_MODERN=1
+		fi
+	fi
+
+	if [[ -n $FIX ]]; then fix_variants; fi
+	
+	if (( MINOR >= 11 )); then
+		PEP_668=1
+		[[ $VENV == 0 ]] && VENV="$DEFAULT_VENV_DIR"
+		if [[ -f $VENV/bin/activate ]]; then
+			. $VENV/bin/activate
+			PYTHON3=$(command -v python3)
+			MYPY="$PYTHON3"
+		fi
+
+	fi
+}
+
+#----------------------------------------------------------------------------------------------
+
+install_python_on_old_ubuntu() {
+	gpg_bypass="--allow-unauthenticated"
+	
+	# ppa:deadsnakes no longer provides for xenial, trusty
+	runn $SUDO apt-get install --fix-missing -y software-properties-common
+	runn $SUDO add-apt-repository -y ppa:fkrull/deadsnakes
+	runn $SUDO apt-get -qq $gpg_bypass update
+	runn $SUDO apt-get install $gpg_bypass --fix-missing -y python3.6
+	runn ln -sf `command -v python3.6` /usr/local/bin/python3
+	runn $SUDO apt-get install $gpg_bypass --fix-missing -y python3.6-venv
+}
+
+install_python36_on_debian9_x64() {
+	runn $SUDO $CLASSICO/bin/getget
+
+	runn $SUDO apt-get install --fix-missing -y \
+		software-properties-common apt-transport-https \
+		unzip lsb-release gnupg2 \
+		libbz2-dev libssl-dev libsqlite3-dev libreadline-dev libgdbm-dev \
+		tk-dev libncursesw5-dev liblzma-dev uuid-dev libexpat1-dev
+	tempd=$(mktemp -d /tmp/py3.XXXXXX)
+	cd $tempd
+	runn wget https://github.com/chriskuehl/python3.6-debian-stretch/releases/download/v3.6.3-1-deb9u1/{python3.6_3.6.3-1.deb9u1_amd64,python3.6-minimal_3.6.3-1.deb9u1_amd64,python3.6-dev_3.6.3-1.deb9u1_amd64,libpython3.6_3.6.3-1.deb9u1_amd64,libpython3.6-minimal_3.6.3-1.deb9u1_amd64,libpython3.6-stdlib_3.6.3-1.deb9u1_amd64,libpython3.6-dev_3.6.3-1.deb9u1_amd64}.deb
+	runn $SUDO dpkg -i *.deb
+	if [[ -f /usr/bin/python3.6 ]]; then
+		runn ln -sf /usr/bin/python3.6 /usr/local/bin/python3
+		MYPY=/usr/local/bin/python3
+	fi
+	cd $HERE
+	rm -rf $tempd
+}
+
+install_modern_python() {
+	note "install version $MODERN_VERSION using pyenv"
+	if [[ $SYSTEM_PYENV == 1 ]]; then
+		runn $SUDO VERSION=$MODERN_VERSION GLOBAL=1 SYSTEM=1 $CLASSICO/bin/getpyenv
+	else
+		runn VERSION=$MODERN_VERSION GLOBAL=1 $CLASSICO/bin/getpyenv
+	fi
+	$OP . $(get_profile_d)/pyenv.sh
+}
+
+prepare_package_manager() {
+	if is_command apt-get; then
+		runn $SUDO apt-get -qq update --fix-missing
+	elif is_command yum; then
+		if [[ $os != fedora ]]; then
+			runn $SUDO $CLASSICO/bin/getepel
+		fi
+	elif is_command apk; then
+		runn $SUDO apk update
+	fi
+}
+
+install_python() {
+	note "installing Python"
+
+	if [[ $(uname) == Darwin ]]; then
+		if ! is_command brew; then
+			eprint "Unable to install Python without brew. Aborting."
+			eprint "Please install brew and retry."
+			exit 1
+		fi
+
+		# try to fix /usr/local/bin/python on macOS unless stated otherwize
+		[[ $FIX != 0 ]] && FIX=1
+	fi
+
+	if [[ $osver == ubuntu14.04 || $osver == ubuntu16.04 ]]; then
+		FORCE_MODERN=1
+	elif [[ $osver == debian9 && $arch == x86_64 ]]; then
+		FORCE_MODERN=1
+	fi
+	
+	prepare_package_manager
+
+	if [[ $MODERN == 1 || $FORCE_MODERN == 1 && -n $MODERN && $MODERN != 0 ]]; then
+		install_modern_python
+		return
+	fi
+
+	if is_command apt-get; then
+		runn $SUDO apt-get install --fix-missing -y python3
+	elif is_command dnf; then
+		runn $SUDO dnf install -y python3
+	elif is_command tdnf; then
+		runn $SUDO tdnf install -y python3
+	elif is_command yum; then
+		xinstall bc
+		if [[ $os == amzn && $(echo "$osverid > 2" | bc -l) == 1 ]]; then
+			xinstall python3
+		else
+			install_modern_python
+		fi
+	elif is_command zypper; then
+		runn $SUDO zypper install -y python3
+	elif is_command apk; then
+		runn $SUDO apk add python3 python3-dev
+	elif is_command brew; then
+		runn brew install python3
+	elif is_command pkg; then
+		runn $SUDO pkg install -y python3
+	elif is_command pacman; then
+		runn $SUDO pacman -Syy --noconfirm python
+	fi
+}
+
+#----------------------------------------------------------------------------------------------
+
+install_pip() {
+	note "installing pip"
+
+	if (( MINOR < 11 )); then
+		install_pip_via_get_pip
+		return
+	fi
+
+	# with Python >= 3.11 a virtualenv needs to be used to install packages
+	# if our Pytohn is native, we use either system package manager to install pip and virtualenv or
+	#   use get-pip.
+	# otherwise, it's a pyenv-based Python that should probably have pip installed.
+	# if for some reason pip is missing, we use native package manager (get-pip will probably fail
+	#   in this case).
+	if [[ $($MYPY -m pip --version > /dev/null 2>&1; echo $?) != 0 ]]; then
+		xinstall python3-pip || xinstall python-pip || true
+		xinstall python3-virtualenv || xinstall python-virtualenv || true
+	fi
+	if [[ $($MYPY -m pip --version > /dev/null 2>&1; echo $?) != 0 ]]; then
+		eprint "cannot install pip"
+		exit 1
+	fi
+	if ! $MYPY -m virtualenv --version > /dev/null 2>&1; then
+		runn $MYPY -m pip install virtualenv
+	fi
+	[[ $VENV == 0 ]] && VENV="$DEFAULT_VENV_DIR"
+	runn $MYPY -m virtualenv $VENV
+	. $VENV/bin/activate
+	PYTHON3=$(command -v python3)
+	MYPY="$PYTHON3"
+	runn $MYPY -m pip install --upgrade pip
+	
+	tmp_profiled=$(mktemp -d)
+	cat <<-END > $tmp_profiled/python3-std-venv.sh
+		if [[ -f $VENV/bin/activate ]]; then
+		    VIRTUAL_ENV_DISABLE_PROMPT=1
+		    . $VENV/bin/activate
+		    unset VIRTUAL_ENV_DISABLE_PROMPT
+		fi
+		END
+	add_to_profile_d $tmp_profiled/python3-std-venv.sh
+}
+
+install_pip_via_get_pip() {
+	if [[ $FORCE != 1 ]]; then
+		[[ $($MYPY -m pip --version > /dev/null 2>&1; echo $?) == 0 ]] && return
+	fi
+
+	local pipspec=""
+	[[ $PIP != 1 ]] && pipspec="pip==$PIP"
+
+	local packs="ca-certificates wget"
+
+	if is_command apt-get; then
+		runn $SUDO apt-get -qq update --fix-missing
+		runn $SUDO apt-get install --fix-missing -y $packs
+		runn @ <<-EOF
+			$SUDO apt-get install --fix-missing -y python3-distutils || $SUDO apt-get install --fix-missing -y python3-distutils-extra
+			EOF
+	elif is_command dnf; then
+		runn $SUDO dnf install -y $packs
+	elif is_command yum; then
+		runn $SUDO yum install -y $packs
+	elif is_command zypper; then
+		packs+=" python-xml"
+		runn $SUDO zypper install -y $packs
+	elif is_command apk; then
+		runn $SUDO apk update
+		runn $SUDO apk add $packs
+	elif is_command brew; then
+		runn brew install wget
+	elif is_command pkg; then
+		runn $SUDO pkg install -y $packs
+	elif is_command pacman; then
+		runn $SUDO pacman -Syy --noconfirm $packs
+	fi
+
+	$MYPY -c 'import sys; print("{major}.{minor}".format(major=sys.version_info.major, minor=sys.version_info.minor))' | \
+		grep '3.6' &>/dev/null
+	if [[ $? == 0 ]]; then
+		pypi_url='https://bootstrap.pypa.io/pip/3.6/get-pip.py'
+	else
+		pypi_url='https://bootstrap.pypa.io/get-pip.py'
+	fi
+	runn wget -O /tmp/get-pip.py $pypi_url
+	# currently can fail on debian-compat platforms due to distutils:
+	# `python3 -m pip --version` will fail to find pip
+	runn "$MYPY /tmp/get-pip.py $pipspec || true"
+	runn rm -f /tmp/get-pip.py
+	
+	runn $MYPY -m pip install $PIP_USER --upgrade pip
+}
+
+#----------------------------------------------------------------------------------------------
+
+check_variants
+
+if [[ $CHECK == 1 ]]; then
+	# Make sure pip is installed
+	if $MYPY -m pip --version &> /dev/null; then exit 0; fi
+	exit 1
+fi
+
+[[ -z $MYPY || $FORCE == 1 || $FORCE_MODERN == 1 ]] && install_python
+
+# If might we ended up installing python, not realizing we need to force modern, so:
+FORCE_MODERN=
+check_variants
+if [[ $FORCE_MODERN == 1 && $MODERN != 0 ]]; then
+	install_modern_python
+	check_variants
+fi
+
+if ! is_command $MYPY; then
+	eprint "Cannot install Python3. Aborting."
+	exit 1
+fi
+
+if [[ -z $VIRTUAL_ENV && $PEP_668 != 1 ]]; then
+	PIP_USER="--user"
+else
+	PIP_USER=""
+fi
+
+[[ $PIP != 0 || $PEP_668 == 1 ]] && install_pip
+
+REQ=$CLASSICO/paella/requirements.txt
+if [[ -n $VENV && $VENV != 0 ]]; then
+	runn $MYPY -m pip install ${PIP_USER} virtualenv
+	[[ $VENV == 1 ]] && VENV=$HOME/venv
+	runn $MYPY -m virtualenv $VENV --system-site-packages
+	runn "{ . $VENV/bin/activate && python -m pip install -r $REQ; }"
+else
+	runn $MYPY -m pip install ${PIP_USER} -r $REQ
+fi
+if (( VERBOSE >= 1 )); then
+	runn $MYPY -m pip list -v
+fi
+
+exit 0

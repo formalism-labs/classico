@@ -1,0 +1,8 @@
+
+set(CMK "${root}/deps/classico/cmake")
+
+include(${CMK}/policy)
+include(${CMK}/common)
+include(${CMK}/functions)
+include(${CMK}/platform)
+include(${CMK}/cc)

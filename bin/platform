@@ -4,8 +4,8 @@ import sys
 import os
 import argparse
 
-READIES_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, READIES_PATH)
+CLASSICO_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, CLASSICO_PATH)
 import paella
 
 parser = argparse.ArgumentParser(description='Report platform characteristics.')

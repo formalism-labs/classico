@@ -11,15 +11,15 @@ OP=""
 OS=`uname`
 if [[ $OS == Linux ]]; then
 	if [[ $(( $BASH_VERSINFO >= 4 )) && $FORCE != 4 ]]; then
-		url="https://s3.tebi.io/autobahn/bashdb/bashdb-5.0-1.1.2-linux-bin.tgz"
+		url="https://s3.tebi.io/classico/bashdb/bashdb-5.0-1.1.2-linux-bin.tgz"
 	elif [[ $BASH_VERSINFO == 4 || $FORCE == 4 ]]; then
-		url="https://s3.tebi.io/autobahn/bashdb/bashdb-4.4-1.0.1-linux-bin.tgz"
+		url="https://s3.tebi.io/classico/bashdb/bashdb-4.4-1.0.1-linux-bin.tgz"
 	else
 		eprint "Unsupported bash version: $BASH_VERSINFO"
 		exit 1
 	fi
 elif [[ $OS == Darwin ]]; then
-	url="https://s3.tebi.io/autobahn/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
+	url="https://s3.tebi.io/classico/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
 else
 	eprint "Unsupported OS"
 	exit 1

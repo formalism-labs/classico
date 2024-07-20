@@ -18,7 +18,7 @@ MK_ALL_TARGETS:=help
 endif
 
 ifeq ($(CLASSICO),)
-ifneq ($(wildcard $(ROOT)/deps/autobahn),)
+ifneq ($(wildcard $(ROOT)/deps/classico),)
 CLASSICO:=$(ROOT)/deps/classico
 else ifneq ($(wildcard $(ROOT)/opt/classico),)
 CLASSICO:=$(ROOT)/opt/classico

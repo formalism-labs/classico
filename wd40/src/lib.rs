@@ -16,8 +16,8 @@ pub fn _BB();
 #[macro_export]
 macro_rules! BB {
 	() => {
-		use readies_wd40::_BB;
-		use readies_wd40::getenv;
+		use classico_wd40::_BB;
+		use classico_wd40::getenv;
 		if getenv("BB", "") == "1" {
 			unsafe { _BB(); } 
 		}

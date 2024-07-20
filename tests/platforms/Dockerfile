@@ -3,8 +3,8 @@ ARG OS
 
 FROM ${OS}
 
-WORKDIR /readies
-ADD . /readies/
+WORKDIR /classico
+ADD . /classico/
 
 RUN set -e ;\
 	echo "::group::getpy3" ;\

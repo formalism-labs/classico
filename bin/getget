@@ -16,17 +16,19 @@ xinstall bc
 packs="ca-certificates wget curl unzip gzip xz"
 
 if is_command apt-get; then
-	packs=${packs/xz/xz-utils}
+	packs="${packs/xz/xz-utils}"
 elif is_command yum; then
 	packs+=" tar"
 elif is_command brew; then
-	packs=${packs/ca-certificates/}
+	packs="${packs/ca-certificates/}"
 fi
 if [[ $os == rocky || $os == almalinux || $os == rhel ]]; then
 	# has curl-minimal which conflicts with curl
 	if [[ $(echo "$osver >= 9.0" | bc -l) ]]; then
-		packs=${packs/curl/}
+		packs="${packs/curl/}"
 	fi
+elif [[ $os == mariner ]]; then
+	packs+=" awk"
 fi
 
 if [[ $FORCE != 1 ]]; then
@@ -42,26 +44,3 @@ fi
 
 xinstall $packs
 exit 0
-
-if is_command apt-get; then
-	export DEBIAN_FRONTEND=noninteractive
-	runn apt-get update -qq
-	packs=${packs/xz/xz-utils}
-	runn apt-get install --fix-missing -y $packs
-elif is_command dnf; then
-	runn dnf install -y $packs
-elif is_command yum; then
-	runn yum install -y $packs
-elif is_command zypper; then
-	runn zypper install -y $packs
-elif is_command apk; then
-	runn apk update
-	runn apk add $packs
-elif is_command pacman; then
-	pacman --noconfirm -S $packs
-elif is_command brew; then
-	packs=${packs/ca-certificates/}
-	runn brew install $packs
-elif is_command pkg; then
-	runn pkg install -y $packs
-fi

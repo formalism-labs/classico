@@ -5,8 +5,8 @@ HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
 CLASSICO=$(cd $HERE/.. && pwd)
 . $CLASSICO/shibumi/defs
 
-OS=`uname -s`
-ARCH=`uname -m`
+OS="$(uname -s)"
+ARCH="$(uname -m)"
 
 # GOOD_NIGHTLY=nightly-2022-01-09
 
@@ -16,6 +16,7 @@ fi
 if ! is_command rustup; then
 	runn $CLASSICO/bin/getget
 	runn "curl --proto '=https' --tlsv1.2 https://raw.githubusercontent.com/rust-lang/rustup/master/rustup-init.sh -sSf | sh -s -- -y"
+	# runn "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 	source $HOME/.cargo/env
 elif ! runn rustup update stable; then
 	runn rustup toolchain uninstall stable
@@ -42,7 +43,7 @@ fi
 
 rustup show
 
-profile_d=`get_profile_d`
+profile_d="$(get_profile_d)"
 if [[ -f $HOME/.cargo/env ]]; then
     $SUDO cp $HOME/.cargo/env $profile_d/rust.sh
 elif [[ -f /usr/local/cargo/env ]]; then

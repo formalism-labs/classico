@@ -162,38 +162,6 @@ check_variants() {
 
 #----------------------------------------------------------------------------------------------
 
-install_python_on_old_ubuntu() {
-	gpg_bypass="--allow-unauthenticated"
-	
-	# ppa:deadsnakes no longer provides for xenial, trusty
-	runn $SUDO apt-get install --fix-missing -y software-properties-common
-	runn $SUDO add-apt-repository -y ppa:fkrull/deadsnakes
-	runn $SUDO apt-get -qq $gpg_bypass update
-	runn $SUDO apt-get install $gpg_bypass --fix-missing -y python3.6
-	runn ln -sf `command -v python3.6` /usr/local/bin/python3
-	runn $SUDO apt-get install $gpg_bypass --fix-missing -y python3.6-venv
-}
-
-install_python36_on_debian9_x64() {
-	runn $SUDO $CLASSICO/bin/getget
-
-	runn $SUDO apt-get install --fix-missing -y \
-		software-properties-common apt-transport-https \
-		unzip lsb-release gnupg2 \
-		libbz2-dev libssl-dev libsqlite3-dev libreadline-dev libgdbm-dev \
-		tk-dev libncursesw5-dev liblzma-dev uuid-dev libexpat1-dev
-	tempd=$(mktemp -d /tmp/py3.XXXXXX)
-	cd $tempd
-	runn wget https://github.com/chriskuehl/python3.6-debian-stretch/releases/download/v3.6.3-1-deb9u1/{python3.6_3.6.3-1.deb9u1_amd64,python3.6-minimal_3.6.3-1.deb9u1_amd64,python3.6-dev_3.6.3-1.deb9u1_amd64,libpython3.6_3.6.3-1.deb9u1_amd64,libpython3.6-minimal_3.6.3-1.deb9u1_amd64,libpython3.6-stdlib_3.6.3-1.deb9u1_amd64,libpython3.6-dev_3.6.3-1.deb9u1_amd64}.deb
-	runn $SUDO dpkg -i *.deb
-	if [[ -f /usr/bin/python3.6 ]]; then
-		runn ln -sf /usr/bin/python3.6 /usr/local/bin/python3
-		MYPY=/usr/local/bin/python3
-	fi
-	cd $HERE
-	rm -rf $tempd
-}
-
 install_modern_python() {
 	note "install version $MODERN_VERSION using pyenv"
 	if [[ $SYSTEM_PYENV == 1 ]]; then

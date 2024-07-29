@@ -6,6 +6,8 @@
 # CLASSICO=$ROOT/deps/classico
 # . $CLASSICO/shibumi/defs
 
+set -eo pipefail -o errtrace
+
 if [[ -n $PROGNAME ]]; then
 	if commmand -v realpath 2> /dev/null; then
 		__PROGNAME="$(realpath "${PROGNAME}")"
@@ -15,13 +17,16 @@ if [[ -n $PROGNAME ]]; then
 fi
 
 error_trap() {
+	local exit_code=$?
+	[[ $exit_code == 0 ]] && exit_code=1
 	# >&2 echo "$0: There are errors."
 	local __PROGNAME=${__PROGNAME:-$0}
+	local LINE="${BASH_LINENO[0]}"
 	>&2 echo
 	>&2 echo "In $__PROGNAME:"
-	>&2 awk 'NR>L-4 && NR<L+4 { printf "%-5d%4s%s\n",NR,(NR==L?">>> ":""),$0 }' L=$1 $__PROGNAME
+	>&2 awk 'NR>L-4 && NR<L+4 { printf "%-5d%4s%s\n",NR,(NR==L?">>> ":""),$__PROGNAME }' L=$LINE $__PROGNAME
 	>&2 echo
-	exit 1
+	exit $exit_code
 }
 
 # avoid trap with bashdb

@@ -8,7 +8,16 @@ platform_os() {
 		darwin*)  echo "macos" ;;
 		bsd*)     echo "bsd" ;;
 		msys*)    echo "windows" ;;
+		cygwin*)  echo "windows" ;;
 		*)        echo "?" ;;
+	esac
+}
+
+platform_windows() {
+	case "$OSTYPE" in
+		msys*)    echo "msys2" ;;
+		cygwin*)  echo "cygwin" ;;
+		*)        if cat /proc/version | grep -i WSL2 >& /dev/null ]]; then echo "wsl"; else echo "windows"; fi ;;
 	esac
 }
 

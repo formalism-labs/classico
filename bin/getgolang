@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GOLANG_VER=1.15.6
+GOLANG_VER=1.22.5
 
 PROGNAME="${BASH_SOURCE[0]}"
 HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"

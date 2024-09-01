@@ -1,0 +1,11 @@
+
+if [[ -z $CLASSICO ]]; then
+	return
+fi
+
+. $CLASSICO/shibumi/defs
+
+pyenv="$(get_profile_d)/pyenv.sh"
+if [[ -f $pyenv ]]; then
+	. $pyenv
+fi

@@ -81,7 +81,7 @@ class SSHFSSetupModern(paella.Setup):
 
 parser = argparse.ArgumentParser(description='Install SSHFS')
 parser.add_argument('-n', '--nop', action="store_true", help='No operation')
-parser.add_argument('--modern', action="store_true", help='Install latest gdb')
+parser.add_argument('--modern', action="store_true", help='Install latest sshfs')
 parser.add_argument('--keep', action="store_true", help="Do not remove source files and build artifacts")
 args = parser.parse_args()
 

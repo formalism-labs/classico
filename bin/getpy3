@@ -115,8 +115,8 @@ check_variants() {
 		return
 	fi
 	
-	PYTHON=$(command -v python)
-	PYTHON3=$(command -v python3)
+	PYTHON=$(command -v python || true)
+	PYTHON3=$(command -v python3 || true)
 
 	MYPY=""
 	PYTHON_VER=""
@@ -153,7 +153,7 @@ check_variants() {
 		[[ $VENV == 0 ]] && VENV="$DEFAULT_VENV_DIR"
 		if [[ -f $VENV/bin/activate ]]; then
 			. $VENV/bin/activate
-			PYTHON3=$(command -v python3)
+			PYTHON3=$(command -v python3 || true)
 			MYPY="$PYTHON3"
 		fi
 
@@ -267,7 +267,7 @@ install_pip() {
 	[[ $VENV == 0 ]] && VENV="$DEFAULT_VENV_DIR"
 	runn $MYPY -m virtualenv $VENV
 	. $VENV/bin/activate
-	PYTHON3=$(command -v python3)
+	PYTHON3=$(command -v python3 || true)
 	MYPY="$PYTHON3"
 	runn $MYPY -m pip install --upgrade pip
 	

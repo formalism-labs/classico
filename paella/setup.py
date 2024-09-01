@@ -431,10 +431,11 @@ class Setup(OnPlatform):
 
     @property
     def profile_d(self):
-        if self.os == 'macos':
-            return os.path.abspath(os.path.join(os.path.expanduser('~'), ".profile.d"))
-        else:
-            return "/etc/profile.d"
+        return os.path.abspath(os.path.join(os.path.expanduser('~'), ".profile.d"))
+        # if self.os == 'macos':
+        #     return os.path.abspath(os.path.join(os.path.expanduser('~'), ".profile.d"))
+        # else:
+        #     return "/etc/profile.d"
 
     def cp_to_profile_d(self, file, as_file=None):
         if not os.path.isfile(file):

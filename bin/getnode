@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import argparse
+import re
+import tempfile
+import urllib.request
+
+HERE = os.path.dirname(__file__)
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
+sys.path.insert(0, ROOT)
+import paella
+
+NODE_VERSION = "20"
+
+#----------------------------------------------------------------------------------------------
+
+class NodeSetup(paella.Setup):
+    def __init__(self, args):
+        paella.Setup.__init__(self, nop=args.nop)
+
+    def common_first(self):
+        self.install("nodejs")
+
+#----------------------------------------------------------------------------------------------
+
+class SetupModern(paella.Setup):
+    def __init__(self, args):
+        paella.Setup.__init__(self, nop=args.nop)
+        self.yarn = args.yarn
+        self.typescript = args.ts
+
+    def common_first(self):
+        self.install_downloaders()
+        self.run("mkdir -p $HOME/.fnm")
+        self.run("curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell")
+        self.cat_to_profile_d(r'''
+            export PATH="$HOME/.fnm:$PATH"
+            eval "$(fnm env)"
+            ''', "nodejs.sh")
+        self.run(f"fnm use --install-if-missing {NODE_VERSION}")
+        if self.typescript:
+            self.run("npm install -g typescript")
+
+    def debian_compat(self):
+        pass
+
+    def redhat_compat(self):
+        pass
+
+    def fedora(self):
+        pass
+
+    def archlinux(self):
+        pass
+
+    def macos(self):
+        pass
+
+    def common_last(self):
+        pass
+
+#----------------------------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser(description='Install node.js and related software')
+parser.add_argument('-n', '--nop', action="store_true", help='No operation')
+parser.add_argument('--modern', action="store_true", help='Install latest node.js')
+parser.add_argument('--yarn', action="store_true", help='Install yarn')
+parser.add_argument('--ts', action="store_true", help='Install TypeScript')
+args = parser.parse_args()
+
+SetupModern(args).setup()
+#if args.modern:
+#    SetupModern(args).setup()
+#else:
+#    Setup(args).setup()

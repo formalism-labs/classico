@@ -46,13 +46,17 @@ Operating on various version of various operating systems on various hardware ar
 * Binary compatibility: sysems of the same platform should be able to run same binary files.
 We introduce a one-word term (`osnick`) that encapsulates the these qualities on the OS side, and along the system architecture forms our concept of platform.
 
+#### Functionality across languages
+
+The general desire is to make useful idioms (like job runners) available across languages that Classico supports. Howerver, this is a rolling effort. Most likly new features will appear in Paella, then find their way into the other libs.
+
 ### Components
 
 [bin](docs/bin.md): scripts for direct execution
 
-[Shibumi](shibumi/README.md): Bash code
+[Shibumi](docs/shibumi/README.md): Bash code
 
-[Paella](paella/README.md): Python automation library
+[Paella](docs/paella/README.md): Python automation library
 
 [Bento](docs/bento/README.md): Ruby automation library
 

@@ -70,21 +70,29 @@ USER_MYPY="$MYPY"
 
 #----------------------------------------------------------------------------------------------
 
-if [[ -f /etc/os-release ]]; then
-	os=$(source /etc/os-release; echo "${ID}")
-	osverid=$(source /etc/os-release; echo "${VERSION_ID}")
-	osver=$(source /etc/os-release; echo "${ID}${VERSION_ID}")
+os="$(platform_os)"
+if [[ $os == windows ]]; then
+	wintype="$(platform_windows)"
 fi
-arch=$(uname -m)
+
+arch="$(platform_arch)"
+
+if [[ -f /etc/os-release ]]; then
+	dist="$(source /etc/os-release; echo "${ID}")"
+	distver="$(source /etc/os-release; echo "${VERSION_ID}")"
+	distx="$(source /etc/os-release; echo "${ID}${VERSION_ID}")"
+fi
 
 SUDO=
-if [[ $(id -u) != 0 ]]; then
-	if is_command sudo; then
-		SUDO=sudo
+if [[ $os != windows ]]; then
+	if [[ $(id -u) != 0 ]]; then
+		if is_command sudo; then
+			SUDO=sudo
+		fi
 	fi
 fi
 
-[[ $os == mariner ]] && tdnf install -q -y awk
+[[ $dist == mariner ]] && tdnf install -q -y awk
 
 #----------------------------------------------------------------------------------------------
 
@@ -173,6 +181,15 @@ install_modern_python() {
 }
 
 prepare_package_manager() {
+	if [[ $os == windows ]]; then
+		if [[ $wintype == msys2 ]]; then
+			runn pacman -Sy
+		elif [[ $wintype == cygwin ]]; then
+			runn apt-cyg update
+		fi
+		return
+	fi
+
 	if is_command apt-get; then
 		runn $SUDO apt-get -qq update --fix-missing
 	elif is_command yum; then
@@ -187,7 +204,7 @@ prepare_package_manager() {
 install_python() {
 	note "installing Python"
 
-	if [[ $(uname) == Darwin ]]; then
+	if [[ $os == macos ]]; then
 		if ! is_command brew; then
 			eprint "Unable to install Python without brew. Aborting."
 			eprint "Please install brew and retry."
@@ -198,9 +215,9 @@ install_python() {
 		[[ $FIX != 0 ]] && FIX=1
 	fi
 
-	if [[ $osver == ubuntu14.04 || $osver == ubuntu16.04 ]]; then
+	if [[ $distx == ubuntu14.04 || $distx == ubuntu16.04 ]]; then
 		FORCE_MODERN=1
-	elif [[ $osver == debian9 && $arch == x86_64 ]]; then
+	elif [[ $distx == debian9 && $arch == x64 ]]; then
 		FORCE_MODERN=1
 	fi
 	
@@ -211,6 +228,15 @@ install_python() {
 		return
 	fi
 
+	if [[ $os == windows ]]; then
+		if [[ $wintype == msys2 ]]; then
+			runn pacman -Syy --noconfirm python
+		elif [[ $wintype == cygwin ]]; then
+			runn apt-cyg install python
+		fi
+		return
+	fi
+
 	if is_command apt-get; then
 		runn $SUDO apt-get install --fix-missing -y python3
 	elif is_command dnf; then
@@ -218,8 +244,7 @@ install_python() {
 	elif is_command tdnf; then
 		runn $SUDO tdnf install -y python3
 	elif is_command yum; then
-		xinstall bc
-		if [[ $os == amzn && $(echo "$osverid > 2" | bc -l) == 1 ]]; then
+		if [[ $os == amzn ]] && (( distver > 2 )); then
 			xinstall python3
 		else
 			install_modern_python
@@ -316,9 +341,7 @@ install_pip_via_get_pip() {
 		runn $SUDO pacman -Syy --noconfirm $packs
 	fi
 
-	$MYPY -c 'import sys; print("{major}.{minor}".format(major=sys.version_info.major, minor=sys.version_info.minor))' | \
-		grep '3.6' &>/dev/null
-	if [[ $? == 0 ]]; then
+	if $MYPY -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' | grep '3.6' &>/dev/null; then
 		pypi_url='https://bootstrap.pypa.io/pip/3.6/get-pip.py'
 	else
 		pypi_url='https://bootstrap.pypa.io/get-pip.py'

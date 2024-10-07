@@ -10,7 +10,11 @@ name = "classico_wd40"
 path = "src/lib.rs"
 
 [[bin]]
-name = "mybin"
+name = "wd40-test"
 path = "src/bin.rs"
 
 [dependencies]
+bindgen = "0.65"
+
+[build-dependencies]
+bindgen = "0.65"

@@ -1,6 +1,6 @@
 
 extern crate classico_wd40;
-use crate::classico_wd40::{BB};
+use classico_wd40::BB;
 
 fn main() {
     BB!();

@@ -19,6 +19,10 @@ ifneq ($(MK.cmake),)
 include $(MK)/cmake.rules
 endif
 
+ifneq ($(MK.rust),)
+include $(MK)/rust.rules
+endif
+
 ifneq ($(MK.configure),)
 include $(MK)/configure.rules
 endif

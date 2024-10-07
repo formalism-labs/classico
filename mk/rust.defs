@@ -1,0 +1,58 @@
+
+ifneq ($(MK.rust),)
+#----------------------------------------------------------------------------------------------
+
+RUST_TARGET:=$(shell eval $$(rustc --print cfg | grep =); echo $$target_arch-$$target_vendor-$$target_os-$$target_env)
+
+CARGO_TOOLCHAIN=
+CARGO_BUILD_FLAGS=
+RUST_FLAGS=
+RUST_DOCFLAGS=
+
+ifeq ($(DEBUG),1)
+    TARGET_DIR=$(BINDIR)/target/debug
+    RUST_FLAGS += -C debuginfo=2
+else
+	CARGO_BUILD_FLAGS += --release
+	TARGET_DIR=$(BINDIR)/target/release
+endif
+
+export CARGO_TARGET_DIR=$(BINDIR)/target
+
+export MK_CARGO_DIR := $(BINDIR)/target
+
+ifeq ($(MK_DIAG),1)
+$(info # MK_CARGO_DIR=$(MK_CARGO_DIR))
+endif
+
+export MK_CARGO_LOG := $(BINDIR)/target/buildrs.log
+
+#------------------------------------------------------------------------------------- Coverage
+
+ifeq ($(COV),1)
+RUST_FLAGS += -C instrument_coverage
+endif
+
+#------------------------------------------------------------------------------------ Sanitizer
+
+ifeq ($(DEBUG),1)
+ifneq ($(SAN),)
+
+NIGHTLY=1
+CARGO_BUILD_FLAGS += -Zbuild-std
+RUST_FLAGS += -Zsanitizer=$(SAN)
+ifeq ($(SAN),memory)
+    RUST_FLAGS += -Zsanitizer-memory-track-origins
+endif
+
+endif # SAN
+endif # DEBUG
+
+#-------------------------------------------------------------------------------------- Profile
+
+ifeq ($(PROFILE),1)
+RUST_FLAGS += -g -C force-frame-pointers=yes
+endif
+
+#----------------------------------------------------------------------------------------------
+endif # MK.rust

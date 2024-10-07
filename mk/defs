@@ -9,6 +9,10 @@ ifneq ($(MK.cmake),)
 include $(MK)/cmake.defs
 endif
 
+ifneq ($(MK.rust),)
+include $(MK)/rust.defs
+endif
+
 ifneq ($(MK.configure),)
 include $(MK)/configure.defs
 endif

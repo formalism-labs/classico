@@ -2,6 +2,11 @@
 include $(MK)/platform.cfg
 
 include $(MK)/cc.cfg
+
+ifneq ($(MK.rust),)
+include $(MK)/rust.cfg
+endif
+
 include $(MK)/coverage.cfg
 include $(MK)/valgrind.cfg
 include $(MK)/clang-sanitizer.cfg

@@ -6,8 +6,12 @@ ifeq ($(MAKE_MAJORVER),3)
 $(error GNU Make version is too old. Aborting.)
 endif
 
+# ROOT determines:
+# - location of BINROOT
+# - location of Classico root
 ifeq ($(ROOT),)
-$(error ROOT is undefined)
+# $(error ROOT is undefined)
+ROOT ?= .
 endif
 override ROOT:=$(shell cd $(ROOT) && pwd)
 
@@ -20,18 +24,18 @@ endif
 ifeq ($(CLASSICO),)
 ifneq ($(wildcard $(ROOT)/deps/classico),)
 CLASSICO:=$(ROOT)/deps/classico
-else ifneq ($(wildcard $(ROOT)/opt/classico),)
-CLASSICO:=$(ROOT)/opt/classico
 else ifneq ($(wildcard $(ROOT)/classico),)
 CLASSICO:=$(ROOT)/classico
+else ifneq ($(wildcard $(ROOT)/mk),)
+CLASSICO:=$(ROOT)
 else
-$(error Cannot find classico root)
+$(error Cannot find Classico root)
 endif
 endif
 
-ifeq ($(wildcard $(CLASSICO)/*),)
-___:=$(shell git submodule update --init --recursive &> /dev/null)
-endif
+# ifeq ($(wildcard $(CLASSICO)/*),)
+# ___:=$(shell git submodule update --init --recursive &> /dev/null)
+# endif
 
 export MK:=$(CLASSICO)/mk
 
@@ -80,3 +84,10 @@ include $(MK)/bindirs.defs
 include $(MK)/nproc.defs
 
 endif # __NO_PYTHON
+
+MK.simple ?= 1
+
+ifeq ($(MK.simple),1)
+include $(MK)/defs
+include $(MK)/rules
+endif

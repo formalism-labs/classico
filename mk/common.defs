@@ -25,3 +25,7 @@ endif
 ifneq ($(BB),)
 SLOW:=1
 endif
+
+MODULE_NAME ?= $(notdir $(CURDIR))
+
+SRCDIR ?= .

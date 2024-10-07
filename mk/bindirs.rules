@@ -9,8 +9,8 @@ endif
 
 bindirs: $(BIN_DIRS)
 
-ifeq ($(DIAG),1)
-$(info *** BIN_DIRS=$(BIN_DIRS))
+ifeq ($(MK_DIAG),1)
+$(info # BIN_DIRS=$(BIN_DIRS))
 endif
 
 $(foreach DIR,$(BIN_DIRS),$(eval $(call mkdir_rule,$(DIR))))

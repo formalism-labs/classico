@@ -1,2 +1,66 @@
+ifneq ($(MK.cc),)
+#----------------------------------------------------------------------------------------------
 
-# TBD
+-include $(CC_SOURCES_DEPS)
+
+define c_files_rule
+$$(BINDIR)/%.o: $$(SRCDIR)/%.$(1)
+	@echo Compiling $$<...
+	$$(SHOW)$$(CC) $$(CC_FLAGS) $$(CC_C_FLAGS) -c $$< -o $$@
+endef
+
+define cxx_files_rule
+$$(BINDIR)/%.o: $$(SRCDIR)/%.$(1)
+	@echo Compiling $$<...
+	$$(SHOW)$$(CXX) $$(CC_FLAGS) $$(CC_CXX_FLAGS) -c $$< -o $$@
+endef
+
+$(eval $(call c_files_rule,c))
+
+$(foreach ext,$(CC_CXX_EXT), \
+	$(eval $(call cxx_files_rule,$(ext))) \
+)
+
+ifeq ($(CC_PROD),prog)
+
+$(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
+	@echo Linking $@...
+	$(SHOW)$(CC) $(EXE_LD_FLAGS) $(LD_FLAGS) -o $@ $(CC_OBJECTS) $(LD_LIBS)
+
+run:
+	$(SHOW)$(CC_TARGET)
+
+else ifeq ($(CC_PROD),lib)
+
+$(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
+	@echo Creating $@...
+	$(SHOW)$(AR) rcs $@ $(CC_OBJECTS)
+
+else ifeq ($(CC_PROD),so)
+
+$(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
+	@echo Linking $@...
+	$(SHOW)$(CC) $(SO_LD_FLAGS) $(LD_FLAGS) -o $@ $(CC_OBJECTS) $(LD_LIBS)
+
+endif
+
+ifneq ($(MK_CUSTOM_CLEAN),1)
+ifeq ($(ALL),)
+
+clean:
+	$(SHOW)set -e ;\
+	files="$(CC_TARGET) $(CC_OBJECTS) $(CC_DEPS)" ;\
+	if [[ -n "$${files// /}" ]]; then \
+		rm -f $$files ;\
+	fi
+
+.PHONY: clean
+
+endif
+endif
+
+nm: $(CC_TARGET)
+	$(SHOW)nm -AC $(CC_TARGET)
+
+#----------------------------------------------------------------------------------------------
+endif # MK.cc

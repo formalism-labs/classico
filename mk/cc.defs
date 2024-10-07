@@ -1,4 +1,34 @@
 
+#--------------------------------------------------------------------------------------- Target
+
+CC_TARGET_NAME ?= $(CC_TARGET_PREFIX)$(MODULE_NAME)$(CC_TARGET_EXT)
+CC_TARGET ?= $(BINDIR)/$(CC_TARGET_NAME)
+
+CC_PROD ?= prog
+ifneq ($(CC_PROD),prog)
+ifneq ($(CC_PROD),lib)
+ifneq ($(CC_PROD),so)
+ifneq ($(CC_PROD),dylib)
+$(error CC_PROD: invalid value)
+endif
+endif
+endif
+endif
+
+CC_TARGET_PREFIX.lib=lib
+
+CC_TARGET_EXT.prog=
+CC_TARGET_EXT.lib=.a
+CC_TARGET_EXT.so=.so
+CC_TARGET_EXT.dylib=.dylib
+
+CC_TARGET_PREFIX=$(CC_TARGET_PREFIX.$(CC_PROD))
+CC_TARGET_EXT=$(CC_TARGET_EXT.$(CC_PROD))
+
+ifneq ($(MK.cc),)
+TARGET=$(CC_TARGET)
+endif
+
 #------------------------------------------------------------------------------------- Compiler
 
 ifeq ($(origin CC),default) # CC not explicitly overridden
@@ -29,7 +59,7 @@ endef
 
 CC_FLAGS.defs=$(foreach d,$(call flatten,$(CC_DEFS)),-D$(d))
 
-CC_INCLUDES += $(CC_INCLUDES.$(OSNICK)) $(CC_INCLUDES.$(OS))  $(CC_INCLUDES.$(ARCH))
+CC_INCLUDES += $(CC_INCLUDES.$(OSNICK)) $(CC_INCLUDES.$(OS)) $(CC_INCLUDES.$(ARCH))
 CC_FLAGS.includes=$(foreach d,$(call flatten,$(CC_INCLUDES)),-I$(d))
 
 CC_COMMON_H ?= $(SRCDIR)/common.h
@@ -210,6 +240,29 @@ define _DYLIB_LD_FLAGS
 	$(DYLIB_LD_FLAGS.$(OS))
 endef
 DYLIB_LD_FLAGS += $(call flatten,$(_DYLIB_LD_FLAGS))
+
+#-------------------------------------------------------------------------------------- Objects
+
+CC_EXT=c $(CC_CXX_EXT)
+CC_CXX_EXT=cpp cxx cc
+
+_CC_SOURCES=$(addprefix $(SRCDIR)/,$(call flatten,$(CC_SOURCES) $(CC_SOURCES.$(OS))))
+
+$(foreach ext,$(CC_EXT),$(eval \
+    CC_OBJECTS.$(ext)=$$(patsubst $$(SRCDIR)/%.$(ext),$$(BINDIR)/%.o,$$(filter %.$(ext),$$(_CC_SOURCES))) \
+))
+
+CC_C_OBJECTS=$(CC_OBJECTS.c)
+CC_CXX_OBJECTS=$(foreach ext,$(CC_CXX_EXT),$(CC_OBJECTS.$(ext)))
+CC_OBJECTS=$(CC_C_OBJECTS) $(CC_CXX_OBJECTS)
+
+CC_DEPS = $(patsubst %.o,%.d,$(CC_OBJECTS))
+
+ifeq ($(MK_DIAG),1)
+$(info # CC_C_OBJECTS=$(CC_C_OBJECTS))
+$(info # CC_CXX_OBJECTS=$(CC_CXX_OBJECTS))
+$(info # CC_DEPS=$(CC_DEPS))
+endif
 
 #----------------------------------------------------------------------------------------- Libs
 

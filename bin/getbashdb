@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PROGNAME="${BASH_SOURCE[0]}"
 HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
@@ -8,18 +8,23 @@ CLASSICO=$(cd $HERE/.. && pwd)
 OP=""
 [[ $NOP == 1 ]] && OP=echo
 
-OS=`uname`
-if [[ $OS == Linux ]]; then
-	if [[ $(( $BASH_VERSINFO >= 4 )) && $FORCE != 4 ]]; then
+OS="$(platform_os)"
+url=""
+if [[ $OS == linux || $OS == windows ]]; then
+	if (( BASH_VERSINFO >= 4 )); then
 		url="https://s3.tebi.io/classico/bashdb/bashdb-5.0-1.1.2-linux-bin.tgz"
-	elif [[ $BASH_VERSINFO == 4 || $FORCE == 4 ]]; then
+	elif (( BASH_VERSINFO == 4 )); then
 		url="https://s3.tebi.io/classico/bashdb/bashdb-4.4-1.0.1-linux-bin.tgz"
 	else
 		eprint "Unsupported bash version: $BASH_VERSINFO"
 		exit 1
 	fi
-elif [[ $OS == Darwin ]]; then
-	url="https://s3.tebi.io/classico/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
+elif [[ $OS == macos ]]; then
+	if (( BASH_VERSINFO == 5 )); then
+		url="https://s3.tebi.io/classico/bashdb/bashdb-5.0-1.1.2-linux-bin.tgz"
+	elif (( BASH_VERSINFO == 3 )); then
+		url="https://s3.tebi.io/classico/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
+	fi
 else
 	eprint "Unsupported OS"
 	exit 1

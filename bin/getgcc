@@ -27,7 +27,7 @@ class SystemSetup(paella.Setup):
                     ''', sudo=True)
                 self.add_repo("ppa:ubuntu-toolchain-r/test")
             if self.os_ver >= 22 or self.platform.is_arm64():
-                gcc_ver = 11
+                gcc_ver = 14
             else:
                 gcc_ver = 10
             if self.install(f"gcc-{gcc_ver} g++-{gcc_ver}", output=False, _try=True) != 0:
@@ -47,10 +47,10 @@ class SystemSetup(paella.Setup):
             return
         self.run(f"{ROOT}/bin/getepel")
         if self.os_ver == 9:
-            self.install("gcc-toolset-12")
-            self.install("gcc-toolset-12-libatomic-devel")
+            self.install("gcc-toolset-13")
+            self.install("gcc-toolset-13-libatomic-devel")
             self.run(f"rm -f {self.profile_d}/gcc-devtoolset-*.sh", sudo=True)
-            self.cp_to_profile_d("/opt/rh/gcc-toolset-12/enable", "gcc-devtoolset-12.sh")
+            self.cp_to_profile_d("/opt/rh/gcc-toolset-13/enable", "gcc-devtoolset-13.sh")
         elif self.os_ver == 8:
             if self.dist in ['centos', 'ol']:
                 self.install("gcc-toolset-11-gcc gcc-toolset-11-gcc-c++")
@@ -70,7 +70,7 @@ class SystemSetup(paella.Setup):
                 self.cp_to_profile_d("/opt/rh/devtoolset-11/enable", "scl-devtoolset-11.sh")
                 if self.dist != "centos":
                     return
-                tar = paella.wget(f"https://redismodules.s3.amazonaws.com/gnu/libstdc%2B%2B.so.6.0.25-linux-{self.arch}.tgz",
+                tar = paella.wget(f"s3.tebi.io/classico/gnu/libstdc%2B%2B.so.6.0.25-linux-{self.arch}.tgz",
                                   dest='libstdcxx.tgz', tempdir=True)
                 dir = os.path.dirname(tar)
                 self.run(f'''

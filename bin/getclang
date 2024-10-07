@@ -14,9 +14,9 @@ import paella  # noqa: F401
 
 os.environ["PYTHONWARNINGS"] = 'ignore:DEPRECATION::pip._internal.cli.base_command'
 
-CLANG_COMMON_VER="17"
-CLANG_FORMAT_VER="17"
-CLANG_FORMAT_MASTER_COMMIT="8f72ab3c"
+CLANG_COMMON_VER="19"
+CLANG_FORMAT_VER="18"
+CLANG_FORMAT_MASTER_COMMIT="32d3ac78"
 ARM_CLANG_FORMAT_VER="12"
 
 #----------------------------------------------------------------------------------------------
@@ -41,7 +41,10 @@ class CLangFormatSetup(paella.Setup):
             self.install(f"clang-format-{self.version}")
             self.run(f"ln -sf `command -v clang-format-{self.version}` /usr/local/bin/clang-format", sudo=True)
         else:
-            raise paella.Error("Error installing CLang Format on not-x64/arm platform")
+            try:
+                self.install(f"clang-format")
+            except:
+                raise paella.Error("Error installing CLang Format on not-x64/arm platform")
 
     def macos(self):
         self.install("clang-format")
@@ -127,13 +130,13 @@ class CLangSetup(paella.Setup):
 
     def macos(self):
         # self.install_latest_from_github()
-        self.install("llvm@16")
-        llvm_prefix = sh("brew --prefix llvm@16")
+        self.install("llvm@19")
+        llvm_prefix = sh("brew --prefix llvm@19")
         self.cat_to_profile_d(r'''
             if [[ ":$PATH:" != *":{PREFIX}/bin:"* ]]; then
                 export PATH="{PREFIX}/bin${{PATH:+":$PATH"}}"
             fi
-            '''.format(PREFIX=llvm_prefix), "llvm-16.sh")
+            '''.format(PREFIX=llvm_prefix), "llvm-19.sh")
 
     def common_last(self):
         pass
@@ -150,7 +153,7 @@ class CLangSetup(paella.Setup):
     
     def install_trusty(self):
         clang_ver = "8"
-        self.run("%s/bin/getgcc --modern" % CLASSICO)
+        self.run(f"{CLASSICO}/bin/getgcc --modern")
         self.run('add-apt-repository  "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-8 main"', sudo=True)
         self.run("wget -q -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -", sudo=True)
         self.run("apt-get update -qq", sudo=True)
@@ -189,17 +192,20 @@ class CLangSetup(paella.Setup):
             ''', "llvm-13.sh")
 
     def install_latest_from_github(self):
-        file = None
-        ver = "17.0.6"
+        ver = "19.1.0"
+        if self.os == "macos":
+            os = 'macOS'
+        elif self.os == 'linux':
+            os = 'Linux'
+        else:
+            raise paella.Error(f"Unsupported OS: {self.os}")
         if self.arch == "x64":
-            arch = "x86_64"
-            if self.os == "macos":
-                file = f"clang+llvm-{ver}-{arch}-apple-darwin.tar.xz"
+            arch = "X64"
         elif self.arch == "arm64v8":
-            arch = "arm64"
-            if self.os == "macos":
-                file = f"clang+llvm-{ver}-{arch}-apple-darwin21.0.tar.xz"
-
+            arch = "ARM64"
+        else:
+            raise paella.Error(f"Unsupported architecture: {self.arch}")
+        file = f"LLVM-{ver}-{os}-{arch}.tar.xz"
         if file is None:
             raise Error("artifacts not available at github")
 
@@ -207,11 +213,11 @@ class CLangSetup(paella.Setup):
                           tempdir=True)
         self.run(r'''
             tar -C /opt -xJf {tar}
-            ln -s /opt/`basename {tar} .tar.xz` /opt/llvm-17
+            ln -s /opt/`basename {tar} .tar.xz` /opt/llvm-19
             '''.format(tar=tar), sudo=True)
         self.cat_to_profile_d(r'''
-            export PATH=/opt/llvm-15/bin:${PATH}
-            ''', "llvm-15.sh")
+            export PATH=/opt/llvm-19/bin:${PATH}
+            ''', "llvm-19.sh")
 
 #----------------------------------------------------------------------------------------------
 

@@ -54,17 +54,17 @@ The general desire is to make useful idioms (like job runners) available across 
 
 [bin](docs/bin.md): scripts for direct execution
 
-[Shibumi](docs/shibumi/README.md): Bash code
+[Shibumi](docs/shibumi/README.md): Bash automation library
 
 [Paella](docs/paella/README.md): Python automation library
 
 [Bento](docs/bento/README.md): Ruby automation library
 
-[Julius](docs/julius/README.md): Node.js/TypeScript automation library
+[Jasminder](docs/jasminder/README.md): Javascript/TypeScript automation library
 
 [Cetara](cetara/README.md): C/C++ code
 
-[WD40](docs/wd40.md) Rust code
+[WD40](docs/wd40.md) Rust automation library
 
 [mk](docs/mk/README.md): GNU Make-based build framework
 

@@ -22,6 +22,10 @@ When requirig something more powerfull than bash I'd recommend going with Python
 ### Which bash version is required?
 Most of the code in Shibumi works with bash 4.x, and will of course work with bash 5.x which is the most common now.
 
+### Beyond bash - GNU utilities
+
+### Bash in Windows
+
 ### Debugging
 Start by installing `bashdb` using `bin/getbashdb` (a console bash debugger with an interface resembling `gdb`, implemented in bash).
 Invoke `bashdb` with: `bashdb ./your-script args...`

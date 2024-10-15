@@ -3,12 +3,19 @@
 
 all: $(MK_ALL_TARGETS)
 
+.PHONY: all
+
+ifeq ($(HELP),1)
+
+include $(MK)/help.rules
+
+else
+
 default: build
 
 include $(MK)/common.rules
 include $(MK)/variant.rules
 include $(MK)/bindirs.rules
-include $(MK)/help.rules
 include $(MK)/build.rules
 include $(MK)/cc.rules
 include $(MK)/binutils.rules
@@ -27,4 +34,6 @@ ifneq ($(MK.configure),)
 include $(MK)/configure.rules
 endif
 
-.PHONY: all default
+.PHONY: default
+
+endif # HELP

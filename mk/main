@@ -57,7 +57,7 @@ endif
 
 ifneq ($(HELP),1)
 MK_ALL_TARGETS:=bindirs build
-DEFAULT_TARGETS:=bindirs
+DEFAULT_TARGETS:=__sep bindirs
 else
 MK_ALL_TARGETS:=help
 DEFAULT_TARGETS:=help

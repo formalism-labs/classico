@@ -1,6 +1,9 @@
 
-.PHONY: __sep
-
+ifeq ($(SEP),0)
 __sep: ;
-#	@python -c "$(__SEP)"
+else
+__sep:
+	@$(CLASSICO)/bin/sep1
+endif
 
+.PHONY: __sep

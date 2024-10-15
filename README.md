@@ -54,23 +54,25 @@ The general desire is to make useful idioms (like job runners) available across 
 
 [bin](docs/bin.md): scripts for direct execution
 
-[Shibumi](docs/shibumi/README.md): Bash automation library
+[Shibumi](docs/shibumi/README.md): Bash library
 
-[Paella](docs/paella/README.md): Python automation library
+[Paella](docs/paella/README.md): Python library
 
-[Bento](docs/bento/README.md): Ruby automation library
+[Bento](docs/bento/README.md): Ruby library
 
-[Jasminder](docs/jasminder/README.md): Javascript/TypeScript automation library
+[Jasminder](docs/jasminder/README.md): Javascript/TypeScript library
 
 [Cetara](cetara/README.md): C/C++ code
 
-[WD40](docs/wd40.md) Rust automation library
+[WD40](docs/wd40.md): Rust library
+
+[Golani](docs/golani.md): Golang library
 
 [mk](docs/mk/README.md): GNU Make-based build framework
 
 [cmake](docs/cmake.md): CMake code
 
-[sbin](docs/sbin.md): administrative scripts (for setting up Classico environment)
+[sbin](docs/sbin.md): Administrative scripts (for setting up Classico environment)
 
 ### Conventions
 
@@ -85,7 +87,9 @@ makefiles use their natural postfix argument specification, which is similar to 
 
 #### `get*` scripts
 
-#### Installing rebuild requirements
+#### Installing build requirements
+
+#### Runners
 
 #### Bash scripts
 

@@ -21,7 +21,7 @@ endif
 
 #----------------------------------------------------------------------------------------------
 
-ifneq ($(HELP),1)
+# ifneq ($(HELP),1)
 
 # TODO: __force triggers build even when in HELP=1 mode -> fix this
 
@@ -34,7 +34,20 @@ else
 	@make -C $(BINDIR) $(MAKE_J) $(CMAKE_TARGETS)
 endif
 
+#----------------------------------------------------------------------------------------------
+
+ifeq ($(ALL),) 
+ifneq ($(MK_CUSTOM_CLEAN),1)
+
+clean:
+	$(SHOW)$(MAKE) -C $(BINDIR) clean
+
+.PHONY: clean
+
+endif # MK_CUSTOM_CLEAN
 endif
+
+# endif # HELP
 
 #----------------------------------------------------------------------------------------------
 

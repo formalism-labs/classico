@@ -5,9 +5,11 @@ ifeq ($(BINDIR),)
 $(error BINDIR is undefined)
 endif
 
-.PHONY: bindirs
+export MK_BINDIR:=$(BINDIR)
 
 bindirs: $(BIN_DIRS)
+
+.PHONY: bindirs
 
 ifeq ($(MK_DIAG),1)
 $(info # BIN_DIRS=$(BIN_DIRS))

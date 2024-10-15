@@ -2,30 +2,43 @@
 ifneq ($(MK.rust),)
 #----------------------------------------------------------------------------------------------
 
-RUST_TARGET:=$(shell eval $$(rustc --print cfg | grep =); echo $$target_arch-$$target_vendor-$$target_os-$$target_env)
+RUST_PLATFORM:=$(shell eval $$(rustc --print cfg | grep =); echo $$target_arch-$$target_vendor-$$target_os-$$target_env)
 
-CARGO_TOOLCHAIN=
-CARGO_BUILD_FLAGS=
-RUST_FLAGS=
-RUST_DOCFLAGS=
+CARGO_TARGET_LIB_STEM:=$(shell \
+    cargo metadata --no-deps --format-version 1 | \
+    jq -r '.packages[0].targets[] | select(.kind[] == "rlib") | .name')
+CARGO_TARGET_LIB_NAME=$(TARGET_DIR)/lib$(CARGO_TARGET_LIB_STEM).rlib
+
+CARGO_TARGET_BIN_NAME:=$(shell \
+	cargo metadata --format-version 1 | \
+	jq -r '.packages[] | select(.name == "$(MODULE_NAME)") | .targets[] | select(.kind[] == "bin") | .name')
+
+ifeq ($(NIGHTLY),1)
+CARGO_TOOLCHAIN=+nightly
+endif
 
 ifeq ($(DEBUG),1)
     TARGET_DIR=$(BINDIR)/target/debug
     RUST_FLAGS += -C debuginfo=2
+    CARGO_FLAVOR=debug
 else
 	CARGO_BUILD_FLAGS += --release
-	TARGET_DIR=$(BINDIR)/target/release
+    CARGO_FLAVOR=release
 endif
 
 export CARGO_TARGET_DIR=$(BINDIR)/target
 
-export MK_CARGO_DIR := $(BINDIR)/target
+TARGET_DIR=$(CARGO_TARGET_DIR)/$(CARGO_FLAVOR)
+
+#------------------------------------------------------------------------------------ Interface
+
+export MK_CARGO_TARGET_DIR := $(CARGO_TARGET_DIR)
 
 ifeq ($(MK_DIAG),1)
-$(info # MK_CARGO_DIR=$(MK_CARGO_DIR))
+$(info # MK_CARGO_TARGET_DIR=$(MK_CARGO_TARGET_DIR))
 endif
 
-export MK_CARGO_LOG := $(BINDIR)/target/buildrs.log
+export MK_CARGO_LOG := $(CARGO_TARGET_DIR)/buildrs.log
 
 #------------------------------------------------------------------------------------- Coverage
 

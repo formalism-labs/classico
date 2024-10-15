@@ -3,25 +3,17 @@ ifneq ($(MK.rust),)
 #----------------------------------------------------------------------------------------------
 
 cargo-build:
-ifneq ($(NIGHTLY),1)
 	$(SHOW) \
 	RUSTFLAGS="$(RUST_FLAGS)" \
-	cargo build --all --all-targets $(CARGO_BUILD_FLAGS)
-else
-	$(SHOW) \
-	RUSTFLAGS="$(RUST_FLAGS)" \
-	cargo $(CARGO_TOOLCHAIN) build --target $(RUST_TARGET) $(CARGO_BUILD_FLAGS)
-endif
-	@echo "# build.rs log:"
-	$(SHOW)cat $(MK_CARGO_LOG)
+	cargo $(CARGO_TOOLCHAIN) build $(CARGO_BUILD_FLAGS)
+	@if [[ -f $(MK_CARGO_LOG) ]]; then \
+		echo "# build.rs log:" ;\
+		cat $(MK_CARGO_LOG) ;\
+	fi
 
 .PHONY: cargo-build
 
 #----------------------------------------------------------------------------------------------
-
-CARGO_TARGET_BIN_NAME:=$(shell \
-	cargo metadata --format-version 1 | \
-	jq -r '.packages[] | select(.name == "$(MODULE_NAME)") | .targets[] | select(.kind[] == "bin") | .name')
 
 TARGET_BIN=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(MODULE_NAME)
 ifneq ($(wildcard $(TARGET_BIN)),)
@@ -29,24 +21,31 @@ override TARGET_BIN:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(CARGO_TARGET_BIN_NAME)
 endif
 
 run:
+ifeq ($(GDB),1)
 	$(SHOW)rust-gdb $(TARGET_BIN)
+else
+	$(SHOW)$(TARGET_BIN)
+endif
 
 .PHONY: run
 
 #----------------------------------------------------------------------------------------------
 
-ifneq ($(MK_CUSTOM_CLEAN),1)
 ifeq ($(ALL),)
+ifneq ($(MK_CUSTOM_CLEAN),1)
 
 clean:
 	$(SHOW)cargo clean
 
 .PHONY: clean
 
-endif
 endif # MK_CUSTOM_CLEAN
+endif
 
 #----------------------------------------------------------------------------------------------
+
+nm:
+	$(SHOW)nm -AC $(CARGO_TARGET_LIB_NAME)
 
 update:
 	$(SHOW)cargo update
@@ -62,9 +61,7 @@ rust-info:
 	$(SHOW)rustup --version
 	$(SHOW)rustup show
 
-.PHONY: rust-info
-
-.PHONY: upadate fmt format rust-info
+.PHONY: nm upadate fmt format rust-info
 
 #----------------------------------------------------------------------------------------------
 endif # MK.rust

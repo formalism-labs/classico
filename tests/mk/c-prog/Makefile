@@ -8,5 +8,5 @@ define CC_SOURCES
 	x1.cc
 endef
 
-ROOT=../../..
-include $(ROOT)/mk/main
+CLASSICO=../../..
+include $(CLASSICO)/mk/main

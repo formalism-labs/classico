@@ -2,3 +2,7 @@
 ifneq ($(HELP),) 
 HELPFILE:=$(shell mktemp /tmp/make.help.XXXX)
 endif
+
+define HELPTEXT ?=
+make with mk
+endef

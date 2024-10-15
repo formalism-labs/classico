@@ -6,15 +6,13 @@ ifneq ($(MK_CUSTOM_HELP),1)
 .PHONY: help
 
 help:
-ifeq ($(HELPTEXT),)
-	$(file >$(HELPFILE),$(HELP))
-else
+ifneq ($(HELPTEXT),)
 	$(file >$(HELPFILE),$(HELPTEXT))
-endif
 	@echo
 	@cat $(HELPFILE)
 	@echo
 	@-rm -f $(HELPFILE)
+endif
 
 endif # MK_CUSTOM_HELP
 endif # HELP

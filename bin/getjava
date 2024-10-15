@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # https://adoptium.net/temurin/releases
-OPENJDK_VERSION=${OPENJDK_VERSION:-"21.0.4_7"}
-MAVEN_VERSION=${MAVEN_VERSION:-3.9.8}
+OPENJDK_VERSION=${OPENJDK_VERSION:-"23_37"}
+
+MAVEN_VERSION=${MAVEN_VERSION:-3.9.9}
 
 PROGNAME="${BASH_SOURCE[0]}"
 HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
@@ -48,7 +49,7 @@ else
 	exit 1
 fi
 
-VER_URL_DIR="${OPENJDK_VERSION/_/%2B7}"
+
 if [[ $JDK == 1 ]]; then
 	TYPE=jdk
 else
@@ -73,7 +74,9 @@ if [[ -d $OPENJDK_DIR ]]; then
 	fi
 fi
 if [[ $install_openjdk == 1 ]]; then
-	runn wget -O $tmpdir/openjdk.tgz https://github.com/adoptium/temurin21-binaries/releases/download/jdk-${VER_URL_DIR}/OpenJDK21U-${TYPE}_${ARCH}_${OS}_hotspot_${OPENJDK_VERSION}.tar.gz
+	m=$(echo "$OPENJDK_VERSION" | cut -d_ -f1)
+	encver="${OPENJDK_VERSION/_/%2B}"
+	runn wget -O $tmpdir/openjdk.tgz https://github.com/adoptium/temurin${m}-binaries/releases/download/jdk-${encver}/OpenJDK${m}U-${TYPE}_${ARCH}_${OS}_hotspot_${OPENJDK_VERSION}.tar.gz
 
 	cd $tmpdir
 	tar xzf openjdk.tgz
@@ -93,7 +96,8 @@ if [[ $JDK == 1 ]]; then
 	fi
 fi
 if [[ $install_maven == 1 ]]; then
-	runn wget -O $tmpdir/maven.tgz https://dlcdn.apache.org/maven/maven-$(echo "$MAVEN_VERSION" | cut -f1 -d.)/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+	m="$(echo "$MAVEN_VERSION" | cut -f1 -d.)"
+	runn wget -O $tmpdir/maven.tgz https://dlcdn.apache.org/maven/maven-${m}/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
 	cd $tmpdir
 	tar xzf maven.tgz
 	$OP $SUDO mv $MAVEN_NAME $MAVEN_DIR

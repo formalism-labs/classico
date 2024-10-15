@@ -17,12 +17,12 @@ platform_windows() {
 	case "$OSTYPE" in
 		msys*)    echo "msys2" ;;
 		cygwin*)  echo "cygwin" ;;
-		*)        if cat /proc/version | grep -i wsl2 >& /dev/null ]]; then echo "wsl"; else echo "windows"; fi ;;
+		*)        if cat /proc/version | grep -i wsl2 >& /dev/null ]]; then echo "wsl"; else echo "unknown"; fi ;;
 	esac
 }
 
 platform_arch() {
-	case "`uname -m`" in
+	case "$(uname -m)" in
 		x86_64*)  echo "x64" ;;
 		amd64*)   echo "x64" ;;
 		i386*)    echo "x86" ;;
@@ -203,13 +203,8 @@ add_to_profile_d() {
 	local files="$@"
 	local d
 	local sudo
-#	if [[ `uname -s` == Darwin ]]; then
-		d="$HOME/.profile.d"
-		sudo=
-#	else
-#		d="/etc/profile.d"
-#		sudo="$SUDO"
-#	fi
+	d="$HOME/.profile.d"
+	sudo=
 	if [[ ! -d $d ]]; then
 		$sudo mkdir -p $d
 	fi

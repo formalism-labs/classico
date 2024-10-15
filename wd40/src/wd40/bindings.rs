@@ -26,3 +26,4 @@ pub fn generate_bindings(header: &str, bindings_fname: &str) {
         panic!("sed failed with status: {:?}", status);
     }
 }
+

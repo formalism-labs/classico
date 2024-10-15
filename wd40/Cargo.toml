@@ -6,12 +6,12 @@ edition = "2018"
 
 [lib]
 crate-type = ["rlib"]
-name = "classico_wd40"
+name = "classico"
 path = "src/lib.rs"
 
-[[bin]]
-name = "wd40-test"
-path = "src/bin.rs"
+#[[bin]]
+#name = "bb"
+#path = "src/bin/bb.rs"
 
 [dependencies]
 bindgen = "0.65"

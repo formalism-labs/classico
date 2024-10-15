@@ -1,4 +1,4 @@
 !*.a
-target/
-bin/
+/target/
+/bin/
 Cargo.lock

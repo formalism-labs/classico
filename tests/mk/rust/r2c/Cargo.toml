@@ -1,0 +1,13 @@
+[package]
+name = "cfrom"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+classico-wd40 = { path = "../../../../wd40" }
+
+[build-dependencies]
+classico-wd40 = { path = "../../../../wd40" }
+
+[profile.dev]
+debug = true

@@ -5,10 +5,9 @@ pub use bindings::*;
 
 use std::env;
 use std::fs::File;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
 use std::error::Error;
-//use std::fmt;
 use std::process::Command;
 
 //---------------------------------------------------------------------------------------------
@@ -46,8 +45,8 @@ pub use BB;
 
 //---------------------------------------------------------------------------------------------
 
-pub fn read_deps_config() {
-    let target_dir = PathBuf::from(env::var("MK_CARGO_TARGET_DIR").unwrap());
+pub fn export_deps_config() -> Result<(), Box<dyn Error>> {
+    let target_dir = PathBuf::from(env::var("MK_CARGO_TARGET_DIR")?);
     let config_path = target_dir.join("deps.env");
 
     let file = File::open(&config_path).unwrap();
@@ -56,6 +55,21 @@ pub fn read_deps_config() {
         let line = line.unwrap();
         println!("cargo:rustc-env={}", line);
     }
+    Ok(())
+}
+
+//---------------------------------------------------------------------------------------------
+
+pub struct BuildLog {
+    pub file: File
+}
+
+impl BuildLog {
+    pub fn new() -> Result<Self, Box<dyn Error>> {
+        let path = env::var("MK_CARGO_LOG")?;
+        let file = File::create(path.clone())?;
+        Ok(BuildLog { file: file })
+    }
 }
 
 //---------------------------------------------------------------------------------------------
@@ -63,42 +77,40 @@ pub fn read_deps_config() {
 pub struct Build {
     root: String,
     profile: String,
-    bindir: String
+    bindir: String,
+    log: BuildLog
 }
 
 impl Build {
-    pub fn new() -> Self {
-        Build {
-            root: env::var("CARGO_MANIFEST_DIR").unwrap(),
-            profile: env::var("PROFILE").unwrap_or_else(|_| "debug".to_string()),
-            bindir: env::var("MK_BINDIR").unwrap()
-        }
+    pub fn new() -> Result<Self, Box<dyn Error>> {
+        let root = env::var("CARGO_MANIFEST_DIR")?;
+        // let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
+        let profile = getenv("PROFILE", "debug");
+        let bindir = env::var("MK_BINDIR").
+            expect("MK_BINDIR undefined: build with make");
+        let log = BuildLog::new()?;
+
+        export_deps_config()?;
+
+        Ok(Build { root: root, profile: profile, bindir: bindir, log: log })
     }
 
     pub fn root(&self) -> &String { &self.root }
     pub fn is_debug(&self) -> bool { self.profile == "debug" }
     pub fn bindir(&self) -> &String { &self.bindir }
-}
 
-//---------------------------------------------------------------------------------------------
-
-pub struct BuildLog {
-    path: String,
-    pub file: File
-}
-
-impl BuildLog {
-    pub fn new() -> Result<Self, Box<dyn Error>> {
-        let path = env::var("MK_CARGO_LOG").unwrap();
-        let file = File::create(path.clone())?;
-        Ok(BuildLog { path: path, file: file })
+    pub fn log(&mut self, text: &str) {
+        writeln!(self.log.file, "{}", text).expect("error writing to build log file");
+    }
+    pub fn blog(&mut self, text: &Vec<u8>) {
+        self.log.file.write_all(text).expect("error writing to build log file");
     }
 }
 
 #[macro_export]
 macro_rules! blog {
-    ($blog:expr, $fmt:expr $(, $args:expr)*) => {{
-        writeln!($blog.file, "{}", format!($fmt $(, $args)*))
+    ($build:expr, $fmt:expr $(, $args:expr)*) => {{
+        $build.log(&format!($fmt $(, $args)*))
     }};
 }
 

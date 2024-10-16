@@ -2,13 +2,15 @@
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use std::error::Error;
 
-fn main() {
-    let root = env::var("CARGO_MANIFEST_DIR").unwrap();
+fn main() -> Result<(), Box<dyn Error>> {
+    let root = env::var("CARGO_MANIFEST_DIR")?;
 
     let bb_path = PathBuf::from(root).join("linux-x64");
 
-    let out_dir = PathBuf::from(env::var("MK_CARGO_TARGET_DIR").unwrap());
+    let out_dir = PathBuf::from(env::var("MK_CARGO_TARGET_DIR")
+        .expect("MK_CARGO_TARGET_DIR undefined: build with make"));
     let deps_file_path = out_dir.join("deps.env");
 
     let deps_vars = [ [ "WD40_SEARCH_PATH", &bb_path.display().to_string() ],
@@ -22,4 +24,6 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", bb_path.display());
 
     println!("cargo:rerun-if-changed={}/libbb.a", bb_path.display());
+
+    Ok(())
 }

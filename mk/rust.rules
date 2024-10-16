@@ -47,6 +47,16 @@ endif
 nm:
 	$(SHOW)nm -AC $(CARGO_TARGET_LIB_NAME)
 
+clippy:
+	$(SHOW) \
+	RUSTFLAGS="$(RUST_FLAGS)" \
+	cargo $(CARGO_TOOLCHAIN) clippy
+
+check:
+	$(SHOW) \
+	RUSTFLAGS="$(RUST_FLAGS)" \
+	cargo $(CARGO_TOOLCHAIN) check --quiet --workspace --message-format=json --all-targets --keep-going
+
 update:
 	$(SHOW)cargo update
 

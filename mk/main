@@ -14,6 +14,11 @@ ifeq ($(ROOT),)
 ROOT ?= .
 endif
 override ROOT:=$(shell cd $(ROOT) && pwd)
+export MK_ROOT:=$(ROOT)
+
+ifneq ($(V),)
+VERBOSE?=$(V)
+endif
 
 ifneq ($(filter help,$(MAKECMDGOALS)),)
 override HELP:=1

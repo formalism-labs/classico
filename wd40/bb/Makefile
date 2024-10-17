@@ -1,8 +1,24 @@
 
-ROOT=../..
-PLATFORM:=$(shell $(ROOT)/bin/platform --os --arch | awk '$$1=$$1' OFS="-")
+ROOT=..
 
-all:
-	gcc -c bb.c $(ROOT)/cetara/diag/gdb.c -fPIC -I $(ROOT) -I$(ROOT)/.. -DDEBUG
-	mkdir -p ../$(PLATFORM)
-	ar cr ../$(PLATFORM)/libbb.a bb.o gdb.o
+CC_PROD=lib
+
+SRCDIR=../..
+
+define CC_SOURCES
+	wd40/bb/bb.c
+	cetara/diag/gdb.c
+endef
+
+define CC_INCLUDES
+	../../..
+endef
+
+define CC_DEFS
+	DEBUG
+endef
+
+BINDIR=$(BINROOT)/bb
+
+CLASSICO=../..
+include $(CLASSICO)/mk/main

@@ -9,9 +9,11 @@ CARGO_TARGET_LIB_STEM:=$(shell \
     jq -r '.packages[0].targets[] | select(.kind[] == "rlib") | .name')
 CARGO_TARGET_LIB_NAME=$(TARGET_DIR)/lib$(CARGO_TARGET_LIB_STEM).rlib
 
+TARGET_BIN_NAME ?= $(MODULE_NAME)
+
 CARGO_TARGET_BIN_NAME:=$(shell \
 	cargo metadata --format-version 1 | \
-	jq -r '.packages[] | select(.name == "$(MODULE_NAME)") | .targets[] | select(.kind[] == "bin") | .name')
+	jq -r '.packages[].targets[] | select(.name == "$(TARGET_BIN_NAME)") | select(.kind[] == "bin") | .name')
 
 ifeq ($(NIGHTLY),1)
 CARGO_TOOLCHAIN=+nightly
@@ -19,7 +21,7 @@ endif
 
 ifeq ($(DEBUG),1)
     TARGET_DIR=$(BINDIR)/target/debug
-    RUST_FLAGS += -C debuginfo=2
+    RUSTC_FLAGS += -C debuginfo=2
     CARGO_FLAVOR=debug
 else
 	CARGO_BUILD_FLAGS += --release
@@ -43,7 +45,7 @@ export MK_CARGO_LOG := $(CARGO_TARGET_DIR)/buildrs.log
 #------------------------------------------------------------------------------------- Coverage
 
 ifeq ($(COV),1)
-RUST_FLAGS += -C instrument_coverage
+RUSTC_FLAGS += -C instrument_coverage
 endif
 
 #------------------------------------------------------------------------------------ Sanitizer
@@ -53,9 +55,9 @@ ifneq ($(SAN),)
 
 NIGHTLY=1
 CARGO_BUILD_FLAGS += -Zbuild-std
-RUST_FLAGS += -Zsanitizer=$(SAN)
+RUSTC_FLAGS += -Zsanitizer=$(SAN)
 ifeq ($(SAN),memory)
-    RUST_FLAGS += -Zsanitizer-memory-track-origins
+    RUSTC_FLAGS += -Zsanitizer-memory-track-origins
 endif
 
 endif # SAN
@@ -64,7 +66,7 @@ endif # DEBUG
 #-------------------------------------------------------------------------------------- Profile
 
 ifeq ($(PROFILE),1)
-RUST_FLAGS += -g -C force-frame-pointers=yes
+RUSTC_FLAGS += -g -C force-frame-pointers=yes
 endif
 
 #----------------------------------------------------------------------------------------------

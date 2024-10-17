@@ -1,17 +1,17 @@
 [package]
 name = "classico-wd40"
-version = "0.1.0"
+version = "1.0.0"
 authors = []
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["rlib"]
 name = "classico"
 path = "src/lib.rs"
 
-#[[bin]]
-#name = "bb"
-#path = "src/bin/bb.rs"
+[[bin]]
+name = "bb"
+path = "src/bin/bb.rs"
 
 [dependencies]
 bindgen = "0.65"

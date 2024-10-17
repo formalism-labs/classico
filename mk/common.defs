@@ -29,3 +29,4 @@ endif
 MODULE_NAME ?= $(notdir $(CURDIR))
 
 SRCDIR ?= .
+ABS_SRCDIR=$(abspath $(SRCDIR))

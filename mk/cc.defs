@@ -60,7 +60,7 @@ endef
 CC_FLAGS.defs=$(foreach d,$(call flatten,$(CC_DEFS)),-D$(d))
 
 CC_INCLUDES += $(CC_INCLUDES.$(OSNICK)) $(CC_INCLUDES.$(OS)) $(CC_INCLUDES.$(ARCH))
-CC_FLAGS.includes=$(foreach d,$(call flatten,$(CC_INCLUDES)),-I$(d)) -I$(ROOT)/$(SRCDIR) -I$(ROOT)
+CC_FLAGS.includes=$(foreach d,$(call flatten,$(CC_INCLUDES)),-I$(d)) -I$(SRCDIR) -I$(ROOT)
 
 CC_COMMON_H ?= $(SRCDIR)/common.h
 _CC_COMMON_H=$(realpath $(CC_COMMON_H))

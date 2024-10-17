@@ -1,10 +1,9 @@
 
-
 mod bindings;
 pub use bindings::*;
 
 use std::env;
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
 use std::error::Error;
@@ -19,7 +18,7 @@ pub fn getenv(var: &str, default: &str) -> String {
     };
 }
 
-pub fn command_line(cmd: &Command) -> String {
+pub fn command_str(cmd: &Command) -> String {
     format!("{:?} {}", cmd.get_program(), cmd.get_args().map(|arg| arg.to_string_lossy()).collect::<Vec<_>>().join(" "))
 }
 
@@ -27,16 +26,16 @@ pub fn command_line(cmd: &Command) -> String {
 
 #[link(name="bb", kind="static")]
 extern "C" {
-pub fn _BB();
+pub fn wd40_BB();
 }
 
 #[macro_export]
 macro_rules! BB {
     () => {
-        use classico::wd40::_BB;
+        use classico::wd40::wd40_BB;
         use classico::wd40::getenv;
         if getenv("BB", "") == "1" {
-            unsafe { _BB(); } 
+            unsafe { wd40_BB(); } 
         }
     };
 }
@@ -49,7 +48,7 @@ pub fn export_deps_config() -> Result<(), Box<dyn Error>> {
     let target_dir = PathBuf::from(env::var("MK_CARGO_TARGET_DIR")?);
     let config_path = target_dir.join("deps.env");
 
-    let file = File::open(&config_path).unwrap();
+    let file = File::open(&config_path)?;
     let reader = io::BufReader::new(file);
     for line in reader.lines() {
         let line = line.unwrap();
@@ -67,7 +66,10 @@ pub struct BuildLog {
 impl BuildLog {
     pub fn new() -> Result<Self, Box<dyn Error>> {
         let path = env::var("MK_CARGO_LOG")?;
-        let file = File::create(path.clone())?;
+        let file = OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(&path)?;
         Ok(BuildLog { file: file })
     }
 }
@@ -75,27 +77,30 @@ impl BuildLog {
 //---------------------------------------------------------------------------------------------
 
 pub struct Build {
-    root: String,
+    root: String, // dir of carte that owns Build instance
     profile: String,
-    bindir: String,
+    mk_root: String, // root dir of carte that invoked make
+    bindir: String, // bindir of the carte that invoked make
     log: BuildLog
 }
 
 impl Build {
     pub fn new() -> Result<Self, Box<dyn Error>> {
         let root = env::var("CARGO_MANIFEST_DIR")?;
-        // let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
         let profile = getenv("PROFILE", "debug");
+        let mk_root = env::var("MK_ROOT")
+            .expect("MK_ROOT undefined: build with make");    
         let bindir = env::var("MK_BINDIR").
             expect("MK_BINDIR undefined: build with make");
         let log = BuildLog::new()?;
 
         export_deps_config()?;
 
-        Ok(Build { root: root, profile: profile, bindir: bindir, log: log })
+        Ok(Build { root: root, profile: profile, mk_root: mk_root, bindir: bindir, log: log })
     }
 
     pub fn root(&self) -> &String { &self.root }
+    pub fn mk_root(&self) -> &String { &self.mk_root }
     pub fn is_debug(&self) -> bool { self.profile == "debug" }
     pub fn bindir(&self) -> &String { &self.bindir }
 

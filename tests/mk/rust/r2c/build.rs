@@ -17,15 +17,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     make.stderr(Stdio::piped());
     make.stdout(Stdio::piped());
     make.arg("SEP=0");
+    make.arg(&format!("ROOT={}", &build.mk_root()));
     if build.is_debug() {
         make.arg("DEBUG=1");
     }
 
-    blog!(build, "# in {}, running: {}", clib_root, wd40::command_line(&make));
+    blog!(build, "\n# in {}, running: {}", clib_root, wd40::command_str(&make));
     
     let make_out = make.output()    
         .expect("clib build failed to execute");
-    blog!(build, "{}", String::from_utf8_lossy(&make_out.stdout));
     build.blog(&make_out.stdout);
     if !make_out.status.success() {
         panic!("clib build failed");

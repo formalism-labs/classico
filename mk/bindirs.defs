@@ -7,6 +7,8 @@ BINROOT.debug=$(ROOT)/bin/$(FULL_VARIANT.debug)
 
 BINDIR ?= $(BINROOT)
 
+OBJECTS=$(CC_OBJECTS)
+
 BIN_DIRS=$(sort $(patsubst %/,%,$(BINDIR) $(dir $(OBJECTS))) $(BINDIRS))
 
 define mkdir_rule

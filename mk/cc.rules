@@ -4,13 +4,13 @@ ifneq ($(MK.cc),)
 -include $(CC_DEPS)
 
 define c_files_rule
-$$(BINDIR)/%.o: $$(ROOT)/$$(SRCDIR)/%.$(1)
+$$(BINDIR)/%.o: $$(ABS_SRCDIR)/%.$(1)
 	@echo Compiling $$<...
 	$$(SHOW)$$(CC) $$(CC_FLAGS) $$(CC_C_FLAGS) -c $$< -o $$@
 endef
 
 define cxx_files_rule
-$$(BINDIR)/%.o: $$(ROOT)/$$(SRCDIR)/%.$(1)
+$$(BINDIR)/%.o: $$(ABS_SRCDIR)/%.$(1)
 	@echo Compiling $$<...
 	$$(SHOW)$$(CXX) $$(CC_FLAGS) $$(CC_CXX_FLAGS) -c $$< -o $$@
 endef

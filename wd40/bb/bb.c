@@ -1,6 +1,6 @@
 
 #include "cetara/diag/gdb.h"
 
-void _BB() {
-    BB;
+void wd40_BB() {
+    _BB;
 }

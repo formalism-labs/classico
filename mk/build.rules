@@ -12,19 +12,16 @@ build: $(DEFAULT_TARGETS) $(MK_MAKEFILES) $(TARGET)
 
 endif
 
-ifneq ($(MK_CUSTOM_CLEAN),1)
-
 ifeq ($(ALL),1) 
-clean:
-	$(SHOW)if [ ! -z "$(MK_CLEAN_ALL_DIRS)" ]; then rm -rf $(sort $(MK_CLEAN_ALL_DIRS)); fi
-endif
 
-else # MK_CUSTOM_CLEAN
+clean:
+	@echo "Cleaning $(MK_CLEAN_ALL_DIRS)"
+	$(SHOW)if [ ! -z "$(MK_CLEAN_ALL_DIRS)" ]; then rm -rf $(sort $(MK_CLEAN_ALL_DIRS)); fi
+
+else ifeq ($(MK_CUSTOM_CLEAN),1)
 
 clean: custom-clean
 
-.PHONY: custom-clean
+endif
 
-endif # MK_CUSTOM_CLEAN
-
-.PHONY: clean
+.PHONY: clean custom-clean

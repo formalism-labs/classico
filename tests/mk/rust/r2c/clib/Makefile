@@ -3,7 +3,7 @@ ROOT=..
 
 CC_PROD=lib
 
-SRCDIR=clib
+SRCDIR=.
 define CC_SOURCES
 	clib.cc
 endef

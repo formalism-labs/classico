@@ -2,9 +2,14 @@
 ifneq ($(MK.rust),)
 #----------------------------------------------------------------------------------------------
 
+ifeq ($(VERBOSE),1)
+CARGO_BUILD_FLAGS += -vv
+endif
+
 cargo-build:
 	$(SHOW) \
-	RUSTFLAGS="$(RUST_FLAGS)" \
+	rm -f $(MK_CARGO_LOG) ;\
+	RUSTFLAGS="$(RUSTC_FLAGS)" \
 	cargo $(CARGO_TOOLCHAIN) build $(CARGO_BUILD_FLAGS)
 	@if [[ -f $(MK_CARGO_LOG) ]]; then \
 		echo "# build.rs log:" ;\
@@ -15,16 +20,32 @@ cargo-build:
 
 #----------------------------------------------------------------------------------------------
 
-TARGET_BIN=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(MODULE_NAME)
-ifneq ($(wildcard $(TARGET_BIN)),)
-override TARGET_BIN:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(CARGO_TARGET_BIN_NAME)
+TARGET_BIN:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(MODULE_NAME)
+
+ifeq ($(wildcard $(TARGET_BIN)),)
+	override TARGET_BIN:=
+	ifneq ($(CARGO_TARGET_BIN_NAME),)
+		override TARGET_BIN:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(CARGO_TARGET_BIN_NAME)
+		ifeq ($(wildcard $(TARGET_BIN)),)
+			override TARGET_BIN:=
+		endif
+	endif
 endif
+
+ifneq ($(TARGET_BIN),)
 
 run:
 ifeq ($(GDB),1)
 	$(SHOW)rust-gdb $(TARGET_BIN)
 else
 	$(SHOW)$(TARGET_BIN)
+endif
+
+else
+
+run:
+	@echo "no runnable target found"
+
 endif
 
 .PHONY: run
@@ -49,12 +70,12 @@ nm:
 
 clippy:
 	$(SHOW) \
-	RUSTFLAGS="$(RUST_FLAGS)" \
+	RUSTFLAGS="$(RUSTC_FLAGS)" \
 	cargo $(CARGO_TOOLCHAIN) clippy
 
 check:
 	$(SHOW) \
-	RUSTFLAGS="$(RUST_FLAGS)" \
+	RUSTFLAGS="$(RUSTC_FLAGS)" \
 	cargo $(CARGO_TOOLCHAIN) check --quiet --workspace --message-format=json --all-targets --keep-going
 
 update:

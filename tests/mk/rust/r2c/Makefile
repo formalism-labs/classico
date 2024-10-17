@@ -8,4 +8,4 @@ include $(CLASSICO)/mk/main
 
 custom-clean:
 	$(SHOW)cargo clean
-	$(SHOW)make -C clib clean
+	$(SHOW)$(MAKE) -C clib clean

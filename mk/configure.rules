@@ -13,10 +13,10 @@ $(CONFIGURE_BUILD_DIR)/Makefile: $(SRCDIR)/configure
 		$(abspath $(SRCDIR))/configure $(CONFIGURE_FLAGS)
 
 $(CONFIGURE_TARGET): $(CONFIGURE_BUILD_DIR)/Makefile
-	$(SHOW)make -C $(CONFIGURE_BUILD_DIR) $(CONFIGURE_MAKE_J)
+	$(SHOW)$(MAKE) -C $(CONFIGURE_BUILD_DIR) $(CONFIGURE_MAKE_J)
 
 clean-configure:
-	$(SHOW)make -C $(CONFIGURE_BUILD_DIR) distclean
+	$(SHOW)$(MAKE) -C $(CONFIGURE_BUILD_DIR) distclean
 
 .PHONY: clean-configure
 

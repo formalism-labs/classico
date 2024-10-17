@@ -31,7 +31,7 @@ $(TARGET): $(MISSING_DEPS) $(MK_MAKEFILES) __force
 ifneq ($(DRY_RUN),1)
 	$(SHOW)$(MAKE) -C $(BINDIR) $(MAKE_J) $(CMAKE_TARGETS)
 else
-	@make -C $(BINDIR) $(MAKE_J) $(CMAKE_TARGETS)
+	@$(MAKE) -C $(BINDIR) $(MAKE_J) $(CMAKE_TARGETS)
 endif
 
 #----------------------------------------------------------------------------------------------

@@ -4,7 +4,13 @@ xinstall() {
 
 	if is_command apt-get; then
 		export DEBIAN_FRONTEND=noninteractive
-		[[ $NO_UPDATE != 1 ]] && runn $SUDO apt-get update -qq
+		if [[ $NO_UPDATE != 1 ]]; then
+			local LAST_UPDATE="$(stat -c %Y /var/lib/apt/lists/*Release 2>/dev/null | sort -n | tail -n 1 || true)"
+			local NOW="$(date +%s)"
+			if [[ -z $LAST_UPDATE ]] || (( NOW - LAST_UPDATE > 86400 )); then
+				runn $SUDO apt-get update -qq
+			fi
+		fi
 		runn $SUDO apt-get install --fix-missing -y "$packs"
 	elif is_command dnf; then
 		runn $SUDO dnf install -y "$packs"

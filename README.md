@@ -60,7 +60,7 @@ The general desire is to make useful idioms (like job runners) available across 
 
 [Bento](docs/bento/README.md): Ruby library
 
-[Jasminder](docs/jasminder/README.md): Javascript/TypeScript library
+[Jasmine](docs/jasmine/README.md): Javascript/TypeScript library
 
 [Cetara](cetara/README.md): C/C++ code
 

@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO="$(cd $HERE/.. && pwd)"
+. $CLASSICO/shibumi/defs
+
+export DEBIAN_FRONTEND=noninteractive
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+#----------------------------------------------------------------------------------------------
+
+if [[ $1 == --help || $1 == help || $HELP == 1 ]]; then
+	cat <<-'END'
+		[ARGVARS...] getpy [--help|help]
+
+		Argument variables:
+		VERSION=ver   Use specific Python version
+		SYS=1         Allow use of system site packages
+		VENV=dir      Install virtualenv in `dir`
+		FORCE=1       Install even if present
+		VERBOSE=n     Verbosity level (1: print commands, 2: print results)
+		NOP=1         Print commands, don't execute
+		HELP=1        Print help
+
+	END
+	exit 0
+fi
+
+note() {
+	if (( VERBOSE >= 1 )); then
+		echo "# $@"
+	fi
+}
+
+#----------------------------------------------------------------------------------------------
+
+OP=""
+[[ $NOP == 1 ]] && OP=echo
+
+#----------------------------------------------------------------------------------------------
+
+os="$(platform_os)"
+if [[ $os == windows ]]; then
+	wintype="$(platform_windows)"
+fi
+
+arch="$(platform_arch)"
+
+if [[ -f /etc/os-release ]]; then
+	dist="$(source /etc/os-release; echo "${ID}")"
+	distver="$(source /etc/os-release; echo "${VERSION_ID}")"
+	distx="$(source /etc/os-release; echo "${ID}${VERSION_ID}")"
+fi
+
+#----------------------------------------------------------------------------------------------
+
+PYTHON_VER="${VERSION:-3.13}"
+UV_DIR="$HOME/.local/opt/uv"
+VENV_DIR="${VENV:-$HOME/.venv}"
+
+UV_VENV_ARGS=""
+[[ $SYS == 1 ]] && UV_VENV_ARGS+="  --system-site-packages"
+
+#----------------------------------------------------------------------------------------------
+
+if [[ $FORCE == 1 ]]; then
+	rm -rf $UV_DIR $VEVV_DIR
+fi
+
+if [[ -d $VEVV_DIR ]]; then
+	eprint "Python already installed"
+	exit 1
+fi
+
+runn "curl -LsSf https://astral.sh/uv/install.sh | env INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$UV_DIR" sh"
+append_to_path "$UV_DIR/bin"
+runn uv python install $PYTHON_VER
+profile_d=$(get_profile_d)
+runn uv venv --python $PYTHON_VER $VENV_DIR $UV_VENV_ARGS
+
+cat <<-END > $profile_d/python.sh
+	append_to_path "$UV_DIR/bin"
+	if [[ -f $VENV_DIR/bin/activate ]]; then
+		VIRTUAL_ENV_DISABLE_PROMPT=1
+		. $VENV_DIR/bin/activate
+		unset VIRTUAL_ENV_DISABLE_PROMPT
+	fi
+	END
+
+. $VENV_DIR/bin/activate
+runn uv pip install pip
+runn uv pip install -r $CLASSICO/paella/requirements.txt 
+
+exit 0

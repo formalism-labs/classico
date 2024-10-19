@@ -13,7 +13,7 @@ setup_profile_d() {
 	local d="$HOME/.profile.d"
 	[[ ! -d $d ]] && mkdir -p "$d"
 
-	cat <<-END | >> $profile
+	cat <<-END >> $profile
 		export CLASSICO="$CLASSICO"
 		[[ -d \$CLASSICO ]] && . \$CLASSICO/shibumi/functions;
 		END

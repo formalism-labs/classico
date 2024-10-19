@@ -1,0 +1,24 @@
+
+prepend_to_path() {
+    local DIR="$1"
+    [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$DIR:$PATH"
+}
+
+append_to_path() {
+    local DIR="$1"
+    [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$PATH:$DIR"
+}
+
+prepend_to_var() {
+    local VAR="$1"
+    local DIR="$2"
+    ":${!VAR}:" != *":$DIR:"* ]] && export $VAR="$DIR:${!VAR_NAME}"
+}
+
+append_to_var() {
+    local VAR="$1"
+    local DIR="$2"
+    ":${!VAR}:" != *":$DIR:"* ]] && export $VAR="${!VAR_NAME}:$DIR"
+}
+
+#----------------------------------------------------------------------------------------------

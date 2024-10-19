@@ -1,0 +1,23 @@
+
+eprint() {
+	if [[ -n $PREFIX ]]; then
+		local pref="$PREFIX"
+	elif [[ -n $PROGNAME ]]; then
+		local pref="$(basename "$PROGNAME")"
+	else
+		local pref="Error"
+	fi
+
+	if [[ -t 2 ]]; then
+		>&2 echo "${RED}${pref}: $@${NOCOLOR}"
+	else
+		>&2 echo "${pref}: $@"
+	fi
+}
+
+fatal() {
+	eprint $@
+	exit 1
+}
+
+#----------------------------------------------------------------------------------------------

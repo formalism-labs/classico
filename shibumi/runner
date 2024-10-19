@@ -1,0 +1,50 @@
+
+is_command() {
+	command -v $1 &> /dev/null
+}
+
+#----------------------------------------------------------------------------------------------
+
+runn() {
+	if [[ $1 == @ ]]; then
+		cmd="$(</dev/stdin)"
+		(( NOP == 1 || V >= 1 )) && { >&2 echo "$cmd"; }
+		[[ $NOP == 1 ]] && { return; }
+		if (( V < 2 )); then
+			__runn_log=$(mktemp)
+			{ eval "$cmd" > $__runn_log 2>&1 ; E=$?; } || true
+			[[ $E != 0 && $LOG != 0 ]] && cat $__runn_log
+			rm -f $__runn_log
+			return $E
+		else
+			eval "$cmd"
+		fi
+	else
+		(( NOP == 1 || V >= 1 )) && { >&2 echo "${@:1}"; }
+		[[ $NOP == 1 ]] && { return; }
+		if (( V < 2 )); then
+			__runn_log=$(mktemp)
+			{ eval "${@:1}" > $__runn_log 2>&1 ; E=$?; } || true
+			[[ $E != 0 && $LOG != 0 ]] && cat $__runn_log
+			rm -f $__runn_log
+			return $E
+		else
+			eval "${@:1}"
+		fi
+	fi
+}
+
+#----------------------------------------------------------------------------------------------
+
+# run $2 command file in docker container with id $1 by base64 decoding it and piping to bash
+# remove command file after execution
+
+run_in_docker() {
+	local did=$1
+	local cmdf=$2
+	local cmd="$(cat $cmdf | base64 -w0)"
+	rm $cmdf
+	docker exec $did bash -c "echo '$cmd' | base64 -d | bash"
+}
+
+#----------------------------------------------------------------------------------------------

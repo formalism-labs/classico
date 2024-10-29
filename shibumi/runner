@@ -5,33 +5,65 @@ is_command() {
 
 #----------------------------------------------------------------------------------------------
 
+# NOP=1: do nothing, just print command
+# LOG=0: when command fails, do not print the log
+# V=0..2: control verbosity: 0: none, 1: print on failure, 2: print everything
+
 runn() {
 	if [[ $1 == @ ]]; then
-		cmd="$(</dev/stdin)"
-		(( NOP == 1 || V >= 1 )) && { >&2 echo "$cmd"; }
-		[[ $NOP == 1 ]] && { return; }
+		local cmd="$(mktemp)"
+		cat > "$cmd"
+		(( NOP == 1 || V >= 1 )) && cat "$cmd"
+		[[ $NOP == 1 ]] && { rm -f "$cmd"; return; }
 		if (( V < 2 )); then
-			__runn_log=$(mktemp)
-			{ eval "$cmd" > $__runn_log 2>&1 ; E=$?; } || true
-			[[ $E != 0 && $LOG != 0 ]] && cat $__runn_log
-			rm -f $__runn_log
-			return $E
+			local log="$(mktemp)"
+			{ bash "$cmd" > "$log" 2>&1 ; E=$?; } || true
+			[[ $E != 0 && $LOG != 0 ]] && cat "$log"
+			rm -f "$cmd" "$log"
 		else
-			eval "$cmd"
+			{ bash "$cmd"; E=$?; } || true
+			rm -f "$cmd"
 		fi
+		return $E
 	else
-		(( NOP == 1 || V >= 1 )) && { >&2 echo "${@:1}"; }
+		(( NOP == 1 || V >= 1 )) && { >&2 echo "$@"; }
 		[[ $NOP == 1 ]] && { return; }
 		if (( V < 2 )); then
-			__runn_log=$(mktemp)
-			{ eval "${@:1}" > $__runn_log 2>&1 ; E=$?; } || true
-			[[ $E != 0 && $LOG != 0 ]] && cat $__runn_log
-			rm -f $__runn_log
+			local log="$(mktemp)"
+			{ eval "$@" > "$log" 2>&1 ; E=$?; } || true
+			[[ $E != 0 && $LOG != 0 ]] && cat "$log"
+			rm -f "$log"
 			return $E
 		else
-			eval "${@:1}"
+			eval "$@"
 		fi
 	fi
+}
+
+#----------------------------------------------------------------------------------------------
+
+posh() {
+	local ps_exe=powershell.exe
+	if is_command pwsh.exe; then
+		ps_exe=pwsh.exe
+	elif [[ -f '/c/Program Files/PowerShell/7/pwsh.exe' ]]; then
+		ps_exe='/c/Program Files/PowerShell/7/pwsh.exe'
+	fi
+
+	PREFIX=posh SUFFIX=.ps1 heredoc <<-'END'; local cmd="$FILE"
+		$ErrorActionPreference = 'Stop'
+		END
+	cat >> "$cmd"
+	(( NOP == 1 || V >= 1 )) && cat "$cmd"
+	[[ $NOP == 1 ]] && return
+	if (( V < 2 )); then
+		mk_temp log; local log="$FILE"
+		{ "$ps_exe" -File "$cmd" > "$log" 2>&1 ; E=$?; } || true
+		[[ $E != 0 && $LOG != 0 ]] && cat "$log"
+	else
+		{ "$ps_exe" -File "$cmd"; E=$?; } || true
+	fi
+	return $E
 }
 
 #----------------------------------------------------------------------------------------------

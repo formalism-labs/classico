@@ -14,3 +14,45 @@ is_abspath() {
 }
 
 #----------------------------------------------------------------------------------------------
+
+temp_files=()
+
+declare -ga temp_files
+
+# this cannot be called in a subshell, i.e. $(mk_temp)
+mk_temp() {
+	local prefix="$1"
+	local suffix="$2"
+	[[ -z $prefix ]] && prefix=temp
+	FILE="$(mktemp "/tmp/${prefix}.XXXXXX${suffix}")"
+	temp_files+=("$FILE")
+}
+
+cleanup_temp_files() {
+	if [[ $KEEP = 1 ]]; then
+		eprint "temporary files are retained: ${temp_files[@]}"
+		return
+	fi
+    for f in "${temp_files[@]}"; do
+        [[ -f $f ]] && rm -f "$f"
+		# echo "removed $f"
+    done
+}
+
+trap cleanup_temp_files EXIT
+
+#----------------------------------------------------------------------------------------------
+
+# PREFIX: filename prefix
+# SUFFIX: filename suffix
+# $1: var name for filename (default: "FILE")
+
+heredoc() {
+	local var="$1"
+	[[ -z $var ]] && var=FILE
+	local prefix="$PREFIX"
+	[[ -z $prefix ]] && prefix=heredoc
+	mk_temp "$prefix" $SUFFIX
+	cat > $FILE
+	declare -g "$var=$FILE"
+}

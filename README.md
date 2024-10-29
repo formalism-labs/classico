@@ -52,27 +52,36 @@ The general desire is to make useful idioms (like job runners) available across 
 
 ### Components
 
+**Scripts:**
+
 [bin](docs/bin.md): scripts for direct execution
 
-[Shibumi](docs/shibumi/README.md): Bash library
+[sbin](docs/sbin.md): Administrative scripts (for setting up Classico environment)
 
-[Paella](docs/paella/README.md): Python library
+**Libraries:**
 
 [Bento](docs/bento/README.md): Ruby library
 
+[Cetara](cetara/README.md): C/C++ code
+
+[Golani](docs/golani.md): Golang library
+
 [Jasmine](docs/jasmine/README.md): Javascript/TypeScript library
 
-[Cetara](cetara/README.md): C/C++ code
+[Paella](docs/paella/README.md): Python library
+
+[Posh](docs/posh.md): PowerShell library
+
+[Shibumi](docs/shibumi/README.md): Bash library
 
 [WD40](docs/wd40.md): Rust library
 
-[Golani](docs/golani.md): Golang library
+**Build tools:**
 
 [mk](docs/mk/README.md): GNU Make-based build framework
 
 [cmake](docs/cmake.md): CMake code
 
-[sbin](docs/sbin.md): Administrative scripts (for setting up Classico environment)
 
 ### Conventions
 

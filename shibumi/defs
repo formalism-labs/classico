@@ -30,7 +30,7 @@ error_trap() {
 }
 
 # CBL-Mariner is missing awk, which is required for error_trap()
-[[ $(source /etc/os-release; echo "${ID}") == mariner ]] && tdnf install -q -y awk
+[[ -d /etc/os-release && $(source /etc/os-release; echo "${ID}") == mariner ]] && tdnf install -q -y awk
 
 # avoid trap with bashdb
 if [[ -z $_Dbg_DEBUGGER_LEVEL ]]; then

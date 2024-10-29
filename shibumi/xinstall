@@ -1,6 +1,83 @@
 
+winget_install() {
+	local packs="$@"
+	for pack in "$packs"; do
+		local pack
+		runn winget install "$pack" --accept-package-agreements --silent
+	done
+}
+
+choco_install() {
+	local packs="$@"
+	runn /c/ProgramData/chocolatey/bin/choco.exe install "$packs" -y --noprogress
+}
+
+scoop_install() {
+	local packs="$@"
+	runn $(cygpath -u $USERPROFILE)/scoop/shims/scoop install "$packs" --yes
+}
+
+xinstall_windows_native() {
+	local packs="$@"
+	
+	if [[ $WINGET == 1 ]]; then
+		if is_command winget; then
+			winget_install "$packs"
+		else
+			eprint "winget is not available"
+			return 1
+		fi
+	elif [[ $CHOCO == 1 ]]; then
+		if is_command /c/ProgramData/chocolatey/bin/choco.exe; then
+			choco_install "$packs"
+		else
+			eprint "choco is not available"
+			return 1
+		fi
+	elif [[ $SCOOP == 1 ]]; then
+		if is_command $(cygpath -u $USERPROFILE)/scoop/shims/scoop; then
+			scoop_install "$packs"
+		else
+			eprint "scoop is not available"
+			return 1
+		fi
+	else
+		if is_command winget; then
+			winget_install "$packs"
+		elif is_command /c/ProgramData/chocolatey/bin/choco.exe; then
+			choco_install "$packs"
+		elif is_command $(cygpath -u $USERPROFILE)/scoop/shims/scoop; then
+			scoop_install "$packs"
+		else
+			eprint "No package manager available"
+			return 1
+		fi
+	fi
+}
+
 xinstall() {
 	local packs="$@"
+
+	if [[ $(platform_os) == windows ]]; then
+		if [[ $NATIVE == 1 ]]; then
+			xinstall_windows_native "$packs"
+			return
+		fi
+
+		case $(platform_windows) in
+			msys2)
+				runn pacman --noconfirm --needed "$packs"
+				;;
+			cygwin)
+				[[ -f /usr/local/bin/apt-cyg ]] && cp $CLASSICO/win/cygwin/apt-cyg /usr/local/bin/apt-cyg
+				runn apt-cyg install "$packs"
+				;;
+			*)
+				xinstall_windows_native "$packs"
+				;;
+		esac
+		return
+	fi
 
 	if is_command apt-get; then
 		export DEBIAN_FRONTEND=noninteractive

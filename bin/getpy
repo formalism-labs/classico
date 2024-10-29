@@ -73,22 +73,33 @@ if [[ -d $VEVV_DIR ]]; then
 	exit 1
 fi
 
-runn "curl -LsSf https://astral.sh/uv/install.sh | env INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$UV_DIR" sh"
+mkdir -p "$UV_DIR"
+if [[ ! -f $UV_DIR/bin/uv ]]; then
+	runn "curl -LsSf https://astral.sh/uv/install.sh | env INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$UV_DIR" sh"
+fi
 append_to_path "$UV_DIR/bin"
 runn uv python install $PYTHON_VER
 profile_d=$(get_profile_d)
-runn uv venv --python $PYTHON_VER $VENV_DIR $UV_VENV_ARGS
+if [[ ! -d $VENV_DIR ]]; then
+	runn uv venv --python $PYTHON_VER $VENV_DIR $UV_VENV_ARGS
+fi
 
+if [[ $os == windows ]]; then
+	VENV_BINDIR="$VENV_DIR/Scripts"
+else
+	VENV_BINDIR="$VENV_DIR/bin"
+fi
 cat <<-END > $profile_d/python.sh
+	append_to_path "$VENV_BINDIR"
 	append_to_path "$UV_DIR/bin"
-	if [[ -f $VENV_DIR/bin/activate ]]; then
+	if [[ -f $VENV_BINDIR/activate ]]; then
 		VIRTUAL_ENV_DISABLE_PROMPT=1
-		. $VENV_DIR/bin/activate
+		. $VENV_BINDIR/activate
 		unset VIRTUAL_ENV_DISABLE_PROMPT
 	fi
 	END
 
-. $VENV_DIR/bin/activate
+. $VENV_BINDIR/activate
 runn uv pip install pip
 runn uv pip install -r $CLASSICO/paella/requirements.txt 
 

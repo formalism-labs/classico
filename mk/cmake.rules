@@ -6,15 +6,19 @@ ifneq ($(MK_CUSTOM_CMAKE_BUILD),1)
 
 #----------------------------------------------------------------------------------------------
 
+ifeq ($(WHY),1)
+export CMAKE_COLOR_MAKEFILE:=OFF
+endif
+
 ifeq ($(FORCE),1)
 $(BINDIR)/Makefile: __force
 else
 $(BINDIR)/Makefile : $(MK_CMAKE_FILES) $(CMAKE_FILES)
 endif
 	@echo
-	@echo Generating $(BINDIR)/Makefile ...
+	@echo $(RED)"Generating $(BINDIR)/Makefile ..."$(NOCOLOR)
 	$(SHOW)mkdir -p $(BINROOT)
-	$(SHOW)cmake $(CMAKE_WHY) $(CMAKE_FLAGS) -S $(abspath $(SRCDIR)) -B $(BINDIR) $(CMAKE_SINK)
+	$(SHOW)cmake -D CLASSICO_DEFS="$(CLASSICO)/cmake/main" $(CMAKE_WHY) $(CMAKE_FLAGS) -S $(abspath $(SRCDIR)) -B $(BINDIR) $(CMAKE_SINK)
 ifeq ($(WHY),1)
 	@echo CMake log is in /tmp/cmake.why
 endif
@@ -27,7 +31,7 @@ endif
 
 $(TARGET): $(MISSING_DEPS) $(MK_MAKEFILES) __force
 	@echo
-	@echo Building $(TARGET) ...
+	@echo $(RED)"Building $(TARGET) ..."$(NOCOLOR)
 ifneq ($(DRY_RUN),1)
 	$(SHOW)$(MAKE) -C $(BINDIR) $(MAKE_J) $(CMAKE_TARGETS)
 else

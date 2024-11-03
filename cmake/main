@@ -1,5 +1,11 @@
 
-set(CMK "${root}/deps/classico/cmake")
+set(root $ENV{MK_ROOT} CACHE STRING "" FORCE)
+set(binroot $ENV{MK_BINROOT} CACHE STRING "" FORCE)
+set(CLASSICO $ENV{CLASSICO} CACHE STRING "" FORCE)
+set(CMK "${CLASSICO}/cmake" CACHE STRING "" FORCE)
+
+message("# root: " ${root})
+message("# binroot: " ${binroot})
 
 include(${CMK}/policy)
 include(${CMK}/common)

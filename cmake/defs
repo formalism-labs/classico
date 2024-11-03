@@ -1,0 +1,10 @@
+
+unset(root CACHE)
+unset(binroot CACHE)
+unset(CLASSICO CACHE)
+unset(CMK CACHE)
+
+set(root $ENV{MK_ROOT})
+set(binroot $ENV{MK_BINROOT})
+set(CLASSICO $ENV{CLASSICO})
+set(CMK "${CLASSICO}/cmake")

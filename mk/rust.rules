@@ -20,25 +20,14 @@ cargo-build:
 
 #----------------------------------------------------------------------------------------------
 
-TARGET_BIN:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(MODULE_NAME)
 
-ifeq ($(wildcard $(TARGET_BIN)),)
-	override TARGET_BIN:=
-	ifneq ($(CARGO_TARGET_BIN_NAME),)
-		override TARGET_BIN:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(CARGO_TARGET_BIN_NAME)
-		ifeq ($(wildcard $(TARGET_BIN)),)
-			override TARGET_BIN:=
-		endif
-	endif
-endif
-
-ifneq ($(TARGET_BIN),)
+ifneq ($(TARGET_PROG),)
 
 run:
 ifeq ($(GDB),1)
-	$(SHOW)rust-gdb $(TARGET_BIN)
+	$(SHOW)rust-gdb $(TARGET_PROG)
 else
-	$(SHOW)$(TARGET_BIN)
+	$(SHOW)$(TARGET_PROG)
 endif
 
 else
@@ -66,7 +55,7 @@ endif
 #----------------------------------------------------------------------------------------------
 
 nm:
-	$(SHOW)nm -AC $(CARGO_TARGET_LIB_NAME)
+	$(SHOW)nm -AC $(CARGO_TARGET_LIB)
 
 clippy:
 	$(SHOW) \
@@ -81,8 +70,6 @@ check:
 update:
 	$(SHOW)cargo update
 
-.PHONY: update fmt format
-
 fmt format:
 	$(SHOW)cargo fmt
 
@@ -92,7 +79,7 @@ rust-info:
 	$(SHOW)rustup --version
 	$(SHOW)rustup show
 
-.PHONY: nm upadate fmt format rust-info
+.PHONY: clippy check update fmt format rust-info
 
 #----------------------------------------------------------------------------------------------
 endif # MK.rust

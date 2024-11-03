@@ -7,13 +7,15 @@ RUST_PLATFORM:=$(shell eval $$(rustc --print cfg | grep =); echo $$target_arch-$
 CARGO_TARGET_LIB_STEM:=$(shell \
     cargo metadata --no-deps --format-version 1 | \
     jq -r '.packages[0].targets[] | select(.kind[] == "rlib") | .name')
-CARGO_TARGET_LIB_NAME=$(TARGET_DIR)/lib$(CARGO_TARGET_LIB_STEM).rlib
+CARGO_TARGET_LIB=$(TARGET_DIR)/lib$(CARGO_TARGET_LIB_STEM).rlib
 
-TARGET_BIN_NAME ?= $(MODULE_NAME)
+TARGET_PROG_NAME ?= $(MODULE_NAME)
 
-CARGO_TARGET_BIN_NAME:=$(shell \
+CARGO_TARGET_PROG_NAME:=$(shell \
 	cargo metadata --format-version 1 | \
-	jq -r '.packages[].targets[] | select(.name == "$(TARGET_BIN_NAME)") | select(.kind[] == "bin") | .name')
+	jq -r '.packages[].targets[] | select(.name == "$(TARGET_PROG_NAME)") | select(.kind[] == "bin") | .name')
+
+TARGET_PROG:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(MODULE_NAME)
 
 ifeq ($(NIGHTLY),1)
 CARGO_TOOLCHAIN=+nightly
@@ -31,6 +33,24 @@ endif
 export CARGO_TARGET_DIR=$(BINDIR)/target
 
 TARGET_DIR=$(CARGO_TARGET_DIR)/$(CARGO_FLAVOR)
+
+ifneq ($(CARGO_TARGET_LIB_STEM),)
+BIN_TARGET=$(CARGO_TARGET_LIB)
+endif
+
+#----------------------------------------------------------------------------------------------
+
+ifeq ($(wildcard $(TARGET_PROG)),)
+	override TARGET_PROG:=
+	ifneq ($(CARGO_TARGET_PROG_NAME),)
+		override TARGET_PROG:=$(CARGO_TARGET_DIR)/$(FLAVOR)/$(CARGO_TARGET_PROG_NAME)
+		ifeq ($(wildcard $(TARGET_PROG)),)
+			override TARGET_PROG:=
+		endif
+	endif
+endif
+
+RUN_CMD=$(TARGET_PROG)
 
 #------------------------------------------------------------------------------------ Interface
 

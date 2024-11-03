@@ -1,4 +1,5 @@
 ifneq ($(MK.cc),)
+ifndef ($(NO_CC_RULES),1)
 #----------------------------------------------------------------------------------------------
 
 -include $(CC_DEPS)
@@ -21,6 +22,7 @@ $(foreach ext,$(CC_CXX_EXT), \
 	$(eval $(call cxx_files_rule,$(ext))) \
 )
 
+#----------------------------------------------------------------------------------------------
 ifeq ($(CC_PROD),prog)
 
 $(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
@@ -30,12 +32,14 @@ $(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
 run:
 	$(SHOW)$(CC_TARGET)
 
+#----------------------------------------------------------------------------------------------
 else ifeq ($(CC_PROD),lib)
 
 $(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
 	@echo Creating $@...
 	$(SHOW)$(AR) rcs $@ $(CC_OBJECTS)
 
+#----------------------------------------------------------------------------------------------
 else ifeq ($(CC_PROD),so)
 
 $(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
@@ -43,6 +47,8 @@ $(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
 	$(SHOW)$(CC) $(SO_LD_FLAGS) $(LD_FLAGS) -o $@ $(CC_OBJECTS) $(LD_LIBS)
 
 endif
+
+#----------------------------------------------------------------------------------------------
 
 ifeq ($(ALL),)
 ifneq ($(MK_CUSTOM_CLEAN),1)
@@ -59,8 +65,6 @@ clean:
 endif
 endif
 
-nm: $(CC_TARGET)
-	$(SHOW)nm -AC $(CC_TARGET)
-
 #----------------------------------------------------------------------------------------------
+endif # NO_CC_RULES
 endif # MK.cc

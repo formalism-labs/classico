@@ -1,0 +1,50 @@
+
+ifneq ($(MK.conan),)
+#----------------------------------------------------------------------------------------------
+
+ifneq ($(shell command -v conan),)
+CONAN=conan
+else
+CONAN=python3 -m conans.conan
+endif
+
+CONAN_BINDIR ?= $(BINDIR)/conan
+
+TARGET=$(BINDIR)/CMakePresets.json
+
+ifneq ($(wildcard $(SRCDIR)/conanfile.txt.$(OSNICK)),)
+CONANFILE=$(SRCDIR)/conanfile.txt.$(OSNICK)
+else
+CONANFILE=$(SRCDIR)/conanfile.txt
+endif
+
+# CONAN_INSTALL_ARGS.macos=-s compiler.libcxx=libc++
+
+MK_CLEAN_ALL_DIRS += $(HOME)/.conan2
+
+#-------------------------------------------------------------------------------------- Profile
+
+CONAN_ARCH.x64=x86_64
+CONAN_ARCH.arm64v8=armv8
+
+CONAN_OS.linux=Linux
+CONAN_OS.macos=Macos
+
+define CONAN_PROFILE
+[settings]
+build_type=Release
+arch=$(CONAN_ARCH.$(ARCH))
+os=$(CONAN_OS.$(OS))
+$(CONAN_PROFILE_CC)
+endef
+
+ifeq ($(CLANG),1)
+CONAN_PROFILE_CC=$(CONAN_PROFILE_CC.clang)
+CONAN_BUILD ?= 1
+else
+CONAN_PROFILE_CC=$(CONAN_PROFILE_CC.gcc)
+CONAN_BUILD ?= 0
+endif
+
+#----------------------------------------------------------------------------------------------
+endif # MK.conan

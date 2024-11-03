@@ -1,4 +1,6 @@
 
+export MK_BINROOT:=$(BINROOT)
+
 .DEFAULT_GOAL: all
 
 all: $(MK_ALL_TARGETS)
@@ -19,11 +21,14 @@ include $(MK)/bindirs.rules
 include $(MK)/build.rules
 include $(MK)/cc.rules
 include $(MK)/binutils.rules
-include $(MK)/run.rules
 include $(MK)/coverage.rules
 
 ifneq ($(MK.cmake),)
 include $(MK)/cmake.rules
+endif
+
+ifneq ($(MK.conan),)
+include $(MK)/conan.rules
 endif
 
 ifneq ($(MK.rust),)

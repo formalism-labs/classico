@@ -3,7 +3,6 @@ include $(MK)/help.defs
 include $(MK)/build.defs
 include $(MK)/cc.defs
 include $(MK)/binutils.defs
-include $(MK)/run.defs
 
 ifneq ($(MK.cmake),)
 include $(MK)/cmake.defs
@@ -11,6 +10,10 @@ endif
 
 ifneq ($(MK.rust),)
 include $(MK)/rust.defs
+endif
+
+ifneq ($(MK.conan),)
+include $(MK)/conan.defs
 endif
 
 ifneq ($(MK.configure),)

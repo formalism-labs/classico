@@ -1,0 +1,48 @@
+
+ifneq ($(MK.conan),)
+#----------------------------------------------------------------------------------------------
+
+ifeq ($(CONAN_BUILD),1)
+CONAN_BUILD_ARG=missing
+else
+CONAN_BUILD_ARG=never
+endif
+
+ifeq ($(shell command -v unbuffer),)
+UNBUFFER=
+else
+UNBUFFER=unbuffer
+endif
+
+$(TARGET): $(CONANFILE)
+ifeq ($(FORCE),1)
+	$(SHOW)$(CONAN) profile detect --force
+else
+	$(SHOW)if [[ ! -e $$HOME/.conan2/profiles/default ]]; then $(CONAN) profile detect --force; fi
+endif
+	@echo $(RED)"Installing Conan packages ..."$(NOCOLOR)
+	$(SHOW)mkdir -p $(CONAN_BINDIR)
+	@$(file >$(BINDIR)/profile,$(CONAN_PROFILE))
+ifeq ($(VERBOSE),1)
+	$(SHOW)
+	$(SHOW)$(CONAN) install --output-folder=$(CONAN_BINDIR) --build=$(CONAN_BUILD_ARG) \
+		--profile:all=$(BINDIR)/profile $(CONAN_INSTALL_ARGS) $(CONANFILE)
+else
+	$(SHOW)$(UNBUFFER) $(CONAN) install --output-folder=$(CONAN_BINDIR) --build=$(CONAN_BUILD_ARG) \
+		--profile:all=$(BINDIR)/profile $(CONAN_INSTALL_ARGS) $(CONANFILE) >& $(BINDIR)/conan.log ;\
+	if [[ $$? != 0 ]]; then \
+		cat $(BINDIR)/conan.log ;\
+		false ;\
+	else \
+		echo $(GREEN)"Done."$(NOCOLOR) ;\
+	fi
+endif
+
+conan-clean:
+	$(SHOW)rm -rf $(CONAN_BINDIR)
+ifeq ($(CACHE),1)
+	$(SHOW)rm -rf $$HOME/.conan2
+endif
+
+#----------------------------------------------------------------------------------------------
+endif # MK.conan

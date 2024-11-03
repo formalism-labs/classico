@@ -2,7 +2,7 @@
 ifneq ($(MK.nobindir),1)
 
 ifeq ($(BINDIR),)
-$(error BINDIR is undefined)
+__:=$(error BINDIR is undefined)
 endif
 
 export MK_BINDIR:=$(BINDIR)

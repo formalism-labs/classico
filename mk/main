@@ -3,14 +3,14 @@ SHELL:=$(shell sh -c "command -v bash")
 
 MAKE_MAJORVER:=$(shell echo "$(MAKE_VERSION)" | cut -d. -f1)
 ifeq ($(MAKE_MAJORVER),3)
-$(error GNU Make version is too old. Aborting.)
+__:=$(error GNU Make version is too old. Aborting.)
 endif
 
 # ROOT determines:
 # - location of BINROOT
 # - location of Classico root
 ifeq ($(ROOT),)
-# $(error ROOT is undefined)
+# __:=$(error ROOT is undefined)
 ROOT ?= .
 endif
 override ROOT:=$(shell cd $(ROOT) && pwd)
@@ -34,9 +34,12 @@ CLASSICO:=$(ROOT)/classico
 else ifneq ($(wildcard $(ROOT)/mk),)
 CLASSICO:=$(ROOT)
 else
-$(error Cannot find Classico root)
+__:=$(error Cannot find Classico root)
 endif
+else
+override CLASSICO:=$(shell cd $(CLASSICO) && pwd)
 endif
+export CLASSICO
 
 # ifeq ($(wildcard $(CLASSICO)/*),)
 # ___:=$(shell git submodule update --init --recursive &> /dev/null)
@@ -55,7 +58,7 @@ define PYERROR
 Cannot find python$(MK.pyver) interpreter.
 You can install one by running 'make setup'.
 endef
-$(error $(PYERROR))
+__:=$(error $(PYERROR))
 endif
 __NO_PYTHON=1
 endif
@@ -73,6 +76,7 @@ USER:=$(shell whoami)
 
 include $(MK)/functions
 include $(MK)/common.defs
+include $(MK)/term.defs
 include $(MK)/cfg
 
 ifneq ($(__NO_PYTHON),1)

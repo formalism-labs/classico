@@ -9,7 +9,7 @@ ifneq ($(CC_PROD),prog)
 ifneq ($(CC_PROD),lib)
 ifneq ($(CC_PROD),so)
 ifneq ($(CC_PROD),dylib)
-$(error CC_PROD: invalid value)
+__:=$(error CC_PROD: invalid value)
 endif
 endif
 endif

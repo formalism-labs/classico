@@ -48,5 +48,5 @@ endif # OS
 
 OS=$(OS.$(OSNICK))
 ifeq ($(OS),)
-$(error Invalid OSNICK. Aborting.)
+__:=$(error Invalid OSNICK. Aborting.)
 endif

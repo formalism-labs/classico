@@ -99,7 +99,7 @@ cat <<-END > $profile_d/python.sh
 	fi
 	END
 
-. $VENV_BINDIR/activate
+$OP . $VENV_BINDIR/activate
 runn uv pip install pip
 runn uv pip install -r $CLASSICO/paella/requirements.txt 
 

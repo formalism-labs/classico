@@ -67,30 +67,30 @@ class Runner:
             cmds1 = str.lstrip(textwrap.dedent(cmd))
             cmds = list(filter(lambda s: str.lstrip(s) != '', cmds1.split("\n")))
             if venv != '':
-                cmds = [". {VENV}/bin/activate".format(VENV=venv)] + cmds
+                cmds = [f". {venv}/bin/activate"] + cmds
             cmd = "; ".join(cmds)
             cmd_for_log = cmd
             if sudo is not False:
                 cmd_file = paella.tempfilepath()
                 paella.fwrite(cmd_file, cmd)
-                cmd = "bash -l {}".format(cmd_file)
+                cmd = f"bash -l {cmd_file}"
                 cmd_for_log = "sudo { %s }" % cmd_for_log
         else:
             if venv != '':
-                cmd = "{{ . {VENV}/bin/activate; {CMD}; }}".format(VENV=venv, CMD=cmd)
+                cmd = f"{{ . {venv}/bin/activate; {cmd}; }}"
             cmd_for_log = cmd
         if sudo is not False:
             if sudo == "file":
                 cmd_file = paella.tempfilepath()
                 paella.fwrite(cmd_file, cmd)
-                cmd = "sudo bash -l {}".format(cmd_file)
+                cmd = f"sudo bash -l {cmd_file}"
                 cmd_for_log = "sudo { %s }" % cmd_for_log
             else:
-                cmd = "sudo bash -l -c '{}'".format(cmd)
+                cmd = f"sudo bash -l -c '{cmd}'"
         if echo:
             print(cmd)
         if cmd_file is not None:
-            print("# {}".format(cmd_for_log))
+            print(f"# {cmd_for_log}")
         sys.stdout.flush()
         if nop is None:
             nop = self.nop
@@ -99,7 +99,7 @@ class Runner:
         if output != True:
             fd, temppath = tempfile.mkstemp()
             os.close(fd)
-            cmd = "{{ {CMD}; }} >{LOG} 2>&1".format(CMD=cmd, LOG=temppath)
+            cmd = f"{{ {cmd}; }} >{temppath} 2>&1"
         if at is None:
             rc = subprocess.call(["bash", "-l", "-e", "-c", cmd])
         else:
@@ -109,7 +109,7 @@ class Runner:
         if rc > 0:
             if output != True:
                 if output.on_error():
-                    os.system("cat {}".format(temppath))
+                    os.system(f"cat {temppath}")
                 eprint("command failed: " + cmd_for_log)
                 sys.stderr.flush()
         if output != True:
@@ -198,7 +198,7 @@ class Yum(PackageManager):
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         if not self.has_command("yum-config-manager"):
             return self.install("yum-utils")
-        return self.run("yum-config-manager -y --add-repo {}".format(repourl), output=output, _try=_try, sudo=True)
+        return self.run(f"yum-config-manager -y --add-repo {repourl}", output=output, _try=_try, sudo=True)
 
 #----------------------------------------------------------------------------------------------
 
@@ -221,7 +221,7 @@ class Dnf(PackageManager):
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         if self.run("dnf config-manager 2>/dev/null", output=output, _try=True):
             return self.install("dnf-plugins-core", _try=_try)
-        return self.run("dnf config-manager -y --add-repo {}".format(repourl), output=output, _try=_try, sudo=True)
+        return self.run(f"dnf config-manager -y --add-repo {repourl}", output=output, _try=_try, sudo=True)
 
 #----------------------------------------------------------------------------------------------
 
@@ -244,7 +244,7 @@ class TDnf(PackageManager):
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         if self.run("tdnf config-manager 2>/dev/null", output=output, _try=True):
             return self.install("tdnf-plugins-core", _try=_try)
-        return self.run("tdnf config-manager -y --add-repo {}".format(repourl), output=output, _try=_try, sudo=True)
+        return self.run(f"tdnf config-manager -y --add-repo {repourl}", output=output, _try=_try, sudo=True)
 
 #----------------------------------------------------------------------------------------------
 
@@ -264,7 +264,7 @@ class Apt(PackageManager):
     def add_repo(self, repo_url, repo="", output="on_error", _try=False):
         if not self.has_command("add-apt-repository"):
             self.install("software-properties-common")
-        rc = self.run("add-apt-repository -y {URL}".format(URL=repo_url), output=output, _try=_try, sudo=True)
+        rc = self.run(f"add-apt-repository -y {repo_url}", output=output, _try=_try, sudo=True)
         self.run("apt-get -qq update", output=output, _try=_try, sudo=True)
         return rc
 
@@ -284,7 +284,7 @@ class Zypper(PackageManager):
         return self.run("zypper --non-interactive remove " + packs, output=output, _try=_try, sudo=True)
 
     def add_repo(self, repo_url, repo="", output="on_error", _try=False):
-        return self.run("zypprt addrepo {URL} {NAME}".format(URL=repo_url, NAME=repo), output=output, _try=_try, sudo=True)
+        return self.run(f"zypprt addrepo {repo_url} {repo}", output=output, _try=_try, sudo=True)
 
 #----------------------------------------------------------------------------------------------
 
@@ -302,7 +302,7 @@ class Pacman(PackageManager):
                 aurbin = "trizen"
             else:
                 raise FileNotFoundError("Failed to find yay or trizen, for aur package installation.")
-            return self.run("{} --noconfirm -S {}".format(aurbin, packs), output=output, _try=_try, sudo=True)
+            return self.run(f"{aurbin} --noconfirm -S {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
         return self.run("pacman --noconfirm -R " + packs, output=output, _try=_try, sudo=True)
@@ -334,14 +334,14 @@ class Brew(PackageManager):
         # brew will fail if package is already installed
         rc = True
         for pack in packs.split():
-            rc = self.run("brew list {PACK} &>/dev/null || brew install {PACK}".format(PACK=pack),
+            rc = self.run(f"brew list {PACK} &>/dev/null || brew install {pack}",
                      output=output, _try=_try, sudo=False) and rc
         return rc
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
         rc = True
         for pack in packs.split():
-            rc = self.run("brew remove {PACK}".format(PACK=pack), output=output, _try=_try,
+            rc = self.run(f"brew remove {pack}", output=output, _try=_try,
                           sudo=False) and rc
         return rc
 
@@ -412,13 +412,7 @@ class Setup(OnPlatform):
     def setup(self):
         if self.repo_refresh:
             self.package_manager.update()
-            self.python = paella.sh("command -v python{VER}".format(VER=sys.version_info.major))
-
-        try:
-            gitver = sh("cd {} && git rev-parse --short HEAD".format(os.path.abspath(os.path.dirname(__file__))))
-        except:
-            gitver = "?"
-        print("# classico version: {}".format(gitver))
+            self.python = paella.sh(f"command -v python{sys.version_info.major}")
 
         self.invoke()
 
@@ -445,8 +439,8 @@ class Setup(OnPlatform):
             as_file = os.path.basename(file)
         not_mac = self.os != 'macos'
         if not os.path.isdir(d):
-            self.run('mkdir -p "{}"'.format(d), sudo=not_mac)
-        self.run('cp "{FROM}" "{TO}"'.format(FROM=file, TO=os.path.join(d, as_file)), sudo=not_mac)
+            self.run(f'mkdir -p "{d}"', sudo=not_mac)
+        self.run(f'cp "{file}" "{os.path.join(d, as_file)}"', sudo=not_mac)
 
     def cat_to_profile_d(self, text, as_file=None):
         file = paella.tempfilepath()
@@ -456,8 +450,8 @@ class Setup(OnPlatform):
             as_file = os.path.basename(file)
         not_mac = self.os != 'macos'
         if not os.path.isdir(d):
-            self.run('mkdir -p "{}"'.format(d), sudo=not_mac)
-        self.run('cp "{FROM}" "{TO}"'.format(FROM=file, TO=os.path.join(d, as_file)), sudo=not_mac)
+            self.run(f'mkdir -p "{d}"', sudo=not_mac)
+        self.run(f'cp "{file}" "{os.path.join(d, as_file)}"', sudo=not_mac)
         os.unlink(file)
 
     def sudoIf(self, sudo=True):
@@ -517,15 +511,15 @@ class Setup(OnPlatform):
             lfs_arch = 'arm'
         else:
             raise Error("Cannot determine platform for git-lfs installation")
-        self.run("""
+        self.run(f"""
             set -e
             d=$(mktemp -d /tmp/git-lfs.XXXXXX)
             mkdir -p $d
-            wget -q https://github.com/git-lfs/git-lfs/releases/download/v{LFS_VER}/git-lfs-linux-{ARCH}-v{LFS_VER}.tar.gz -O $d/git-lfs.tar.gz
+            wget -q https://github.com/git-lfs/git-lfs/releases/download/v{GIT_LFS_VER}/git-lfs-linux-{lfs_arch}-v{GIT_LFS_VER}.tar.gz -O $d/git-lfs.tar.gz
             (cd $d; tar xf git-lfs.tar.gz)
             $d/install.sh
             rm -rf $d
-            """.format(LFS_VER=GIT_LFS_VER, ARCH=lfs_arch), sudo=True)
+            """, sudo=True)
 
     def install_gnu_utils(self, _try=False):
         packs = ""
@@ -542,17 +536,17 @@ class Setup(OnPlatform):
         for x in ['make', 'find', 'xargs', 'sed', 'tar', 'mktemp', 'du']:
             dest = os.path.join(path, x)
             if not os.path.exists(dest):
-                src = paella.sh("command -v g{}".format(x)).strip()
+                src = paella.sh(f"command -v g{x}").strip()
                 if os.path.exists(dest):
                     os.unlink(dest)
                 os.symlink(src, dest)
             else:
-                eprint("Warning: {} exists - not replaced".format(dest))
+                eprint(f"Warning: {dest} exists - not replaced")
 
         if self.os == 'macos':
             destfile = os.path.join(self.profile_d, 'classico-gnu-utils.sh')
             with open(destfile, 'w+') as fp:
-                fp.write("export PATH={}:$PATH".format(path))
+                fp.write(f"export PATH={path}:$PATH")
 
     def install_linux_gnu_tar(self, _try=False):
         if self.os != 'linux':

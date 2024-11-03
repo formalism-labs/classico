@@ -22,7 +22,7 @@ def sh(cmd, join=False, lines=False, fail=True):
         with open(cmd_file, 'w') as file:
             file.write(cmd)
         os.close(fd)
-        cmd = "/usr/bin/env bash {cmd_file}".format(cmd_file=cmd_file)
+        cmd = f"/usr/bin/env bash {cmd_file}"
     proc = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     out, err = proc.communicate()
     if shell:

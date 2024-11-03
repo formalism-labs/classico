@@ -6,7 +6,7 @@ import functools
 def noctor(f):
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
-        raise TypeError("No default constrcutor for {}".format(self.__class__.__name__))
+        raise TypeError(f"No default constrcutor for {self.__class__.__name__}")
     return wrapper
 
 #----------------------------------------------------------------------------------------------

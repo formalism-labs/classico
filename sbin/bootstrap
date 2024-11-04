@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+set -eo pipefail -o errtrace
+
+if [[ -d $HOME/.local/classico ]]; then
+	echo "Classico installed in $HOME/.local/classico"
+	exit 1
+fi
+
+is_command() {
+	command -v $1 &> /dev/null
+}
+
+xinstall() {
+	local packs="$@"
+
+	if is_command apt-get; then
+		export DEBIAN_FRONTEND=noninteractive
+		$SUDO apt-get update -qq
+		$SUDO apt-get install --fix-missing -y $packs
+	elif is_command dnf; then
+		$SUDO dnf install -y $packs
+	elif is_command tdnf; then # mariner linux
+		$SUDO tdnf install -y $packs
+	elif is_command yum; then
+		if [[ -f /etc/os-release ]]; then
+			local DIST="$(source /etc/os-release; echo "${ID}${VERSION_ID}";)"
+			if [[ $DIST == centos7 || $DIST == amzn2 ]]; then
+				if grep -q -r "mirror.centos.org" "/etc/yum.repos.d/"; then
+					# http://mirror.centos.org/centos/7/ is deprecated, so we have to disable mirrorlists
+					# and change the baseurl in the repo file to the working mirror
+					# from mirror.centos.org to vault.centos.org
+					sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo &> /dev/null || true
+					sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo &> /dev/null || true
+					sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo &> /dev/null || true
+					$SUDO yum upgrade -y
+				fi
+			fi
+		fi
+
+		$SUDO yum install -y $packs
+	elif is_command zypper; then
+		$SUDO zypper install -y $packs
+	elif is_command apk; then
+		$SUDO apk update
+		$SUDO apk add $packs
+	elif is_command pacman; then
+		$SUDO pacman --noprogressbar -Sy
+		$SUDO pacman --noconfirm --noprogressbar -S $packs
+	elif is_command brew; then
+		for p in $packs; do
+			brew list $p &>/dev/null || brew install $p
+		done
+	elif is_command pkg; then
+		$SUDO pkg install -y $packs
+	fi
+}
+
+SUDO=
+if [[ $(id -u) != 0 ]]; then
+	if is_command sudo; then
+		SUDO=sudo
+		sudo true
+	fi
+fi
+
+packs="ca-certificates wget unzip"
+
+if is_command brew; then
+	packs="${packs/ca-certificates/}"
+fi
+
+xinstall $packs
+tmpdir=$(mktemp -d /tmp/classico.XXXXXX)
+cd $tmpdir
+wget -q -O classico-master.zip https://github.com/formalism-labs/classico/archive/refs/heads/master.zip
+unzip -q classico-master.zip
+$SUDO mkdir -p $HOME/.local
+$SUDO mv classico-master $HOME/.local/classico
+cd /tmp
+rm -rf $tmpdir
+
+echo "Classico installed in $HOME/.local/classico"
+exit 0

@@ -101,10 +101,10 @@ xinstall() {
 					# http://mirror.centos.org/centos/7/ is deprecated, so we have to disable mirrorlists
 					# and change the baseurl in the repo file to the working mirror
 					# from mirror.centos.org to vault.centos.org
-					sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo &> /dev/null || true
-					sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo &> /dev/null || true
-					sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo &> /dev/null || true
-					yum upgrade -y &> /dev/null
+					$SUDO sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo &> /dev/null || true
+					$SUDO sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo &> /dev/null || true
+					$SUDO sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo &> /dev/null || true
+					runn $SUDO yum upgrade -y
 				fi
 			fi
 		fi
@@ -113,10 +113,10 @@ xinstall() {
 	elif is_command zypper; then
 		runn $SUDO zypper install -y "$packs"
 	elif is_command apk; then
-		[[ $NO_UPDATE != 1 ]] && runn apk update
+		[[ $NO_UPDATE != 1 ]] && runn $SUDO apk update
 		runn $SUDO apk add "$packs"
 	elif is_command pacman; then
-		[[ $NO_UPDATE != 1 ]] && runn pacman --noprogressbar -Sy
+		[[ $NO_UPDATE != 1 ]] && runn $SUDO pacman --noprogressbar -Sy
 		runn $SUDO pacman --noconfirm --noprogressbar -S "$packs"
 	elif is_command brew; then
 		[[ $NO_UPDATE == 1 ]] && export HOMEBREW_NO_AUTO_UPDATE=1

@@ -1,8 +1,13 @@
 
-set(root $ENV{MK_ROOT} CACHE STRING "" FORCE)
-set(binroot $ENV{MK_BINROOT} CACHE STRING "" FORCE)
-set(CLASSICO $ENV{CLASSICO} CACHE STRING "" FORCE)
-set(CMK "${CLASSICO}/cmake" CACHE STRING "" FORCE)
+unset(root CACHE)
+unset(binroot CACHE)
+unset(CLASSICO CACHE)
+unset(CMK CACHE)
+
+set(root $ENV{MK_ROOT})
+set(binroot $ENV{MK_BINROOT})
+set(CLASSICO $ENV{CLASSICO})
+set(CMK "${CLASSICO}/cmake")
 
 message("# root: " ${root})
 message("# binroot: " ${binroot})

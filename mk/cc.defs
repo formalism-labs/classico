@@ -293,22 +293,20 @@ LD_LIBS += \
 
 #---------------------------------------------------------------------------------------- CMake
 
-export CMAKE_CC_FLAGS=\
-	-UNDEBUG \
-	$(CC_FLAGS.core)
+export CMK_CC_FLAGS=$(CC_FLAGS.core)
 
-export CMAKE_CC_C_FLAGS=$(CC_C_FLAGS)
-export CMAKE_CC_CXX_FLAGS=$(CC_CXX_FLAGS)
+export CMK_CC_C_FLAGS=$(CC_C_FLAGS)
+export CMK_CC_CXX_FLAGS=$(CC_CXX_FLAGS)
 
-export CMAKE_LD_FLAGS=$(LD_FLAGS)
-export CMAKE_SO_LD_FLAGS=$(SO_LD_FLAGS)
-export CMAKE_EXE_LD_FLAGS=$(EXE_LD_FLAGS)
+export CMK_LD_FLAGS=$(LD_FLAGS)
+export CMK_LD_SO_FLAGS=$(SO_LD_FLAGS)
+export CMK_LD_EXE_FLAGS=$(EXE_LD_FLAGS)
 
-export CMAKE_LD_FLAGS_LIST=$(LD_FLAGS)
-export CMAKE_SO_LD_FLAGS_LIST=$(SO_LD_FLAGS)
-export CMAKE_EXE_LD_FLAGS_LIST=$(EXE_LD_FLAGS)
+export CMK_LD_FLAGS_LIST=$(LD_FLAGS)
+export CMK_LD_SO_FLAGS_LIST=$(SO_LD_FLAGS)
+export CMK_LD_EXE_FLAGS_LIST=$(EXE_LD_FLAGS)
 
-export CMAKE_LD_LIBS=$(LD_LIBS)
+export CMK_LD_LIBS=$(LD_LIBS)
 
 #----------------------------------------------------------------------------------------------
 

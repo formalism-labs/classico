@@ -1,22 +1,22 @@
 
 # include(CheckCCompilerFlag)
 
-str_from_env(CMAKE_CC_FLAGS CMAKE_CC_C_FLAGS CMAKE_CC_CXX_FLAGS)
-str_from_env(CMAKE_LD_FLAGS CMAKE_SO_LD_FLAGS CMAKE_EXE_LD_FLAGS)
+str_from_env(CMK_CC_FLAGS CMK_CC_C_FLAGS CMK_CC_CXX_FLAGS)
+str_from_env(CMK_LD_FLAGS CMK_LD_SO_FLAGS CMK_LD_EXE_FLAGS)
 
-lists_from_env(CMAKE_LD_FLAGS_LIST CMAKE_SO_LD_FLAGS_LIST CMAKE_EXE_LD_FLAGS_LIST)
-lists_from_env(CMAKE_LD_LIBS)
+lists_from_env(CMK_LD_FLAGS_LIST CMK_LD_SO_FLAGS_LIST CMK_LD_EXE_FLAGS_LIST)
+lists_from_env(CMK_LD_LIBS)
 
 if ("$ENV{VERBOSE}" STREQUAL "1")
 	message("# CC=$ENV{CC}")
 	message("# CXX=$ENV{CXX}")
-	message("# CMAKE_CC_FLAGS=${CMAKE_CC_FLAGS}")
-	message("# CMAKE_CC_C_FLAGS=${CMAKE_CC_C_FLAGS}")
-	message("# CMAKE_CC_CXX_FLAGS=${CMAKE_CC_CXX_FLAGS}")
-	message("# CMAKE_LD_FLAGS=${CMAKE_LD_FLAGS}")
-	message("# CMAKE_EXE_LD_FLAGS=${CMAKE_EXE_LD_FLAGS}")
-	message("# CMAKE_SO_LD_FLAGS=${CMAKE_SO_LD_FLAGS}")
-	message("# CMAKE_LD_LIBS=${CMAKE_LD_LIBS}")
+	message("# CMK_CC_FLAGS=${CMK_CC_FLAGS}")
+	message("# CMK_CC_C_FLAGS=${CMK_CC_C_FLAGS}")
+	message("# CMK_CC_CXX_FLAGS=${CMK_CC_CXX_FLAGS}")
+	message("# CMK_LD_FLAGS=${CMK_LD_FLAGS}")
+	message("# CMK_LD_EXE_FLAGS=${CMK_LD_EXE_FLAGS}")
+	message("# CMK_LD_SO_FLAGS=${CMK_LD_SO_FLAGS}")
+	message("# CMK_LD_LIBS=${CMK_LD_LIBS}")
 endif()
 
 if (DEFINED $ENV{SAN})
@@ -65,18 +65,18 @@ endfunction()
 function(setup_cc_options)
 	message("# CMAKE_C_COMPILER_ID: " ${CMAKE_C_COMPILER_ID})
 
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CC_C_FLAGS}" PARENT_SCOPE)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CC_CXX_FLAGS}" PARENT_SCOPE)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMK_CC_C_FLAGS}" PARENT_SCOPE)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMK_CC_CXX_FLAGS}" PARENT_SCOPE)
 
 	# dirty trick to override default CMake flags (like: -O2 -DNDEBUG)
 	# by appending the overiding options using add_compile_options().
-	# we rely on the overiding options being defined in CMAKE_CC_FLAGS rather than the 
-	# language-specific CMAKE_CC_C_FLAGS and CMAKE_CC_CXX_FLAGS.
+	# we rely on the overiding options being defined in CMK_CC_FLAGS rather than the 
+	# language-specific CMK_CC_C_FLAGS and CMK_CC_CXX_FLAGS.
 
 	# need to be a list, otherwise quotes are erroneously inserted
-	string(REPLACE " " ";" CMAKE_CC_FLAGS_LIST ${CMAKE_CC_FLAGS})
-	add_compile_options(${CMAKE_CC_FLAGS_LIST})
+	string(REPLACE " " ";" CMK_CC_FLAGS_LIST ${CMK_CC_FLAGS})
+	add_compile_options(${CMK_CC_FLAGS_LIST})
 	
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_LD_FLAGS} ${CMAKE_EXE_LD_FLAGS}" PARENT_SCOPE)
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_LD_FLAGS} ${CMAKE_SO_LD_FLAGS}" PARENT_SCOPE)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMK_LD_FLAGS} ${CMK_LD_EXE_FLAGS}" PARENT_SCOPE)
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CMK_LD_FLAGS} ${CMK_LD_SO_FLAGS}" PARENT_SCOPE)
 endfunction()

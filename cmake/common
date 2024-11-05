@@ -15,3 +15,13 @@ if (DEFINED $ENV{VERBOSE} AND $ENV{VERBOSE} STREQUAL "1")
 else()
 	set(CMK_VERBOSE FALSE)
 endif()
+
+# consider removing the following in favor of configuration via mk:
+
+# avoid -DNDEBUG (nullifies assert)
+set(CMAKE_C_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+# -O3 instead of -O2
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g")

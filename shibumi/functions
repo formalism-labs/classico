@@ -1,5 +1,8 @@
 
+#----------------------------------------------------------------------------------------------
+
 if [[ -d $CLASSICO ]]; then
+	. $CLASSICO/shibumi/traps
 	. $CLASSICO/shibumi/platform
 	. $CLASSICO/shibumi/errors
 	. $CLASSICO/shibumi/text
@@ -7,8 +10,14 @@ if [[ -d $CLASSICO ]]; then
 	. $CLASSICO/shibumi/files
 	. $CLASSICO/shibumi/runner
 	. $CLASSICO/shibumi/term
+	. $CLASSICO/shibumi/time
+	. $CLASSICO/shibumi/types
 	. $CLASSICO/shibumi/profile
 	. $CLASSICO/shibumi/xinstall
+	
+	if [[ -n $PS1 || $IACT == 1 ]]; then
+		. $CLASSICO/shibumi/interactive
+	fi
 fi
 
 #----------------------------------------------------------------------------------------------

@@ -16,33 +16,6 @@ if [[ -n $PROGNAME ]]; then
 	fi
 fi
 
-error_trap() {
-	local exit_code=$?
-	[[ $exit_code == 0 ]] && exit_code=1
-	# >&2 echo "$0: There are errors."
-	local __PROGNAME=${__PROGNAME:-$0}
-	local LINE="${BASH_LINENO[0]}"
-	>&2 echo
-	>&2 echo "In $__PROGNAME:"
-	>&2 awk 'NR>L-4 && NR<L+4 { printf "%-5d%4s%s\n",NR,(NR==L?">>> ":""),$__PROGNAME }' L=$LINE $__PROGNAME
-	>&2 echo
-	exit $exit_code
-}
-
-# CBL-Mariner is missing awk, which is required for error_trap()
-[[ -d /etc/os-release && $(source /etc/os-release; echo "${ID}") == mariner ]] && tdnf install -q -y awk
-
-# avoid trap with bashdb
-if [[ -z $_Dbg_DEBUGGER_LEVEL ]]; then
-	trap 'error_trap $LINENO' ERR
-fi
-
-if [[ -d $CLASSICO ]]; then
-	. $CLASSICO/shibumi/functions 
-fi
-
-setup_profile_d
-
 OP=""
 [[ $NOP == 1 ]] && OP=echo
 
@@ -57,3 +30,32 @@ fi
 if [[ $_SUDO == 1 && -n $SUDO ]]; then
 	$SUDO echo -n
 fi
+
+error_trap() {
+	set +e
+	local exit_code=$?
+	[[ $exit_code == 0 ]] && exit_code=1
+	# >&2 echo "$0: There are errors."
+	local __PROGNAME=${__PROGNAME:-$0}
+	local LINE="${BASH_LINENO[0]}"
+	>&2 echo
+	>&2 echo "In $__PROGNAME:"
+	>&2 awk 'NR>L-4 && NR<L+4 { printf "%-5d%4s%s\n",NR,(NR==L?">>> ":""),$__PROGNAME }' L=$LINE $__PROGNAME
+	>&2 echo
+	exit $exit_code
+}
+
+# CBL-Mariner is missing awk, which is required for error_trap()
+# this should move into system-setup
+[[ -d /etc/os-release && $(source /etc/os-release; echo "${ID}") == mariner ]] && $SUDO tdnf install -q -y awk
+
+# avoid trap with bashdb
+if [[ -z $_Dbg_DEBUGGER_LEVEL ]]; then
+	trap 'error_trap $LINENO' ERR
+fi
+
+if [[ -d $CLASSICO ]]; then
+	. $CLASSICO/shibumi/functions 
+fi
+
+setup_profile_d

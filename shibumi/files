@@ -13,6 +13,25 @@ is_abspath() {
 	case $1 in (/*) pathchk -- "$1";; (*) ! : ;; esac
 }
 
+abspath() {
+    local path="$1"
+    if [[ -z "$path" ]]; then
+        echo ""
+	else
+		echo "$(cd "$(dirname "$path")" && pwd)/$(basename "$path")"
+    fi
+}
+
+#----------------------------------------------------------------------------------------------
+
+_pushd() {
+	pushd $1 > /dev/null
+}
+
+_popd() {
+	popd > /dev/null
+}
+
 #----------------------------------------------------------------------------------------------
 
 temp_files=()
@@ -39,7 +58,7 @@ cleanup_temp_files() {
     done
 }
 
-trap cleanup_temp_files EXIT
+add_exit_trap cleanup_temp_files
 
 #----------------------------------------------------------------------------------------------
 

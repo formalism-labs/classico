@@ -1,0 +1,192 @@
+
+#----------------------------------------------------------------------------------------------
+
+join() { # delim args
+	local d=$1
+	shift
+	echo -n "$1"
+	shift
+	printf "%s" "${@/#/$d}"
+}
+
+join_t() { # delim t-exp
+	local d=$1
+	local x
+	local i=0
+	while IFS= read -ra x; do
+		[[ $i > 0 ]] && echo -n "$d"
+		printf %s "${x[@]}"
+		((++i))
+	done <<< "$2"
+}
+
+# join_dirs() # (dirs_array)
+# {
+# 	join_t ';' "$(a2t $1)"
+# }
+
+join_dirs() # (dirs_array)
+{
+	local __t=
+	join_t ':' "$(a2t $@)"
+}
+
+join_path() # (dirs_array)
+{
+	join_t ':' "$(a2t $@)"
+}
+
+join_path_a() # (dirs_array)
+{
+	join_t ':' "$(a2t $@)"
+}
+
+join_path_t() {
+	join_t ':' "$1"
+}
+
+to_path_t() {
+	join_t ':' "$1"
+}
+
+#----------------------------------------------------------------------------------------------
+
+split() { # char, text
+	local x
+	while IFS="$1" read -ra x; do
+		echo "${x[@]}"
+	done <<< "$2"
+}
+
+split_t() { # char, text
+	local x
+	local i
+	while IFS="$1" read -ra x; do
+		for i in "${x[@]}"; do
+			echo "$i"
+		done
+	done <<< "$2"
+}
+
+#----------------------------------------------------------------------------------------------
+
+map_t() { # func t-exp
+	local f=$1
+	local x
+	while read -r x; do
+		$f "$x"
+	done <<< $2
+}
+
+#----------------------------------------------------------------------------------------------
+
+str_t() { # t-exp
+	local t=$1
+	echo "${t//$'\n'/ }"
+}
+
+str_a() { # var
+	local __a__
+	declare -n __a__=$1
+	echo "${__a__[@]}"
+}
+
+str_q() { # q-exp
+	local q=$1
+	echo "${q//\'/}"
+}
+
+#----------------------------------------------------------------------------------------------
+
+quote_a() {
+	local __a__
+	declare -n __a__=$1
+	shift
+	local q=$(printf "'%s' " "${__a__[@]}")
+	echo "${q%%*( )}"
+}
+
+#----------------------------------------------------------------------------------------------
+
+t2a() {
+	local t=$1
+	local __a__
+	declare -n __a__=$2
+	readarray -t __a__ <<< "$t"
+}
+
+t2q() {
+	local t=$1
+	local a
+	readarray -t a <<< "$t"
+	echo "${a[@]@Q}"
+}
+
+a2t() {
+	local __a__
+	while [[ ! -z "$1" ]]; do
+		declare -n __a__=$1
+		local x
+		for x in "${__a__[@]}"; do
+			echo "$x"
+		done
+		shift
+	done
+}
+
+a2q() {
+	local __a__
+
+	[[ -z "$1" ]] && return
+
+	declare -n __a__=$1
+	echo -n "${__a__[@]@Q}"
+	shift
+
+	while [[ ! -z "$1" ]]; do
+		declare -n __a__=$1
+		echo -n " ${__a__[@]@Q}"
+		shift
+	done
+}
+
+q2t() {
+	local i=0
+	while [[ ! -z "$1" ]]; do
+		while read -r -d "'"; do 
+			[[ $(( $i % 2 )) == 1 ]] && echo "$REPLY"
+			((++i))
+		done <<< "$1"
+		shift
+	done
+}
+
+q2a() {
+	unset $2
+	eval "$2=()"
+	declare -n __a__=$2
+
+	local i=0
+	while read -r -d "'"; do
+		[[ $(( $i % 2 )) == 1 ]] && __a__+=("$REPLY")
+		((++i))
+	done <<< "$1"
+}
+
+#----------------------------------------------------------------------------------------------
+
+in_a () { # str a-var
+	local e="$1"
+	local __a__
+	declare -n __a__=$2
+	local x
+	for x in "${__a__[@]}"; do
+		if [[ "$x" == "$e" ]]; then
+			echo 1
+			return 0
+		fi
+	done
+	return 1
+}
+
+#----------------------------------------------------------------------------------------------

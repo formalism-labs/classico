@@ -2,8 +2,12 @@
 ifneq ($(MK.cmake),)
 #----------------------------------------------------------------------------------------------
 
-CMAKE_TARGET ?= $(MODUL_NAME)
-TARGET=$(CC_TARGET)
+CMAKE_TARGET_NAME ?= $(MODUL_NAME)
+TARGET ?= $(CC_TARGET)
+
+CMAKE_TARGETS=
+
+# TARGET ?= $(BINDIR)/$(CMAKE_TARGET_NAME)
 
 #----------------------------------------------------------------------------------------------
 

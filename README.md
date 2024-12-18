@@ -11,7 +11,7 @@ Clone the Classico repo into your codebase.
 
 ### Classico in bash
 Start your script as follows, modifying the relative CLASSICO path specification if needed.
-```
+```bash
 #!/bin/bash
 
 PROGNAME="${BASH_SOURCE[0]}"
@@ -22,7 +22,7 @@ CLASSICO=$(cd $HERE/.. && pwd)
 
 ### Classico  in Python
 Start your script as follows, modifying the relative Paella root path specification if needed.
-```
+```python
 #!/usr/bin/env python3
 
 import os, sys

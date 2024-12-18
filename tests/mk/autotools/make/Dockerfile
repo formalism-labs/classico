@@ -9,7 +9,7 @@ ADD . classico
 RUN ./classico/bin/getget
 RUN ./classico/bin/getpy
 RUN ./classico/bin/getgcc
-RUN ./classico/bin/getautotools
+RUN ./classico/bin/getautotools --modern
 
 RUN apt-get install -y git make pkg-config texinfo autopoint
 

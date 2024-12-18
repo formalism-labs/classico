@@ -1,3 +1,7 @@
+**/bin
+!/bin/
+!/wd40/src/bin/
+
 # Object files
 *.o
 *.ko
@@ -24,6 +28,7 @@
 *.d
 
 # Python
+__pycache__/
 *.pyc
 *.pyo
 
@@ -37,3 +42,4 @@ CMakeCache.txt
 .project
 
 venv/
+1/

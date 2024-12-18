@@ -1,11 +1,18 @@
 
 ifneq (,$(MK.configure))
+#----------------------------------------------------------------------------------------------
 
 ifneq ($(VERBOSE),1)
 CONFIGURE_FLAGS += --enable-silent-rules
 endif
 
 CONFIGURE_MAKE_J ?= -j $(NPROC)
+
+$(SRCDIR)/configure:
+	$(SHOW)set -e ;\
+	cd $(SRCDIR) ;\
+	$(AUTOGEN_CMD) ;\
+	git ls-files --others --ignored --exclude-standard > $(BINROOT)/autofiles
 
 $(CONFIGURE_BUILD_DIR)/Makefile: $(SRCDIR)/configure
 	$(SHOW)set -e ;\
@@ -20,4 +27,5 @@ clean-configure:
 
 .PHONY: clean-configure
 
+#----------------------------------------------------------------------------------------------
 endif # MK.configure

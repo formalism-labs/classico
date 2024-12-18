@@ -1,16 +1,20 @@
 
-.PHONY: build clean
-
 ifeq ($(MK_DIAG),1)
 $(info # DEFAULT_TARGETS=$(DEFAULT_TARGETS))
 $(info # MK_MAKEFILES=$(MK_MAKEFILES))
 endif
+
+#----------------------------------------------------------------------------------------------
 
 ifneq ($(MK_CUSTOM_BUILD),1)
 
 build: $(DEFAULT_TARGETS) $(MK_MAKEFILES) $(TARGET)
 
 endif
+
+.PHONY: build
+
+#----------------------------------------------------------------------------------------------
 
 ifeq ($(ALL),1) 
 
@@ -22,6 +26,6 @@ else ifeq ($(MK_CUSTOM_CLEAN),1)
 
 clean: custom-clean
 
-endif
-
 .PHONY: clean custom-clean
+
+endif

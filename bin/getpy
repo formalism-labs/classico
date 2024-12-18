@@ -74,10 +74,10 @@ if [[ -d $VEVV_DIR ]]; then
 fi
 
 mkdir -p "$UV_DIR"
-if [[ ! -f $UV_DIR/bin/uv ]]; then
+if [[ ! -f $UV_DIR/uv ]]; then
 	runn "curl -LsSf https://astral.sh/uv/install.sh | env INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$UV_DIR" sh"
 fi
-append_to_path "$UV_DIR/bin"
+append_to_path "$UV_DIR"
 runn uv python install $PYTHON_VER
 profile_d=$(get_profile_d)
 if [[ ! -d $VENV_DIR ]]; then
@@ -91,7 +91,7 @@ else
 fi
 cat <<-END > $profile_d/python.sh
 	append_to_path "$VENV_BINDIR"
-	append_to_path "$UV_DIR/bin"
+	append_to_path "$UV_DIR"
 	if [[ -f $VENV_BINDIR/activate ]]; then
 		VIRTUAL_ENV_DISABLE_PROMPT=1
 		. $VENV_BINDIR/activate

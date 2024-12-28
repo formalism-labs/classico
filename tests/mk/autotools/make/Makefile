@@ -20,6 +20,10 @@ fetch:
 #	$(SHOW)git clone https://git.savannah.gnu.org/git/gnulib.git
 
 docker:
+ifeq ($(GUILE),1)
+	$(SHOW)cd $(CLASSICO); docker build -f tests/mk/autotools/make/Dockerfile.guile -t gnu-make-guile .
+else
 	$(SHOW)cd $(CLASSICO); docker build -f tests/mk/autotools/make/Dockerfile -t gnu-make .
+endif
 
 .PHONY: fetch docker

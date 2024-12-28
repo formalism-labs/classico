@@ -45,9 +45,6 @@ class DockerSetup(paella.Setup):
             return
         self.run("bash <(curl -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh)", sudo="file")
 
-        # self.add_repo("https://download.docker.com/linux/fedora/docker-ce.repo")
-        # self.install("docker-ce docker-ce-cli containerd.io")
-
     def common_last(self):
         # enable running docker as non-root user
         self.run("groupadd docker || true", sudo=True)

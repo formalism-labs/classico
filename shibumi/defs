@@ -23,7 +23,7 @@ OP=""
 
 SUDO=
 if [[ $(id -u) != 0 ]]; then
-	if is_command sudo; then
+	if command -v sudo &> /dev/null; then
 		SUDO=sudo
 	fi
 fi

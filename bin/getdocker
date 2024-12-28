@@ -51,7 +51,10 @@ class DockerSetup(paella.Setup):
     def common_last(self):
         # enable running docker as non-root user
         self.run("groupadd docker || true", sudo=True)
-        self.run("usermod -aG docker $USER || true", sudo=True)
+        self.run(f"usermod -aG docker {os.getlogin()} || true", sudo=True)
+        if os.path.exists("/var/run/docker.sock"):
+            self.run(f"chmod 660 /var/run/docker.sock", sudo=True)
+            self.run(f"chown root:docker /var/run/docker.sock", sudo=True)
 
         if self.no_exp:
             return

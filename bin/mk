@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import argparse
+import subprocess
+
+HERE = os.path.dirname(__file__)
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
+sys.path.insert(0, ROOT)
+import paella
+
+subprocess.run(["make"] + sys.argv[1::])

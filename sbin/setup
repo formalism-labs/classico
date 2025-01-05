@@ -6,6 +6,10 @@ ROOT=$(cd $HERE/.. && pwd)
 CLASSICO=$ROOT
 . $CLASSICO/shibumi/defs
 
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+profile_d="$(get_profile_d)"
+
 tmp_profiled=$(mktemp -d)
 cat <<-'END' > $tmp_profiled/dotlocal.sh
 	if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -15,14 +19,12 @@ cat <<-'END' > $tmp_profiled/dotlocal.sh
 add_to_profile_d $tmp_profiled/dotlocal.sh
 rm -rf $tmp_profiled
 
-export HOMEBREW_NO_AUTO_UPDATE=1
+$CLASSICO/bin/getpy
+. "$(profile_d)/python.sh"
 
-$CLASSICO/bin/getpy3
-pyenv="$(get_profile_d)/pyenv.sh"
-if [[ -f $pyenv ]]; then
-	. $pyenv
-fi
 if [[ $VERBOSE == 1 ]]; then
-	python3 --version
-	python3 -m pip list
+	python --version
+	python -m pip list
 fi
+
+$HERE/system-setup.py

@@ -15,8 +15,8 @@ import paella  # noqa: F401
 os.environ["PYTHONWARNINGS"] = 'ignore:DEPRECATION::pip._internal.cli.base_command'
 
 CLANG_COMMON_VER="19"
-CLANG_FORMAT_VER="18"
-CLANG_FORMAT_MASTER_COMMIT="32d3ac78"
+CLANG_FORMAT_VER="19"
+CLANG_FORMAT_MASTER_COMMIT="46b8640"
 ARM_CLANG_FORMAT_VER="12"
 
 #----------------------------------------------------------------------------------------------

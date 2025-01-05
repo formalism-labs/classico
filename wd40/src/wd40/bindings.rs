@@ -8,6 +8,7 @@ use std::process::Command;
 pub fn generate_bindings(header: &str, bindings_fname: &str) {
     let bindings = bindgen::Builder::default()
         .header(header)
+        .clang_arg("-std=c2x")
         .generate()
         .expect("Unable to generate bindings");
 
@@ -19,7 +20,10 @@ pub fn generate_bindings(header: &str, bindings_fname: &str) {
 
     let status = Command::new("sh")
         .arg("-c")
-        .arg(format!("{} {}", r#"sed -i '/#\[test\]/a\#[allow(non_snake_case)]' "#, bindings_path.display()))
+        .arg(format!("sed -i -e '{}' -e '{}' {}", 
+			r#"/#\[test\]/a\#[allow(non_snake_case)]"#,
+			r#"/^pub const __bool_true_false_are_defined/i \#[allow(non_upper_case_globals)]"#, 
+			bindings_path.display()))
         .status()
         .expect("Failed to run sed command");
     if !status.success() {
@@ -27,3 +31,11 @@ pub fn generate_bindings(header: &str, bindings_fname: &str) {
     }
 }
 
+#[macro_export]
+macro_rules! bind_this {
+    ($filename:expr) => {
+        include!(concat!(env!("OUT_DIR"), "/", $filename, ".rs"));
+    };
+}
+
+pub use bind_this;

@@ -20,14 +20,13 @@ cargo-build:
 
 #----------------------------------------------------------------------------------------------
 
-
 ifneq ($(TARGET_PROG),)
 
 run:
 ifeq ($(GDB),1)
-	$(SHOW)rust-gdb $(TARGET_PROG)
+	$(SHOW)rust-gdb $(TARGET_PROG) -- $(ARGS)
 else
-	$(SHOW)$(TARGET_PROG)
+	$(SHOW)$(TARGET_PROG) $(ARGS)
 endif
 
 else

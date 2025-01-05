@@ -50,7 +50,7 @@ ifeq ($(wildcard $(TARGET_PROG)),)
 	endif
 endif
 
-RUN_CMD=$(TARGET_PROG)
+RUN_CMD=$(TARGET_PROG) $(ARGS)
 
 #------------------------------------------------------------------------------------ Interface
 

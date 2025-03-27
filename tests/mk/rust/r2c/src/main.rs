@@ -9,7 +9,8 @@ use std::error::Error;
 #[repr(C)]
 pub struct Bar {
 	flag: bool,
-	text: String
+	text: String,
+	maybe_text: Option<String>
 }
 
 type BarCallback = fn(*mut Bar);
@@ -27,6 +28,20 @@ pub extern "C" fn get_bar_text(bar_ptr: *const Bar) -> *const c_char {
         }
         let bar = &*bar_ptr;
         CString::new(bar.text.clone()).unwrap().into_raw()
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn get_bar_maybe_text(bar_ptr: *const Bar) -> *const c_char {
+    unsafe {
+        if bar_ptr.is_null() {
+            return std::ptr::null();
+        }
+        let bar = &*bar_ptr;
+		match &bar.maybe_text {
+			Some(text) => CString::new(text.clone()).unwrap().into_raw(),
+			None => std::ptr::null(),
+		}
     }
 }
 
@@ -77,7 +92,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         clib_del_foo(foo);
     }
 
-	let mut bar = Bar { flag: true, text: String::from("bar") };
+	let mut bar = Bar { flag: true, text: String::from("bar"), maybe_text: Some(String::from("bar")) };
     unsafe {
 	    bar_c_operation(bar_callback, &mut bar);
     }

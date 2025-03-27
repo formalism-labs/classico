@@ -60,6 +60,7 @@ pub fn export_deps_config() -> Result<(), Box<dyn Error>> {
 //---------------------------------------------------------------------------------------------
 
 pub struct BuildLog {
+    pub path: String,
     pub file: File
 }
 
@@ -70,7 +71,7 @@ impl BuildLog {
             .append(true)
             .create(true)
             .open(&path)?;
-        Ok(BuildLog { file: file })
+        Ok(BuildLog { path, file })
     }
 }
 
@@ -96,7 +97,7 @@ impl Build {
 
         export_deps_config()?;
 
-        Ok(Build { root: root, profile: profile, mk_root: mk_root, bindir: bindir, log: log })
+        Ok(Build { root, profile, mk_root, bindir, log })
     }
 
     pub fn root(&self) -> &String { &self.root }
@@ -106,9 +107,12 @@ impl Build {
 
     pub fn log(&mut self, text: &str) {
         writeln!(self.log.file, "{}", text).expect("error writing to build log file");
+        self.log.file.flush().expect("error writing to build log file");
     }
+
     pub fn blog(&mut self, text: &Vec<u8>) {
         self.log.file.write_all(text).expect("error writing to build log file");
+        self.log.file.flush().expect("error writing to build log file");
     }
 }
 

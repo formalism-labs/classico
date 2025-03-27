@@ -2,8 +2,8 @@
 !/bin/
 !/wd40/src/bin/
 .git/
-__pycache__/
-1/
+**/__pycache__/
+**/1/
 /tests/mk/autotools/make/gnulib/
 /tests/mk/autotools/make/pkgconf/
 /tests/mk/autotools/make/build/

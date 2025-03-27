@@ -15,5 +15,5 @@ endif
 ifeq ($(CC_OPENMP),1)
 CC_FLAGS.core += $(CC_FLAGS.openmp)
 LD_FLAGS += $(LD_FLAGS.openmp)
-LD_LIBS.ext += $(LD_LIBS.openmp)
+LD_LIBS += $(LD_LIBS.openmp)
 endif

@@ -1,7 +1,7 @@
 
 ifneq ($(SAN),)
 	ifeq ($(GCC),1)
-		_:=$(error Cannot build for SAN=$(SAN) with GCC=1)
+		__:=$(error Cannot build for SAN=$(SAN) with GCC=1)
 	endif
 	CLANG=1
 endif
@@ -10,7 +10,7 @@ ifeq ($(SAN),memory)
     ifneq ($(MSAN_PREFIX),)
         MSAN_PREFIX=/opt/llvm-project/build-msan
 		ifeq ($(wildcard $(MSAN_PREFIX)),)
-			_:=$(error LLVM/MSAN stdlibc++ directory '$(MSAN_PREFIX)' is missing)
+			__:=$(error LLVM/MSAN stdlibc++ directory '$(MSAN_PREFIX)' is missing)
         endif
     endif
 endif

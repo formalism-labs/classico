@@ -9,12 +9,15 @@ endif
 cargo-build:
 	$(SHOW) \
 	rm -f $(MK_CARGO_LOG) ;\
+	{ \
 	RUSTFLAGS="$(RUSTC_FLAGS)" \
-	cargo $(CARGO_TOOLCHAIN) build $(CARGO_BUILD_FLAGS)
-	@if [[ -f $(MK_CARGO_LOG) ]]; then \
-		echo "# build.rs log:" ;\
+	cargo $(CARGO_TOOLCHAIN) build $(CARGO_BUILD_FLAGS) ;\
+	E=$$?; } || true ;\
+	if [[ -f $(MK_CARGO_LOG) ]]; then \
+		echo -e "\n# build.rs log:" ;\
 		cat $(MK_CARGO_LOG) ;\
-	fi
+	fi; \
+	exit $$E
 
 .PHONY: cargo-build
 

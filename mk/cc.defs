@@ -97,25 +97,25 @@ endif
 
 ifeq ($(CC_PEDANTIC),1)
 define CC_FLAGS.warnings +=
-	-Wall
-	-Wpedantic
+	all
+	pedantic
 endef
 endif
 
 define CC_FLAGS.warnings +=
-	-Wno-unused-function
-	-Wno-unused-variable
-	-Wno-sign-compare
+	no-unused-function
+	no-unused-variable
+	no-sign-compare
 endef
 
 #----------------------------------------------------------------------------------------------
 
 define CC_C_FLAGS.warnings +=
-	-Werror=incompatible-pointer-types
-	-Werror=implicit-function-declaration
+	error=incompatible-pointer-types
+	error=implicit-function-declaration
 endef
 
-#	-Wno-error=incompatible-pointer-types-discards-qualifiers
+#	no-error=incompatible-pointer-types-discards-qualifiers
 
 ifneq ($(CC_C_STD),)
 CC_C_FLAGS.lang += -std=$(CC_C_STD)
@@ -141,7 +141,7 @@ define _CC_FLAGS.core
 	$(CC_FLAGS.common)
 	$(CC_FLAGS.includes)
 	$(CC_FLAGS.opt)
-	$(CC_FLAGS.warnings)
+	$(CC_FLAGS.warnings:%=-W%)
 	$(CC_FLAGS.debug)
 	$(CC_FLAGS.coverage)
 	$(CC_FLAGS.sanitizer)
@@ -161,7 +161,7 @@ CC_FLAGS += $(call flatten,$(_CC_FLAGS))
 define _CC_C_FLAGS +=
 	-fcommon
 	$(CC_C_FLAGS.lang)
-	$(CC_C_FLAGS.warnings)
+	$(CC_C_FLAGS.warnings:%=-W%)
 endef
 CC_C_FLAGS=$(call flatten,$(_CC_C_FLAGS))
 
@@ -169,7 +169,7 @@ CC_C_FLAGS=$(call flatten,$(_CC_C_FLAGS))
 
 define _CC_CXX_FLAGS +=
 	$(CC_CXX_FLAGS.lang)
-	$(CC_CXX_FLAGS.warnings)
+	$(CC_CXX_FLAGS.warnings:%=-W%)
 	$(CC_CXX_FLAGS.sanitizer)
 endef
 CC_CXX_FLAGS=$(call flatten,$(_CC_CXX_FLAGS))
@@ -281,15 +281,20 @@ define LD_LIBS.macos +=
 endef
 
 define _LD_LIBS
+	$(LD_LIBS)
 	$(LD_LIBS.common)
 	$(LD_LIBS.$(OS))
-	$(LD_LIBS.ext)
 endef
+
 _LD_LIBS.flat=$(call flatten,$(_LD_LIBS))
-_LD_LIBS.qualified=$(filter /%,$(_LD_LIBS.flat)) $(filter -%,$(_LD_LIBS.flat))
-LD_LIBS += \
+_LD_LIBS.files=$(filter /%,$(_LD_LIBS.flat))
+_LD_LIBS.args=$(filter -%,$(_LD_LIBS.flat))
+_LD_LIBS.qualified=$(_LD_LIBS.files) $(_LD_LIBS.args)
+_LD_LIBS.names=$(filter-out $(_LD_LIBS.qualified),$(_LD_LIBS.flat))
+	
+CC_LIBS=\
 	$(_LD_LIBS.qualified) \
-	$(foreach LIB,$(filter-out $(_LD_LIBS.qualified),$(_LD_LIBS.flat)),-l$(LIB))
+	$(foreach LIB,$(_LD_LIBS.names),-l$(LIB))
 
 #---------------------------------------------------------------------------------------- CMake
 

@@ -25,9 +25,9 @@ $(foreach ext,$(CC_CXX_EXT), \
 #----------------------------------------------------------------------------------------------
 ifeq ($(CC_PROD),prog)
 
-$(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
+$(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS) $(_LD_LIBS.files)
 	@echo Linking $@...
-	$(SHOW)$(CC) $(EXE_LD_FLAGS) $(LD_FLAGS) -o $@ $(CC_OBJECTS) $(LD_LIBS)
+	$(SHOW)$(CC) $(EXE_LD_FLAGS) $(LD_FLAGS) -o $@ $(CC_OBJECTS) $(CC_LIBS)
 
 run:
 	$(SHOW)$(CC_TARGET)
@@ -42,9 +42,9 @@ $(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
 #----------------------------------------------------------------------------------------------
 else ifeq ($(CC_PROD),so)
 
-$(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS)
+$(CC_TARGET): $(BIN_DIRS) $(CC_OBJECTS) $(_LD_LIBS.files)
 	@echo Linking $@...
-	$(SHOW)$(CC) $(SO_LD_FLAGS) $(LD_FLAGS) -o $@ $(CC_OBJECTS) $(LD_LIBS)
+	$(SHOW)$(CC) $(SO_LD_FLAGS) $(LD_FLAGS) -o $@ $(CC_OBJECTS) $(CC_LIBS)
 
 endif
 

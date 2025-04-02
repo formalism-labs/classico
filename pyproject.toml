@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paella"
+version = "1.0.0"
+dynamic = ["dependencies"]
+
+# [project.scripts]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["paella/requirements.txt"] }

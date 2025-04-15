@@ -1,0 +1,21 @@
+#!/bin/bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO=$(cd $HERE/.. && pwd)
+. $CLASSICO/shibumi/defs
+
+dir=$(mktemp -d /tmp/starfish.XXXXXX)
+wget -q -O $dir/install.sh https://starship.rs/install.sh
+cd $dir
+mkdir -p $HOME/.local/bin
+runn sh ./install.sh --bin-dir $HOME/.local/bin --force
+cd $HERE
+rm -rf $dir
+
+if [[ $AUTO != 0 ]]; then
+	profile_d=$(get_profile_d)
+	cat <<-'END' > $profile_d/starship.sh
+		eval "$(starship init bash)"
+		END
+fi

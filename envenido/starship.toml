@@ -1,0 +1,28 @@
+format = """
+${custom.envenido_userhost} ${env_var.envenido_prompt} $directory$git_branch
+\\$ 
+"""
+
+[directory]
+truncation_length = 0
+truncate_to_repo = false
+style='green'
+read_only = ''
+
+[git_branch]
+format = "[$symbol$branch]($style)"
+# symbol = ''
+
+[custom.envenido_userhost]
+command = 'echo "${ENVENIDO_PS1_SSH}${ENVENIDO_USER}@${ENVENIDO_HOST}"'
+format = "[$output](green)"
+when = "true"
+
+[env_var.envenido_prompt]
+variable = 'ENVENIDO_PS1_PROMPT'
+format = "[$env_value](purple)"
+
+# [env_var.envenido_title]
+# variable = 'ENVENIDO_TITLE'
+# format = "[$env_value](red)"
+

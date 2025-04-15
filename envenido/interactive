@@ -1,0 +1,62 @@
+
+_debug "interactive mode"
+
+#------------------------------------------------------------------------------------- Starship
+
+set_win_title() {
+	echo -ne "\033]0; "$ENVENIDO_PS1_TITLE" \007"
+}
+export -f set_win_title
+
+if [[ -z $ENVENIDO_TITLE ]]; then
+	export ENVENIDO_TITLE=Devka
+	export ENVENIDO_TITLE0=Devka
+fi
+
+if [[ -z $ENVENIDO_SSH ]]; then
+	export ENVENIDO_PS1_SSH=""
+	ENVENIDO_PS1_HOST=""
+else
+	export ENVENIDO_PS1_SSH="ssh:"
+	ENVENIDO_PS1_HOST="`hostname -s`: "
+fi
+
+# TODO: add docker indicator
+
+[[ -z $ENVENIDO_SHLVL ]] && export ENVENIDO_SHLVL=$SHLVL
+if (( SHLVL > ENVENIDO_SHLVL )); then
+	ENVENIDO_PS1_SHLVL="+$((SHLVL - ENVENIDO_SHLVL))"
+else
+	ENVENIDO_PS1_SHLVL=""
+fi
+
+# terminal title (used in set_win_title)
+export ENVENIDO_PS1_TITLE="$ENVENIDO_PS1_HOST$ENVENIDO_TITLE0"
+
+# prompt (used in starship.toml)
+export ENVENIDO_PS1_PROMPT="[$ENVENIDO_TITLE]${ENVENIDO_PS1_SHLVL}"
+
+_debug "setting up Sharship"
+export STARSHIP_CONFIG="$ENVENIDO/starship.toml"
+export starship_precmd_user_func="set_win_title"
+eval "$(starship init bash)"
+export ENVENIDO_PS1="$PS1"
+
+#----------------------------------------------------------------------- User definitions cache
+
+if [[ -n $ENVENIDO_CACHE && -e $ENVENIDO_CACHE ]]; then
+	_debug "read cache"
+	. $ENVENIDO_CACHE
+fi
+
+#----------------------------------------------------------------------------------------------
+
+term-title() {
+	if [[ -z "$1" ]]; then
+		echo "$ENVENIDO_PS1_TITLE"
+	else
+		ENVENIDO_PS1_TITLE="$1"
+	fi
+}
+
+export -f term-title

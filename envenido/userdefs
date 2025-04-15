@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import re
+
+HERE = os.path.dirname(__file__)
+CLASSICO = os.getenv('CLASSICO')
+sys.path.insert(0, CLASSICO)
+import paella
+
+dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != '' else os.environ['ENVENIDO_USER_DEFS']
+if not os.path.isdir(dir):
+	eprint("userdefs: invalid dir '%s'" % (dir))
+	exit(1)
+
+if os.path.isfile(dir + '/aliases'):
+	with open(dir + '/aliases', 'r') as file:
+		for line in file:
+			if re.match(r"^\s*$", line) or re.match(r"^\s*#", line):
+				continue
+			s = re.sub(r"^([^\s]+)\s+(.*)", r"alias -- \1='\2'", line.strip())
+			print(s)
+
+if os.path.isfile(dir + '/faliases'):
+	with open(dir + '/faliases', 'r') as file:
+		for line in file:
+			if re.match(r"^\s*$", line) or re.match(r"^\s*#", line):
+				continue
+			s = re.sub(r"^([^\s]+)\s+(.*)", r"function \1() { \2 ;}", line.strip())
+			print(s)
+
+# TODO: instead of copying, we can source
+print(f". {dir}/functions")
+#if os.path.isfile(dir + '/functions'):
+#    with open(dir + '/functions', 'r') as file:
+#        print(file.read())
+
+exit(0)

@@ -1,0 +1,73 @@
+#!/bin/bash
+
+_debug() {
+	[[ -z $ENVENIDO_DEBUG ]] && return
+	>&2 echo "### $*"
+}
+
+[[ $NO_ENVENIDO == 1 ]] && { _debug "NO ENVENIDO"; return; }
+
+# since envenido is invoked from serveral initialization scripts, typically:
+# ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc, /etc/profile
+# we'd like to avoid superfluous initialization
+if [[ -n $__ENVENIDO__ ]]; then
+	# this is required because .bashrc sets PS1
+	if [[ -n $ENVENIDO_IACT && "$PS1" != "$ENVENIDO_PS1" ]]; then
+		eval "$(starship init bash)"
+	fi
+
+	return
+fi
+__ENVENIDO__=1
+
+[[ -z $ENVENIDO ]] && export ENVENIDO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+_debug "args: '$*'"
+
+#------------------------------------------------------------------------------- Classification
+
+# IACT=1 forces interactive mode, otherwise determined by PS1
+if [[ $IACT == 1 ]]; then
+	export ENVENIDO_IACT=1
+else
+	unset ENVENIDO_IACT
+	[[ -n $PS1 ]] && export ENVENIDO_IACT=1
+fi
+
+shopt -q login_shell && ENVENIDO_LOGIN=1
+if [[ $ENVENIDO_LOGIN == 1 ]]; then
+	_debug "this is a login shell"
+else
+	_debug "this is not a login shell"
+fi
+
+[[ -n $SSH_CLIENT ]] && export ENVENIDO_SSH=1
+
+unset ENVENIDO_SUDO
+_debug "USER=$USER; SUDO_USER=$SUDO_USER"
+[[ $USER == root ]] && ENVENIDO_SUDO=1
+
+[[ -n $ENVENIDO_SUDO ]] && _debug "this is a sudo shell"
+
+#----------------------------------------------------------------------------------------- Core
+
+. $ENVENIDO/core
+
+_debug "user is $ENVENIDO_USER"
+
+#---------------------------------------------------------------------------------- Interactive
+
+[[ -n $ENVENIDO_IACT ]] && . $ENVENIDO/interactive
+
+#------------------------------------------------------------------------------------ se/mixenv
+
+# ENVENIDO_MIXENV set by se to be mixed by a newly-invoked shell
+if [[ -n $ENVENIDO_MIXENV ]]; then
+	_debug "se/mixenv $ENVENIDO_MIXENV"
+	FORCE=1 mixenv $ENVENIDO_MIXENV || return 1
+	unset ENVENIDO_MIXENV
+fi
+
+#----------------------------------------------------------------------------------------------
+
+_debug "envenido: done"

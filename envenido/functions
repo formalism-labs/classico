@@ -1,0 +1,37 @@
+
+#----------------------------------------------------------------------------------------------
+
+mixenv() {
+	. $ENVENIDO/mixenv "$@"
+}
+
+export -f mixenv
+
+#----------------------------------------------------------------------------------------------
+
+se() {
+	$ENVENIDO/se "$@"
+}
+
+export -f se
+
+#----------------------------------------------------------------------------------------------
+
+userdefs() {
+	if [[ -z $ENVENIDO_CACHE ]]; then
+		export ENVENIDO_CACHE=$(mktemp /tmp/envenido.XXXXXX)
+		chmod 644 $ENVENIDO_CACHE
+	fi
+	$ENVENIDO/userdefs $ENVENIDO_USER_DEFS > $ENVENIDO_CACHE
+	. $ENVENIDO_CACHE
+}
+
+export -f userdefs
+
+#----------------------------------------------------------------------------------------------
+
+sush() {
+	sudo -E -s "$@"
+}
+
+export -f sush

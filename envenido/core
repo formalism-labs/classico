@@ -1,0 +1,81 @@
+
+if [[ -n $__ENVENIDO_CORE__ ]]; then
+	_debug "(core already defined)"
+	return 0
+fi
+
+export __ENVENIDO_CORE__=1
+
+_debug "reading core"
+
+. $ENVENIDO/functions
+
+#------------------------------------------------------------------------------------ Locations
+
+# ok for login shell
+
+[[ -z $ENVENIDO_ENV ]] && export ENVENIDO_ENV=$HOME/.env
+
+#------------------------------------------------------------------------------------ User/Host
+
+if [[ -z $ENVENISO_USER ]]; then
+	if [[ $USER != root ]]; then
+		ENVENIDO_USER="$(basename $HOME)"
+	else
+		ENVENIDO_USER="$SUDO_USER"
+	fi
+	export ENVENIDO_USER="${ENVENIDO_USER,,}"
+fi
+
+ENVENIDO_HOST="$(hostname)"
+export ENVENIDO_HOST="${ENVENIDO_HOST,,}"
+
+#------------------------------------------------------------------------------------- Classico
+
+# not ok for login shell -> functions are not exported
+
+export CLASSICO="$DEVKA/classico"
+. $CLASSICO/shibumi/functions
+
+#------------------------------------------------------------------------- Default environments
+
+START=1 mixenv devka
+START=0 mixenv classico
+
+#--------------------------------------------------------------------------------------- Shells
+
+export ENVENIDO_SHLVL=$SHLVL
+
+#-------------------------------------------------------------------------------------- Aliases
+
+# not ok for login shell, aliases should be defined for any interactive shell
+# however, they should be captured on (first?) interactive login shell
+
+if [[ -n $ENVENIDO_IACT ]]; then
+	_debug "processing user defs"
+	userdefs
+fi
+
+#------------------------------------------------------------------------------------ profile.d
+
+read_profile_d() {
+	local d="$1"
+	local f
+	if [[ -d $d ]]; then
+		if [[ -n $(ls $d/*.sh 2> /dev/null) ]]; then
+			for f in $d/*.sh; do
+				if [[ -r $f ]]; then
+					. $f
+				fi
+			done
+		fi
+	fi
+	hash -r
+}
+
+read_profile_d "/home/$ENVENIDO_USER/.profile.d"
+read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
+
+#-------------------------------------------------------------------------------------- On exit
+
+add_exit_trap $ENVENIDO/cleanup

@@ -1,0 +1,85 @@
+
+__help() {
+	cat <<-'END'
+		mixenv: mix Envenido environment
+
+		[ARGVARS...] mixenv [--help|help]
+
+		Argument variables:
+		START=0       Don't read start script
+		REMIX=0       Do not remix
+		FORCE=1       Same as REMIX=1
+
+		V|VERBOSE=1   Print commands and output
+		NOP=1         Dry run
+		HELP=1        Show help
+	END
+}
+
+if [[ $1 == --help || $1 == help || $HELP == 1 ]]; then
+	__help
+	unset -f __help
+	return 0
+fi
+
+unset -f __help
+
+[[ $V == 1 ]] && VERBOSE=1
+[[ $FORCE == 1 ]] && REMIX=1
+
+__mixenv() {
+	local n="$1"
+	if [[ $n == . ]]; then
+		n="${PWD//\//_}"
+		local d="$PWD"
+	else
+		local d="$ENVENIDO_ENV/$n"
+	fi
+	local e="__ENV_${n//-/_}"
+	e="${e//\./_}"
+	shift
+
+	local OP=""
+	[[ $NOP == 1 ]] && OP=echo
+
+	if [[ ${!e} == 1 && $REMIX == 0 ]]; then
+		[[ $VERBOSE == 1 ]] && echo "$n already installed"
+		return 0
+	fi
+
+	if [[ ! -d $d ]]; then
+		>&2 echo "WARNING: environment $n does not exist"
+		return 1
+	fi
+
+	if [[ ! -f $d/env ]]; then
+		[[ $VERBOSE == 1 ]] && >&2 echo "$d/env does not exist"
+		return 0
+	fi
+
+	$OP . $d/env "$@" || return 1
+	[[ $NOP == 1 || $VERBOSE == 1 ]] && { echo -e "\n# $d/env:"; cat $d/env; }
+	if [[ $START != 0 && -f $d/start ]]; then
+		$OP . $d/start "$@" || return 1
+		[[ $NOP == 1 || $VERBOSE == 1 ]] && { echo -e "\n# $d/start:"; cat $d/start; }
+	fi
+
+	$OP export $e=1
+	return 0
+}
+
+for __e in $@; do
+	# [[ $VERBOSE == 1 ]] && echo "# $__e"
+	
+	if ! __mixenv $__e; then
+		>&2 echo "ERROR in mixenv $__e"
+		unset __e
+		unset -f __mixenv
+		return 1
+	else
+		_debug "$__e mixed"
+	fi
+done
+
+unset __e
+unset -f __mixenv __e

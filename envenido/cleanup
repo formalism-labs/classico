@@ -1,0 +1,3 @@
+#!/bin/bash
+
+[[ -n $ENVENIDO_CACHE && -f $ENVENIDO_CACHE ]] && rm -f $ENVENIDO_CACHE

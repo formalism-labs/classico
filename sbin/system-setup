@@ -17,41 +17,32 @@ class SystemSetup(paella.Setup):
         paella.Setup.__init__(self, args.nop)
 
     def common_first(self):
-        # self.install("")
-        # self.group_install("")
-        # self.setup_pip()
-        # self.pip_install("")
-        # self.run("")
-
-        print(f"")
-        print("# common-first")
         self.install_downloaders()
         self.setup_dotlocal()
 
     def linux_first(self):
-        print("# linux-first")
+        pass
 
     def debian_compat(self):
-        print("# debian-compat")
+        pass
 
     def redhat_compat(self):
-        print("# redhat-compat")
+        pass
 
     def archlinux(self):
-        print("# archlinux")
+        pass
 
     def fedora(self):
-        print("# fedora")
+        pass
 
     def linux_last(self):
-        print("# linux-last")
+        pass
 
     def macos(self):
-        print("# macos")
         self.install_gnu_utils()
 
     def common_last(self):
-        print("# common-last")
+        pass
 
 #----------------------------------------------------------------------------------------------
 
@@ -60,7 +51,8 @@ parser.add_argument('-n', '--nop', action="store_true", help='no operation')
 # parser.add_argument('--bool', action="store_true", help="flag")
 # parser.add_argument('--int', type=int, default=1, help='number')
 # parser.add_argument('--str', type=str, default='str', help='string')
+# parser.add_argument("--mode", choices=["fast", "slow", "medium"], default="medium")
+# parser.add_argument("--summary", choices=["short", "long"], nargs="?", const="short")  # None if not present
 args = parser.parse_args()
 
-BB()
 SystemSetup(args).setup()

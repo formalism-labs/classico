@@ -8,6 +8,8 @@ CLASSICO=$ROOT
 
 export HOMEBREW_NO_AUTO_UPDATE=1
 
+$CLASSICO/bin/getget
+
 profile_d="$(get_profile_d)"
 
 tmp_profiled=$(mktemp -d)
@@ -27,4 +29,5 @@ if [[ $VERBOSE == 1 ]]; then
 	python -m pip list
 fi
 
-$HERE/system-setup.py
+$CLASSICO/bin/getnode --bun
+$HERE/system-setup

@@ -1,0 +1,12 @@
+{
+  "name": "@classico/jasmine",
+  "version": "1.0.0",
+  "description": "Jasmine, a part of Classico",
+  "main": "index.ts",
+  "type": "module",
+  "license": "BSD",
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "js-yaml": "^4.1.0"
+  }
+}

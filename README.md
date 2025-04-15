@@ -1,16 +1,19 @@
-# Classico
+<p align="center">
+  <img src="docs/classico.jpg" alt="Logo" />
+</p>
+<h1 align="center">Classico</h1>
+<h3 align="center">Library cluster of automation facilities</h3>
+<p><br></p>
 
-![logo](docs/classico.jpg)
+### What is Classico?
 
-### Library cluster of automation facilities
-
-Classico is a set of tools that help developers write scripts for automation needs of projects (e.g. build, testing, benchmarking, packaging, CI) across platforms.
+**Classico** is a set of tools that help developers write scripts for automation needs of projects (e.g. build, testing, benchmarking, packaging, CI) across platforms.
 
 ### Installation
 Clone the Classico repo into your codebase.
 
 ### Classico in bash
-Start your script as follows, modifying the relative CLASSICO path specification if needed.
+Start your script as follows, modifying the relative `CLASSICO` path specification if needed.
 ```bash
 #!/bin/bash
 
@@ -35,7 +38,7 @@ import paella  # noqa: F401
 
 ### Design choices
 
-The scripts or tools written with Classico are typically part of the development infrastructure, thus agility is generally preferred over rigor.
+The scripts or tools written with **Classico** are typically part of the development infrastructure, thus agility is generally preferred over rigor.
 
 Classico tools are implemented using different tools (mostly, bash any Python), which may invoke one another, rather than implementing the full functionality using a single tool. This in turn imposes restrictions on the distribution method: package managers (`pip`, `npm`, etc) are avoided, and Classico code is delivered in source form. Classico may however require installation of packages of tools it uses, typically inside sandboxes (i.e., Python's virtual environment).
 

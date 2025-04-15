@@ -12,7 +12,7 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, ROOT)
 import paella
 
-NODE_VERSION = "20"
+NODE_VERSION = "23"
 
 #----------------------------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ class NodeSetup(paella.Setup):
 
 #----------------------------------------------------------------------------------------------
 
-class SetupModern(paella.Setup):
+class ModernSetup(paella.Setup):
     def __init__(self, args):
         paella.Setup.__init__(self, nop=args.nop)
         self.yarn = args.yarn
@@ -63,15 +63,27 @@ class SetupModern(paella.Setup):
 
 #----------------------------------------------------------------------------------------------
 
+class BunSetup(paella.Setup):
+    def __init__(self, args):
+        paella.Setup.__init__(self, nop=args.nop)
+
+    def common_first(self):
+        self.install_downloaders()
+        self.run(f"curl -fsSL https://bun.sh/install | bash")
+
+#----------------------------------------------------------------------------------------------
+
 parser = argparse.ArgumentParser(description='Install node.js and related software')
 parser.add_argument('-n', '--nop', action="store_true", help='No operation')
 parser.add_argument('--modern', action="store_true", help='Install latest node.js')
 parser.add_argument('--yarn', action="store_true", help='Install yarn')
 parser.add_argument('--ts', action="store_true", help='Install TypeScript')
+parser.add_argument('--bun', action="store_true", help='Install Bun')
 args = parser.parse_args()
 
-SetupModern(args).setup()
-#if args.modern:
-#    SetupModern(args).setup()
-#else:
-#    Setup(args).setup()
+if args.bun:
+    SetupBun(args).setup()
+elif args.modern:
+    ModernSetup(args).setup()
+else:
+    NodeSetup(args).setup()

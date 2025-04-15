@@ -101,6 +101,8 @@ cat <<-END > $profile_d/python.sh
 
 $OP . $VENV_BINDIR/activate
 runn uv pip install pip
-runn uv pip install -r $CLASSICO/paella/requirements.txt 
+
+# runn uv pip install -r $CLASSICO/paella/requirements.txt
+runn uv pip install -e $CLASSICO
 
 exit 0

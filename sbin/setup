@@ -20,9 +20,10 @@ cat <<-'END' > $tmp_profiled/dotlocal.sh
 	END
 add_to_profile_d $tmp_profiled/dotlocal.sh
 rm -rf $tmp_profiled
+. $profile_d/dotlocal.sh
 
 $CLASSICO/bin/getpy
-. "$(profile_d)/python.sh"
+. $profile_d/python.sh
 
 if [[ $VERBOSE == 1 ]]; then
 	python --version

@@ -1,12 +1,11 @@
 #!/bin/bash
 
-VERSION=${VERSION:-"0.15.0"}
-
-
 PROGNAME="${BASH_SOURCE[0]}"
 HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
 CLASSICO=$(cd $HERE/.. && pwd)
 . $CLASSICO/shibumi/defs
+
+VERSION=${VERSION:-"1.11.4"}
 
 OS=`uname -s`
 if [[ $OS == Linux ]]; then
@@ -15,6 +14,10 @@ elif [[ $OS == Darwin ]]; then
 	OS=darwin
 elif [[ $OS == FreBSD ]]; then
 	OS=freebsd
+elif [[ $OS == OpenBSD ]]; then
+	OS=openbsd
+elif [[ $OS == SunOS ]]; then
+	OS=solaris
 else
 	echo "$OS: unsupported"
 fi
@@ -22,9 +25,9 @@ fi
 ARCH=`uname -m`
 if [[ $ARCH == x86_64 ]]; then
 	ARCH=amd64
-elif [[ $ARCH == i686 ]]; then
+elif [[ $ARCH == i686 || $ARCH == i386 ]]; then
 	ARCH=386
-elif [[ $ARCH == aarch64 ]]; then
+elif [[ $ARCH == aarch64 || $ARCH == arm64 ]]; then
 	ARCH=arm64
 elif [[ $ARCH == armv7l ]]; then
 	ARCH=arm
@@ -38,6 +41,7 @@ wget -q -O $dir/tf.zip https://releases.hashicorp.com/terraform/${VERSION}/terra
 cd $dir
 unzip -q tf.zip
 chmod +x terraform
-mv terraform /usr/local/bin/
+# mv terraform /usr/local/bin/
+mv terraform $HOME/.local/bin/
 cd $HERE
 rm -rf $dir

@@ -13,6 +13,9 @@ setup_profile_d() {
 	local d="$HOME/.profile.d"
 	[[ ! -d $d ]] && mkdir -p "$d"
 
+	# Devka handles .profile.d scripts
+	[[ -n $DEVKA ]] && return
+
 	cat <<-END >> $profile
 		export CLASSICO="$CLASSICO"
 		[[ -d \$CLASSICO ]] && . \$CLASSICO/shibumi/functions;

@@ -1,0 +1,27 @@
+#!/usr/bin/env bun
+
+import * as jasmine from "../jasmine";
+
+jasmine._imports();
+import path from 'path';
+import { Command } from 'commander';
+jasmine._end_imports();
+
+const ROOT = jasmine.CLASSICO;
+
+const program = new Command();
+program
+  .name('json2yaml')
+  .option('-y, --yaml', 'read yaml instead of json')
+  .option('-h, --highlight', 'syntax highlight')
+  .argument('<filename>')
+  .parse();
+
+const opts = program.opts();
+
+const fname = program.args[0];
+jasmine.text.json2yaml(fname).then((yaml) => {
+  console.log(yaml);
+}).catch((x) => {
+  console.error(x);
+});

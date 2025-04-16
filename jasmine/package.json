@@ -8,5 +8,8 @@
   "devDependencies": {
     "typescript": "^5.7.2",
     "js-yaml": "^4.1.0"
+  },
+  "dependencies": {
+    "commander": "^13.1.0"
   }
 }

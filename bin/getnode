@@ -70,6 +70,13 @@ class BunSetup(paella.Setup):
     def common_first(self):
         self.install_downloaders()
         self.run(f"curl -fsSL https://bun.sh/install | bash")
+        self.cat_to_profile_d(r'''
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+            ''', "bun.sh")
+        paella.mkdir_p(f"{HOME}/.jasmine")
+        shutil.copy(f"{ROOT}/jasmine/package.json", f"{HOME}/.jasmine/")
+        self.run("bun install", at=f"{HOME}/.jasmine")
 
 #----------------------------------------------------------------------------------------------
 
@@ -82,7 +89,7 @@ parser.add_argument('--bun', action="store_true", help='Install Bun')
 args = parser.parse_args()
 
 if args.bun:
-    SetupBun(args).setup()
+    BunSetup(args).setup()
 elif args.modern:
     ModernSetup(args).setup()
 else:

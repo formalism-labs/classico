@@ -3,8 +3,10 @@
 import sys
 import os
 import argparse
+from pathlib import Path
 import re
 import tempfile
+import shutil
 import urllib.request
 
 HERE = os.path.dirname(__file__)
@@ -74,9 +76,11 @@ class BunSetup(paella.Setup):
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
             ''', "bun.sh")
-        paella.mkdir_p(f"{HOME}/.jasmine")
-        shutil.copy(f"{ROOT}/jasmine/package.json", f"{HOME}/.jasmine/")
-        self.run("bun install", at=f"{HOME}/.jasmine")
+        home = Path.home()
+        jasmine_dir = f"{home}/.jasmine/"
+        paella.mkdir_p(jasmine_dir)
+        shutil.copy(f"{ROOT}/jasmine/package.json", jasmine_dir)
+        self.run("bun install", at=jasmine_dir)
 
 #----------------------------------------------------------------------------------------------
 

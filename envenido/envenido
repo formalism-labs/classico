@@ -44,7 +44,7 @@ fi
 [[ -n $SSH_CLIENT ]] && export ENVENIDO_SSH=1
 
 unset ENVENIDO_SUDO
-_debug "USER=$USER; SUDO_USER=$SUDO_USER"
+_debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 [[ $USER == root ]] && ENVENIDO_SUDO=1
 
 [[ -n $ENVENIDO_SUDO ]] && _debug "this is a sudo shell"

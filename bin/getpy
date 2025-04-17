@@ -65,10 +65,10 @@ UV_VENV_ARGS=""
 #----------------------------------------------------------------------------------------------
 
 if [[ $FORCE == 1 ]]; then
-	rm -rf $UV_DIR $VEVV_DIR
+	rm -rf $UV_DIR $VENV_DIR
 fi
 
-if [[ -d $VEVV_DIR ]]; then
+if [[ -d $VENV_DIR ]]; then
 	eprint "Python already installed"
 	exit 1
 fi

@@ -19,7 +19,7 @@ _debug "reading core"
 #------------------------------------------------------------------------------------ User/Host
 
 if [[ -z $ENVENISO_USER ]]; then
-	if [[ $USER != root ]]; then
+	if [[ $(id -un) != root ]]; then
 		ENVENIDO_USER="$(basename $HOME)"
 	else
 		ENVENIDO_USER="$SUDO_USER"

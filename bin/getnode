@@ -71,7 +71,7 @@ class BunSetup(paella.Setup):
 
     def common_first(self):
         self.install_downloaders()
-        self.run(f"curl -fsSL https://bun.sh/install | bash")
+        self.run(f"curl -fsSL https://bun.sh/install | SHELL=none bash")
         self.cat_to_profile_d(r'''
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"

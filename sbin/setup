@@ -22,7 +22,7 @@ add_to_profile_d $tmp_profiled/dotlocal.sh
 rm -rf $tmp_profiled
 . $profile_d/dotlocal.sh
 
-$CLASSICO/bin/getpy
+runn $CLASSICO/bin/getpy
 . $profile_d/python.sh
 
 if [[ $VERBOSE == 1 ]]; then
@@ -30,5 +30,5 @@ if [[ $VERBOSE == 1 ]]; then
 	python -m pip list
 fi
 
-$CLASSICO/bin/getnode --bun
-$HERE/system-setup
+runn $CLASSICO/bin/getnode --bun
+runn $HERE/system-setup

@@ -70,7 +70,7 @@ fi
 
 if [[ -d $VENV_DIR ]]; then
 	eprint "Python already installed"
-	exit 1
+	exit 0
 fi
 
 mkdir -p "$UV_DIR"

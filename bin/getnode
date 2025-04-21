@@ -74,7 +74,7 @@ class BunSetup(paella.Setup):
         self.run(f"curl -fsSL https://bun.sh/install | SHELL=none bash")
         self.cat_to_profile_d(r'''
             export BUN_INSTALL="$HOME/.bun"
-            export PATH="$BUN_INSTALL/bin:$PATH"
+            append_to_path $BUN_INSTALL/bin
             ''', "bun.sh")
         home = Path.home()
         jasmine_dir = f"{home}/.jasmine/"

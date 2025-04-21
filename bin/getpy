@@ -92,10 +92,14 @@ fi
 cat <<-END > $profile_d/python.sh
 	append_to_path "$VENV_BINDIR"
 	append_to_path "$UV_DIR"
+	
 	if [[ -f $VENV_BINDIR/activate ]]; then
-		VIRTUAL_ENV_DISABLE_PROMPT=1
-		. $VENV_BINDIR/activate
-		unset VIRTUAL_ENV_DISABLE_PROMPT
+	    __path__="\$PATH"
+	    VIRTUAL_ENV_DISABLE_PROMPT=1
+	    . $VENV_BINDIR/activate
+	    unset VIRTUAL_ENV_DISABLE_PROMPT
+	    export PATH="\$__path__"
+	    unset __path__
 	fi
 	END
 

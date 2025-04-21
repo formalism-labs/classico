@@ -8,29 +8,18 @@ get_profile_d() {
 setup_profile_d() {
 	local profile="$HOME/.bash_profile"
 	[[ ! -f $profile ]] && touch $profile
-	if grep -q '\.profile\.d' $profile 2>/dev/null; then return; fi
+	if grep -q 'read_profile_d' $profile 2>/dev/null; then return; fi
 
 	local d="$HOME/.profile.d"
 	[[ ! -d $d ]] && mkdir -p "$d"
 
-	# Devka handles .profile.d scripts
-	[[ -n $DEVKA ]] && return
+	# Envenido handles .profile.d scripts
+	[[ -n $DEVKA || -n $ENVENIDO ]] && return
 
 	cat <<-END >> $profile
 		export CLASSICO="$CLASSICO"
-		[[ -d \$CLASSICO ]] && . \$CLASSICO/shibumi/functions;
-		END
-	cat <<-END | tr '\n' ' ' >> $profile
-		if [ -d $d ]; then
-			if [ -n "\$(ls $d/*.sh 2> /dev/null)" ]; then
-				for __sh in $d/*.sh; do
-					if [ -r \$__sh ]; then
-						. \$__sh;
-					fi;
-				done;
-				unset __sh;
-			fi;
-		fi
+		[[ -d \$CLASSICO ]] && . \$CLASSICO/shibumi/functions
+		read_profile_d
 		END
 }
 
@@ -49,11 +38,12 @@ add_to_profile_d() {
 }
 
 read_profile_d() {
-	local d="$(get_profile_d)"
+    local dir="$1"
+	[[ -z $dir ]] && dir="$(get_profile_d)"
 	local f
-	if [[ -d $d ]]; then
-		if [[ -n $(ls $d/*.sh 2> /dev/null) ]]; then
-			for f in $d/*.sh; do
+	if [[ -d $dir ]]; then
+		if [[ -n $(ls $dir/*.sh 2> /dev/null) ]]; then
+			for f in $dir/*.sh; do
 				if [[ -r $f ]]; then
 					. $f
 				fi

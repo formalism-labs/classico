@@ -1,15 +1,18 @@
 #!/bin/bash
 
+# envenido is invoked from serveral initialization scripts, typically:
+# ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc, /etc/profile
+
 _debug() {
 	[[ -z $ENVENIDO_DEBUG ]] && return
 	>&2 echo "### $*"
 }
 
+_debug "called by ${BASH_SOURCE[2]}"
+
 [[ $NO_ENVENIDO == 1 ]] && { _debug "NO ENVENIDO"; return; }
 
-# since envenido is invoked from serveral initialization scripts, typically:
-# ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc, /etc/profile
-# we'd like to avoid superfluous initialization
+# avoid superfluous initialization
 if [[ -n $__ENVENIDO__ ]]; then
 	# this is required because .bashrc sets PS1
 	if [[ -n $ENVENIDO_IACT && "$PS1" != "$ENVENIDO_PS1" ]]; then
@@ -43,6 +46,11 @@ fi
 
 [[ -n $SSH_CLIENT ]] && export ENVENIDO_SSH=1
 
+if [[ $($CLASSICO/bin/iscontainer) == 1 ]]; then
+	export ENVENIDO_CONTAINER=1
+	export ENVENIDO_DOCKER_NAME="$DOCKER_NAME"
+fi
+
 unset ENVENIDO_SUDO
 _debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 [[ $USER == root ]] && ENVENIDO_SUDO=1
@@ -64,7 +72,12 @@ _debug "user is $ENVENIDO_USER"
 # ENVENIDO_MIXENV set by se to be mixed by a newly-invoked shell
 if [[ -n $ENVENIDO_MIXENV ]]; then
 	_debug "se/mixenv $ENVENIDO_MIXENV"
-	FORCE=1 mixenv $ENVENIDO_MIXENV || return 1
+	FORCE=1 mixenv $ENVENIDO_MIXENV
+	if [[ $? != 0 ]]; then
+		_debug "se/mixenv $ENVENIDO_MIXENV failed"
+		unset ENVENIDO_MIXENV
+		return 1
+	fi
 	unset ENVENIDO_MIXENV
 fi
 

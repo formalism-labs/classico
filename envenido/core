@@ -12,39 +12,52 @@ _debug "reading core"
 
 #------------------------------------------------------------------------------------ Locations
 
-# ok for login shell
-
 [[ -z $ENVENIDO_ENV ]] && export ENVENIDO_ENV=$HOME/.env
-
-#------------------------------------------------------------------------------------ User/Host
-
-if [[ -z $ENVENISO_USER ]]; then
-	if [[ $(id -un) != root ]]; then
-		ENVENIDO_USER="$(basename $HOME)"
-	else
-		ENVENIDO_USER="$SUDO_USER"
-	fi
-	export ENVENIDO_USER="${ENVENIDO_USER,,}"
-fi
-
-ENVENIDO_HOST="$(hostname)"
-export ENVENIDO_HOST="${ENVENIDO_HOST,,}"
 
 #------------------------------------------------------------------------------------- Classico
 
-# not ok for login shell -> functions are not exported
-
 export CLASSICO="$DEVKA/classico"
-. $CLASSICO/shibumi/functions
+. $CLASSICO/shibumi/profile
+. $CLASSICO/shibumi/vars
+. $CLASSICO/shibumi/traps
+
+#------------------------------------------------------------------------------------ User/Host
+
+if [[ -z $ENVENIDO_USER ]]; then
+	if [[ `$CLASSICO/bin/iscontainer` == 1 ]]; then
+		ENVENIDO_USER="$(id -un)"
+		ENVENIDO_HOME="$HOME"
+	elif [[ $(id -un) != root ]]; then
+		ENVENIDO_USER="$(basename $HOME)"
+		ENVENIDO_HOME="$HOME"
+	else
+		ENVENIDO_USER="$SUDO_USER"
+		ENVENIDO_HOME="/home/$ENVENIDO_USER"
+	fi
+	# lowercase
+	export ENVENIDO_USER="${ENVENIDO_USER,,}"
+fi
+
+if [[ -n $ENVENIDO_CONTAINER ]]; then
+	ENVENIDO_HOST="$ENVENIDO_DOCKER_NAME"
+else
+	ENVENIDO_HOST="$(hostname)"
+fi
+export ENVENIDO_HOST="${ENVENIDO_HOST,,}"
 
 #------------------------------------------------------------------------- Default environments
 
 START=1 mixenv devka
-START=0 mixenv classico
+# START=0 mixenv classico
 
 #--------------------------------------------------------------------------------------- Shells
 
 export ENVENIDO_SHLVL=$SHLVL
+
+#------------------------------------------------------------------------------------ profile.d
+
+read_profile_d "$ENVENIDO_HOME/.profile.d"
+read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
 
 #-------------------------------------------------------------------------------------- Aliases
 
@@ -55,26 +68,6 @@ if [[ -n $ENVENIDO_IACT ]]; then
 	_debug "processing user defs"
 	userdefs
 fi
-
-#------------------------------------------------------------------------------------ profile.d
-
-read_profile_d() {
-	local d="$1"
-	local f
-	if [[ -d $d ]]; then
-		if [[ -n $(ls $d/*.sh 2> /dev/null) ]]; then
-			for f in $d/*.sh; do
-				if [[ -r $f ]]; then
-					. $f
-				fi
-			done
-		fi
-	fi
-	hash -r
-}
-
-read_profile_d "/home/$ENVENIDO_USER/.profile.d"
-read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
 
 #-------------------------------------------------------------------------------------- On exit
 

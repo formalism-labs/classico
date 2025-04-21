@@ -31,4 +31,5 @@ if [[ $VERBOSE == 1 ]]; then
 fi
 
 runn $CLASSICO/bin/getnode --bun
+
 runn $HERE/system-setup

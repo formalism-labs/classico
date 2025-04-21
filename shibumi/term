@@ -16,6 +16,8 @@ if [[ $NO_ANSI != 1 ]]; then
 	LIGHTCYAN=$'\033[1;36m'
 	WHITE=$'\033[1;37m'
 	NOCOLOR=$'\033[0m'
+	BW="$NOCOLOR"
+	BOLD=$'\033[1m'
 
 # 	export BOLD=$(tput bold)
 # 	export NOCOLOR=$(tput sgr0)

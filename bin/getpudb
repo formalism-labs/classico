@@ -9,7 +9,7 @@ OP=""
 [[ $NOP == 1 ]] && OP=echo
 
 if ! is_command python3; then
-	eprint "Python is not innstalled"
+	eprint "Python is not installed"
 	exit 1
 fi
 	
@@ -54,29 +54,31 @@ if [[ -f $cfg ]]; then
 fi
 
 $OP mkdir -p "$(dirname $cfg)"
-cat <<-'EOF' > $cfg
-	[pudb]
-	breakpoints_weight = 1
-	current_stack_frame = top
-	custom_shell = 
-	custom_stringifier = 
-	custom_theme = 
-	default_variables_access_level = public
-	display = auto
-	hide_cmdline_win = True
-	hotkeys_breakpoints = B
-	hotkeys_code = C
-	hotkeys_stack = S
-	hotkeys_variables = V
-	hotkeys_toggle_cmdline_focus = ctrl x
-	line_numbers = True
-	prompt_on_quit = False
-	seen_welcome = e049
-	shell = internal
-	sidebar_width = 0.5
-	stack_weight = 1
-	stringifier = repr
-	theme = monokai
-	variables_weight = 1
-	wrap_variables = True
-	EOF
+if [[ $NOP != 1 ]]; then
+	cat <<-'EOF' > $cfg
+		[pudb]
+		breakpoints_weight = 1
+		current_stack_frame = top
+		custom_shell = 
+		custom_stringifier = 
+		custom_theme = 
+		default_variables_access_level = public
+		display = auto
+		hide_cmdline_win = True
+		hotkeys_breakpoints = B
+		hotkeys_code = C
+		hotkeys_stack = S
+		hotkeys_variables = V
+		hotkeys_toggle_cmdline_focus = ctrl x
+		line_numbers = True
+		prompt_on_quit = False
+		seen_welcome = e049
+		shell = internal
+		sidebar_width = 0.5
+		stack_weight = 1
+		stringifier = repr
+		theme = monokai
+		variables_weight = 1
+		wrap_variables = True
+		EOF
+fi

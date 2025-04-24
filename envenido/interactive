@@ -14,16 +14,11 @@ if [[ -z $ENVENIDO_TITLE ]]; then
 fi
 
 if [[ -n $ENVENIDO_SSH ]]; then
-	export ENVENIDO_PS1_SSH="ssh:"
-	ENVENIDO_PS1_HOST="`hostname -s`: "
+	export ENVENIDO_PS1_CONTEXT="${GREEN}${BOLD}ssh${GREEN}:"
+elif [[ -n $ENVENIDO_CONTAINER ]]; then
+	export ENVENIDO_PS1_CONTEXT="${GREEN}${BOLD}docker${GREEN}:"
 else
-	export ENVENIDO_PS1_SSH=""
-	ENVENIDO_PS1_HOST=""
-fi
-
-if [[ -n $ENVENIDO_CONTAINER ]]; then
-	export ENVENIDO_PS1_SSH="docker:"
-	ENVENIDO_PS1_HOST="$ENVENIDO_DOCKER_NAME"
+	export ENVENIDO_PS1_CONTEXT=""
 fi
 
 [[ -z $ENVENIDO_SHLVL ]] && export ENVENIDO_SHLVL=$SHLVL
@@ -34,7 +29,14 @@ else
 fi
 
 # terminal title (used in set_win_title)
-export ENVENIDO_PS1_TITLE="$ENVENIDO_PS1_HOST$ENVENIDO_TITLE0"
+ENVENIDO_PS1_HOST="$ENVENIDO_HOST"
+[[ -n $ENVENIDO_PS1_HOST ]] && ENVENIDO_PS1_HOST+=': '
+
+if [[ -z $ENVENIDO_TERM_TITLE ]]; then
+	export ENVENIDO_PS1_TITLE="${ENVENIDO_PS1_HOST}${ENVENIDO_TITLE0}"
+else
+	export ENVENIDO_PS1_TITLE="$ENVENIDO_TERM_TITLE"
+fi
 
 # prompt (used in starship.toml)
 export ENVENIDO_PS1_PROMPT="[$ENVENIDO_TITLE]${ENVENIDO_PS1_SHLVL}"
@@ -60,9 +62,10 @@ fi
 
 term-title() {
 	if [[ -z "$1" ]]; then
-		echo "$ENVENIDO_PS1_TITLE"
+		echo "$ENVENIDO_TERM_TITLE"
 	else
-		ENVENIDO_PS1_TITLE="$1"
+		ENVENIDO_TERM_TITLE="$1"
+		ENVENIDO_PS1_TITLE="$ENVENIDO_TERM_TITLE"
 	fi
 }
 

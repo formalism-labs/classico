@@ -46,6 +46,7 @@ fi
 
 [[ -n $SSH_CLIENT ]] && export ENVENIDO_SSH=1
 
+unset ENVENIDO_CONTAINER
 if [[ $($CLASSICO/bin/iscontainer) == 1 ]]; then
 	export ENVENIDO_CONTAINER=1
 	export ENVENIDO_DOCKER_NAME="$DOCKER_NAME"
@@ -60,8 +61,6 @@ _debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 #----------------------------------------------------------------------------------------- Core
 
 . $ENVENIDO/core
-
-_debug "user is $ENVENIDO_USER"
 
 #---------------------------------------------------------------------------------- Interactive
 

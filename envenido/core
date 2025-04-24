@@ -17,6 +17,7 @@ _debug "reading core"
 #------------------------------------------------------------------------------------- Classico
 
 export CLASSICO="$DEVKA/classico"
+. $CLASSICO/shibumi/term
 . $CLASSICO/shibumi/profile
 . $CLASSICO/shibumi/vars
 . $CLASSICO/shibumi/traps
@@ -24,15 +25,18 @@ export CLASSICO="$DEVKA/classico"
 #------------------------------------------------------------------------------------ User/Host
 
 if [[ -z $ENVENIDO_USER ]]; then
-	if [[ `$CLASSICO/bin/iscontainer` == 1 ]]; then
+	if [[ $ENVENIDO_CONTAINER == 1 ]]; then
 		ENVENIDO_USER="$(id -un)"
 		ENVENIDO_HOME="$HOME"
 	elif [[ $(id -un) != root ]]; then
 		ENVENIDO_USER="$(basename $HOME)"
 		ENVENIDO_HOME="$HOME"
-	else
+	elif [[ -n $SUDO_USER ]]; then
 		ENVENIDO_USER="$SUDO_USER"
 		ENVENIDO_HOME="/home/$ENVENIDO_USER"
+	else
+		ENVENIDO_USER="$(id -un)"
+		ENVENIDO_HOME="$HOME"
 	fi
 	# lowercase
 	export ENVENIDO_USER="${ENVENIDO_USER,,}"
@@ -40,10 +44,13 @@ fi
 
 if [[ -n $ENVENIDO_CONTAINER ]]; then
 	ENVENIDO_HOST="$ENVENIDO_DOCKER_NAME"
+	_debug "we're in docker"
 else
-	ENVENIDO_HOST="$(hostname)"
+	ENVENIDO_HOST="$(hostname -s)"
 fi
 export ENVENIDO_HOST="${ENVENIDO_HOST,,}"
+
+_debug "user is $ENVENIDO_USER; home is $ENVENIDO_HOME; host is $ENVENIDO_HOST"
 
 #------------------------------------------------------------------------- Default environments
 

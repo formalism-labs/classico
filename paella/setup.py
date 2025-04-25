@@ -2,10 +2,12 @@
 import os
 import sys
 import re
+from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import textwrap
+
 from .platform import OnPlatform, Platform
 from .error import *
 import paella
@@ -560,10 +562,8 @@ class Setup(OnPlatform):
 
     def setup_dotlocal(self):
         self.cat_to_profile_d(r'''
-                if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-                    export PATH="$HOME/.local/bin${PATH:+":$PATH"}"
-                fi
-            ''', "dotlocal.sh")
+                prepend_to_path {HOME}/.local/bin
+            '''.format(HOME=Path.home()), "dotlocal.sh")
 
     # deprecated
     def install_ubuntu_modern_gcc(self, _try=False):

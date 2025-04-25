@@ -38,9 +38,9 @@ class ModernSetup(paella.Setup):
         self.run("mkdir -p $HOME/.fnm")
         self.run("curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell")
         self.cat_to_profile_d(r'''
-            export PATH="$HOME/.fnm:$PATH"
+            prepend_to_path "{HOME}/.fnm"
             eval "$(fnm env)"
-            ''', "nodejs.sh")
+            '''.format(PATH=Path.home()), "node.sh")
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")
         if self.typescript:
             self.run("npm install -g typescript")
@@ -73,13 +73,14 @@ class BunSetup(paella.Setup):
         self.install_downloaders()
         self.run(f"curl -fsSL https://bun.sh/install | SHELL=none bash")
         self.cat_to_profile_d(r'''
-            export BUN_INSTALL="$HOME/.bun"
+            export BUN_INSTALL="{HOME}/.bun"
             append_to_path $BUN_INSTALL/bin
-            ''', "bun.sh")
+            '''.format(PATH=Path.home()), "bun.sh")
         home = Path.home()
         jasmine_dir = f"{home}/.jasmine/"
         paella.mkdir_p(jasmine_dir)
         shutil.copy(f"{ROOT}/jasmine/package.json", jasmine_dir)
+        shutil.copy(f"{ROOT}/jasmine/bun.lock", jasmine_dir)
         self.run("bun install", at=jasmine_dir)
 
 #----------------------------------------------------------------------------------------------

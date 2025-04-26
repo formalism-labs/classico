@@ -40,7 +40,7 @@ class ModernSetup(paella.Setup):
         self.cat_to_profile_d(r'''
             prepend_to_path "{HOME}/.fnm"
             eval "$(fnm env)"
-            '''.format(PATH=Path.home()), "node.sh")
+            '''.format(HOME=Path.home()), "node.sh")
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")
         if self.typescript:
             self.run("npm install -g typescript")
@@ -75,7 +75,7 @@ class BunSetup(paella.Setup):
         self.cat_to_profile_d(r'''
             export BUN_INSTALL="{HOME}/.bun"
             append_to_path $BUN_INSTALL/bin
-            '''.format(PATH=Path.home()), "bun.sh")
+            '''.format(HOME=Path.home()), "bun.sh")
         home = Path.home()
         jasmine_dir = f"{home}/.jasmine/"
         paella.mkdir_p(jasmine_dir)

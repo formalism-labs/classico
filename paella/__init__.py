@@ -40,3 +40,4 @@ Global.noctor = noctor
 Global.foldl = foldl
 Global.foldr = foldr
 Global.ENV = Env()
+Global.HH = heredoc

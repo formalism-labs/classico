@@ -3,6 +3,7 @@
 import sys
 import os
 import argparse
+from pathlib import Path
 import re
 import tempfile
 import urllib.request
@@ -84,6 +85,43 @@ class GDBSetupModern(paella.Setup):
             """, sudo=True)
         if not self.keep:
             paella.rm_rf(self.base_dir)
+
+        gdbinit = f"{Path.home()}/.gdbinit"
+        if os.path.exists(gdbinit):
+            gdbinit += ".classico"
+        paella.fwrite(gdbinit, HH(r"""
+            set print demangle on
+            set print object on
+            set print pretty on
+            # set print sevenbit-strings off
+            set print static-members on
+            set print thread-events off
+            set print vtbl on
+
+            set demangle-style gnu-v3
+
+            handle SIG32 noprint nostop
+
+            python
+            import sys 
+            sys.path.insert(0, '/usr/share/gcc/python')
+            from libstdcxx.v6.printers import register_libstdcxx_printers
+            register_libstdcxx_printers (None)
+            end
+
+            define fz # freeze
+            set scheduler-locking on
+            end
+
+            define ufz # unfreeze
+            set scheduler-locking off
+            end
+
+            define fixterm
+            shell reset; stty sane; tput rs1; clear; echo -e "\033c\033[0m"
+            end
+            """))
+        
 
 #----------------------------------------------------------------------------------------------
 

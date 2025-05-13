@@ -44,7 +44,7 @@ fi
 
 if [[ -n $ENVENIDO_CONTAINER ]]; then
 	ENVENIDO_HOST="$ENVENIDO_DOCKER_NAME"
-	_debug "we're in docker"
+	_debug "we're in docker: $ENVENIDO_DOCKER_NAME"
 else
 	ENVENIDO_HOST="$(hostname -s)"
 fi

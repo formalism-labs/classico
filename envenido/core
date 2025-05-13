@@ -71,10 +71,10 @@ read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
 # not ok for login shell, aliases should be defined for any interactive shell
 # however, they should be captured on (first?) interactive login shell
 
-if [[ -n $ENVENIDO_IACT ]]; then
+#if [[ -n $ENVENIDO_IACT ]]; then
 	_debug "processing user defs"
 	userdefs
-fi
+#fi
 
 #-------------------------------------------------------------------------------------- On exit
 

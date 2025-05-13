@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import getpass
+from pathlib import Path
 
 HERE = os.path.dirname(__file__)
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -62,6 +63,17 @@ class DockerSetup(paella.Setup):
         self.run("mkdir -p ~/.docker")
         self.run("if [ ! -f ~/.docker/config.json ]; then echo '{}' >  ~/.docker/config.json; fi")
         self.run("jq '.experimental = \"enabled\"' ~/.docker/config.json | sponge ~/.docker/config.json")
+        if False and args.remote_host:
+            self.run("mkdir -p ~/.ssh/docker")
+            self.run(f'cp "{args.remote_key}" ~/.ssh/docker/id_rsa')
+            paella.fwrtite(f"{Path.home()}/.ssh/docker/id_rsa", paella.heredoc(f"""
+                # remote docker
+                Host {args.remote_host}
+                    HostName {args.remote_host}
+                    User {args.remote_user}
+                    IdentityFile ~/.ssh/docker/id_rsa
+                # end remote docker
+                """))
 
         # server
         if paella.sh(f"{ROOT}/bin/iscontainer") == "1":
@@ -92,6 +104,11 @@ parser.add_argument('--just-enable-exp', action="store_true", help='no install, 
 parser.add_argument('--no-exp', action="store_true", help="don't enable experimental features")
 parser.add_argument('--compose', action="store_true", help='install Docker Compose')
 parser.add_argument('--just-compose', action="store_true", help='just install Docker Compose')
+parser.add_argument('--pubkey', type=str, help='Public key file for remote docker host SSH access')
+parser.add_argument('--remote-host', type=str, help='Remote docker host')
+parser.add_argument('--remote-user', type=str, help='Username for remote docker host SSH access')
+parser.add_argument('--remote-key', type=str, help='Private key file for remote docker host SSH access')
+
 args = parser.parse_args()
 
 if not args.just_compose:

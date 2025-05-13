@@ -58,6 +58,8 @@ _debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 
 [[ -n $ENVENIDO_SUDO ]] && _debug "this is a sudo shell"
 
+[[ $DEVITO_MC == 1 ]] && export ENVENIDO_MC=1
+
 #----------------------------------------------------------------------------------------- Core
 
 . $ENVENIDO/core

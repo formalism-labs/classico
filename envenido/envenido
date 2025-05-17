@@ -3,12 +3,21 @@
 # envenido is invoked from serveral initialization scripts, typically:
 # ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc, /etc/profile
 
-_debug() {
+envenido_debug() {
 	[[ -z $ENVENIDO_DEBUG ]] && return
-	>&2 echo "### $*"
+	if [[ $ENVENIDO_DEBUG == log ]]; then
+		echo "$*" >> /tmp/envenido.log
+	else
+		>&2 echo "### $*"
+	fi
+}
+export -f envenido_debug
+
+_debug() {
+    envenido_debug "$@"
 }
 
-_debug "called by ${BASH_SOURCE[2]}"
+_debug "--- called by ${BASH_SOURCE[2]}"
 
 [[ $NO_ENVENIDO == 1 ]] && { _debug "NO ENVENIDO"; return; }
 
@@ -57,6 +66,8 @@ _debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 [[ $USER == root ]] && ENVENIDO_SUDO=1
 
 [[ -n $ENVENIDO_SUDO ]] && _debug "this is a sudo shell"
+
+[[ $DEVITO_MC == 1 ]] && export ENVENIDO_MC=1
 
 #----------------------------------------------------------------------------------------- Core
 

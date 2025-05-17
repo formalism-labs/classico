@@ -13,7 +13,9 @@ if [[ -z $ENVENIDO_TITLE ]]; then
 	export ENVENIDO_TITLE0=Devka
 fi
 
-if [[ -n $ENVENIDO_SSH ]]; then
+if [[ -n $ENVENIDO_MC ]]; then
+	export ENVENIDO_PS1_CONTEXT="${GREEN}${BOLD}mc${GREEN}:"
+elif [[ -n $ENVENIDO_SSH ]]; then
 	export ENVENIDO_PS1_CONTEXT="${GREEN}${BOLD}ssh${GREEN}:"
 elif [[ -n $ENVENIDO_CONTAINER ]]; then
 	export ENVENIDO_PS1_CONTEXT="${GREEN}${BOLD}docker${GREEN}:"

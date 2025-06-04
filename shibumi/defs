@@ -6,7 +6,7 @@
 # export CLASSICO=$ROOT/.../classico
 # . $CLASSICO/shibumi/defs
 
-set -eo pipefail -o errtrace
+[[ -z $PS1 && $IACT != 1 ]] && set -eo pipefail -o errtrace
 
 if [[ -n $PROGNAME ]]; then
 	if commmand -v realpath 2> /dev/null; then
@@ -49,8 +49,8 @@ error_trap() {
 # this should move into system-setup
 [[ -d /etc/os-release && $(source /etc/os-release; echo "${ID}") == mariner ]] && $SUDO tdnf install -q -y awk
 
-# avoid trap with bashdb
-if [[ -z $_Dbg_DEBUGGER_LEVEL ]]; then
+# avoid trap with bashdb or in interactive mode
+if [[ -z $PS1 && $IACT != 1 && -z $_Dbg_DEBUGGER_LEVEL ]]; then
 	trap 'error_trap $LINENO' ERR
 fi
 

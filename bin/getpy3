@@ -92,7 +92,7 @@ if [[ $os != windows ]]; then
 	fi
 fi
 
-[[ $dist == mariner ]] && tdnf install -q -y awk
+[[ $dist == mariner || $dist == azurelinux ]] && tdnf install -q -y awk
 
 #----------------------------------------------------------------------------------------------
 

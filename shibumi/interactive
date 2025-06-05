@@ -43,4 +43,4 @@ title() {
 
 #----------------------------------------------------------------------------------------------
 
-export -f eset etmp var ppath title
+export -f eset etmp var ppath title read_profile_d rearm

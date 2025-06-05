@@ -53,6 +53,11 @@ read_profile_d() {
 	hash -r
 }
 
+rearm() {
+	read_profile_d
+	[[ -n $ENVENIDO ]] && userdefs
+}
+
 activate_python() {
 	local d="$(get_profile_d)"
 	if [[ -f $d/python.sh ]]; then

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys
 import os
@@ -11,10 +11,9 @@ import urllib.request
 
 HERE = os.path.dirname(__file__)
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
-sys.path.insert(0, ROOT)
 import paella
 
-NODE_VERSION = "23"
+NODE_VERSION = "24"
 
 #----------------------------------------------------------------------------------------------
 
@@ -23,18 +22,20 @@ class NodeSetup(paella.Setup):
         paella.Setup.__init__(self, nop=args.nop)
 
     def common_first(self):
-        self.install("nodejs")
+        self.install("nodejs npm")
+        self.run("npm install -g corepack@latest")
+        self.run("corepack enable; corepack prepare yarn@stable --activate")
+        self.run("npm install -g --force pnpm@latest-10")
 
 #----------------------------------------------------------------------------------------------
 
 class ModernSetup(paella.Setup):
     def __init__(self, args):
         paella.Setup.__init__(self, nop=args.nop)
-        self.yarn = args.yarn
-        self.typescript = args.ts
 
     def common_first(self):
         self.install_downloaders()
+        
         self.run("mkdir -p $HOME/.fnm")
         self.run("curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell")
         self.cat_to_profile_d(r'''
@@ -42,26 +43,8 @@ class ModernSetup(paella.Setup):
             eval "$(fnm env)"
             '''.format(HOME=Path.home()), "node.sh")
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")
-        if self.typescript:
-            self.run("npm install -g typescript")
-
-    def debian_compat(self):
-        pass
-
-    def redhat_compat(self):
-        pass
-
-    def fedora(self):
-        pass
-
-    def archlinux(self):
-        pass
-
-    def macos(self):
-        pass
-
-    def common_last(self):
-        pass
+        self.run("corepack enable; corepack prepare yarn@stable --activate")
+        self.run("npm install -g --force pnpm@latest")
 
 #----------------------------------------------------------------------------------------------
 
@@ -71,7 +54,8 @@ class BunSetup(paella.Setup):
 
     def common_first(self):
         self.install_downloaders()
-        self.run(f"curl -fsSL https://bun.sh/install | SHELL=none bash")
+
+        self.run("curl -fsSL https://bun.sh/install | SHELL=none bash")
         self.cat_to_profile_d(r'''
             export BUN_INSTALL="{HOME}/.bun"
             append_to_path $BUN_INSTALL/bin
@@ -85,17 +69,41 @@ class BunSetup(paella.Setup):
 
 #----------------------------------------------------------------------------------------------
 
+class VoltaSetup(paella.Setup):
+    def __init__(self, args):
+        paella.Setup.__init__(self, nop=args.nop)
+
+    def common_first(self):
+        self.install_downloaders()
+
+        self.run("curl https://get.volta.sh | bash -s -- --skip-setup")
+        self.cat_to_profile_d(r'''
+            export VOLTA_HOME="$HOME/.volta"
+            append_to_path $VOLTA_HOME/bin
+            '''.format(HOME=Path.home()), "volta.sh")
+        self.run(f"volta install node@{NODE_VERSION}")
+        self.run("volta install yarn")
+
+#----------------------------------------------------------------------------------------------
+
 parser = argparse.ArgumentParser(description='Install node.js and related software')
 parser.add_argument('-n', '--nop', action="store_true", help='No operation')
 parser.add_argument('--modern', action="store_true", help='Install latest node.js')
-parser.add_argument('--yarn', action="store_true", help='Install yarn')
 parser.add_argument('--ts', action="store_true", help='Install TypeScript')
+parser.add_argument('--volta', action="store_true", help='Install Volta')
 parser.add_argument('--bun', action="store_true", help='Install Bun')
 args = parser.parse_args()
 
+if not args.volta:
+    if args.modern:
+        ModernSetup(args).setup()
+    else:
+        NodeSetup(args).setup()
+else:
+    VoltaSetup(args).setup()
+    
+if args.ts:
+    self.run("npm install typescript -g --save-dev")
+
 if args.bun:
     BunSetup(args).setup()
-elif args.modern:
-    ModernSetup(args).setup()
-else:
-    NodeSetup(args).setup()

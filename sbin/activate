@@ -1,11 +1,5 @@
 
-if [[ -z $CLASSICO ]]; then
-	return
-fi
+export CLASSICO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
 
 . $CLASSICO/shibumi/defs
-
-pyenv="$(get_profile_d)/pyenv.sh"
-if [[ -f $pyenv ]]; then
-	. $pyenv
-fi
+rearm

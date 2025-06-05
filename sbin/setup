@@ -20,16 +20,20 @@ cat <<-'END' > $tmp_profiled/dotlocal.sh
 	END
 add_to_profile_d $tmp_profiled/dotlocal.sh
 rm -rf $tmp_profiled
-. $profile_d/dotlocal.sh
+rearm
 
 runn $CLASSICO/bin/getpy
-. $profile_d/python.sh
+rearm
+
+runn $CLASSICO/bin/getnode --modern --bun
+rearm
+
+runn $HERE/system-setup
 
 if [[ $VERBOSE == 1 ]]; then
 	python --version
-	python -m pip list
+	uv pip list
+	node --version
+	npm --version
+	bun --version
 fi
-
-runn $CLASSICO/bin/getnode --bun
-
-runn $HERE/system-setup

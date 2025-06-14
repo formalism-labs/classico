@@ -61,7 +61,7 @@ if args.triplet:
 if args.os:
     ret += " " + platform.os
 if args.osnick:
-    ret += " " + platform.osnick
+    ret += " " + str(platform.osnick)
 if args.dist:
     ret += " " + platform.dist
 if args.version or args.osver:
@@ -80,7 +80,7 @@ if ret == "":
     if dist != "":
         os = dist + " " + os
     if platform.osnick != "":
-        nick = " (" + platform.osnick + ")"
+        nick = " (" + str(platform.osnick) + ")"
     else:
         nick = ""
     ret = os + " " + platform.os_ver + nick + " " + platform.arch

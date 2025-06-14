@@ -12,7 +12,7 @@ from .platform import OnPlatform, Platform
 from .error import *
 import paella
 
-GIT_LFS_VER = '2.12.1'
+GIT_LFS_VER = '3.6.1'
 
 #----------------------------------------------------------------------------------------------
 
@@ -403,7 +403,7 @@ class Setup(OnPlatform):
         self.dist = self.platform.dist
         self.ver = self.platform.os_ver
         self.os_version = self.platform.os_version
-        self.version = self.platform.version(full=True) # deprecated
+        # self.version = self.platform.version(full=True) # deprecated
         self.repo_refresh = True
 
         self.package_manager = PackageManager.detect(self.platform, self.runner)
@@ -430,10 +430,6 @@ class Setup(OnPlatform):
     @property
     def profile_d(self):
         return os.path.abspath(os.path.join(os.path.expanduser('~'), ".profile.d"))
-        # if self.os == 'macos':
-        #     return os.path.abspath(os.path.join(os.path.expanduser('~'), ".profile.d"))
-        # else:
-        #     return "/etc/profile.d"
 
     def cp_to_profile_d(self, file, as_file=None):
         if not os.path.isfile(file):
@@ -566,7 +562,3 @@ class Setup(OnPlatform):
         self.cat_to_profile_d(r'''
                 prepend_to_path {HOME}/.local/bin
             '''.format(HOME=Path.home()), "dotlocal.sh")
-
-    # deprecated
-    def install_ubuntu_modern_gcc(self, _try=False):
-        return

@@ -102,118 +102,232 @@ DARWIN_VERSIONS_NICKS = {v: k for k, v in DARWIN_VERSIONS.items()}
 
 #----------------------------------------------------------------------------------------------
 
+# note that this also applies to Msys2 and Cygwin
+
+class OSRelease:
+    CUSTOM_BRANDS = [ 'elementary', 'pop' ] # , 'rocky', 'almalinux'
+    UBUNTU_BRANDS = [ 'elementary', 'pop' ]
+    RHEL_BRANDS = [ 'centos', 'rhel', 'redhat', 'rocky', 'almalinux' ]
+    ROLLING_BRANDS = [ 'arch', 'gentoo', 'manjaro' ]
+
+    def __init__(self, brand=False):
+        self.defs = {}
+        self.brand_mode = brand
+        with open("/etc/os-release") as f:
+            for line in f:
+                try:
+                    k, v = line.rstrip().split("=")
+                    self.defs[k] = v.strip('"').strip("'")
+                except:
+                    pass
+
+    def __repr__(self):
+        return str(self.defs)
+
+    #--------------------------------------------------------------------------------------
+
+    # e.g. "centos", "fedora", "rhel", "ubuntu", "debian"
+    def id(self):
+        if self.is_custom_brand() and not self.brand_mode:
+            like = self.id_like()
+            return like[0]
+        return self.defs.get("ID", "")
+
+    # possibly list of values, e.g. "rhel centos fedora"
+    def id_like(self):
+        return self.defs.get("ID_LIKE", "").split()
+
+    def version_id(self):
+        brand = self.brand_id()
+        if brand in self.ROLLING_BRANDS:
+            return "rolling"
+
+        if brand in self.UBUNTU_BRANDS:
+            ver_id = UBUNTU_VERSIONS.get(self.ubuntu_codename(), "")
+            if ver_id == "":
+                raise Error("Cannot determine os version")
+            return ver_id
+
+        if brand in self.RHEL_BRANDS:
+            ver = self.defs.get("VERSION_ID", "").split('.')
+            return ver[0]
+
+        ver = self.defs.get("VERSION_ID", "")
+        if ver == "" and self.id() == 'debian':
+            ver, _ = self.debian_sid_version()
+        return ver
+
+    def debian_sid_version(self):  # returns version_id, codename
+        m = match(r'Debian GNU/Linux ([^/]+)/sid', self.pretty_name())
+        if m:
+            return DEBIAN_VERSIONS.get(m[1], ""), m[1]
+        else:
+            return "", ""
+
+    # e.g. "bionic", "focal", "jammy" - not always present
+    def version_codename(self):
+        brand = self.brand_id()
+        if brand in self.UBUNTU_BRANDS:
+            return self.ubuntu_codename()
+        codename = self.defs.get("VERSION_CODENAME", "")
+        if codename == "" and self.id() == 'debian':
+            _, codename = self.debian_sid_version()
+        return codename
+
+    #--------------------------------------------------------------------------------------
+
+    def variant_id(self):
+        # fedora-specific
+        return self.defs.get("VARIANT_ID")
+
+    # e.g. "bionic", "focal", "jammy"
+    def ubuntu_codename(self):
+        # ubuntu-specific
+        return self.defs.get("UBUNTU_CODENAME")
+
+    #--------------------------------------------------------------------------------------
+
+    def name(self):
+        return self.defs.get("NAME", "")
+
+    def pretty_name(self):
+        return self.defs.get("PRETTY_NAME", "")
+
+    def version(self):
+        # text
+        return self.defs.get("VERSION", "")
+
+    #--------------------------------------------------------------------------------------
+
+    def brand_id(self):
+        return self.defs.get("ID", "")
+
+    def brand_codename(self):
+        return self.defs.get("VERSION_CODENAME", "")
+
+    def brand_version_id(self):
+        return self.defs.get("VERSION_ID", "")
+
+    def is_custom_brand(self):
+        id = self.brand_id()
+        return id != "" and id in self.CUSTOM_BRANDS
+
+#----------------------------------------------------------------------------------------------
+
+class LinuxDist:
+    def __init__(self, os_release: OSRelease, brand_mode=False, strict=False):
+        dist = os_release.id()
+        if dist == 'fedora' or dist == 'debian':
+            pass
+        elif dist == 'ubuntu':
+            pass
+        elif dist == 'mariner':
+            pass
+        elif dist == 'azurelinux':
+            pass
+        elif dist.startswith('rocky') or dist.startswith('almalinux') or dist.startswith('redhat') or dist == 'rhel':
+            if not brand_mode:
+                dist = 'centos'
+        elif dist.startswith('suse'):
+            dist = 'suse'
+        elif dist.startswith('amzn'):
+            dist = 'amzn'
+        else:
+            if 'arch' in os_release.id_like():
+                dist = 'arch'
+            if strict:
+                raise Error("Cannot determine distribution")
+            elif dist == '':
+                dist = 'unknown'
+        self._dist = dist
+
+    def __str__(self):
+        return self._dist
+
+    def __repr__(self):
+        return self._dist
+
+    def __eq__(self, other):
+        if isinstance(other, LinuxDist):
+            return self._dist == other._dist
+        if isinstance(other, str):
+            return self._dist == other
+        return False
+
+    def __hash__(self):
+        return hash(self._dist)
+
+#----------------------------------------------------------------------------------------------
+
+class NoCtor:
+    pass
+
+class OSNick:
+    def __init__(self, _: NoCtor):
+        pass
+
+    @classmethod
+    def from_linux(cls, dist: LinuxDist, os_release: OSRelease):
+        self = super().__new__(cls)
+        osnick = None
+        if dist == 'ubuntu' or dist == 'debian':
+            osnick = os_release.version_codename()
+            if osnick == "":
+                versions = DEBIAN_VERSIONS if dist == 'debian' else UBUNTU_VERSIONS
+                versions_nicks = {v: k for k, v in versions.items()}
+                osnick = versions_nicks.get(os_release.version_id(), "")
+            if osnick == 'ubuntu14.04':
+                osnick = 'trusty'
+        elif dist == 'ol':
+            osnick = dist + str(os_release.version_id().split('.')[0])
+        if osnick is None:
+            osnick = dist + str(os_release.version_id())
+        self._osnick = osnick
+        return self
+
+    @classmethod
+    def from_macos(cls, darwin_ver: str, macos: str, macos_ver: str):
+        self = super().__new__(cls, darwin_ver, macos, macos_ver)
+        self._osnick = DARWIN_VERSIONS_NICKS.get(darwin_ver.split('.')[0], macos + str(macos_ver))
+        return self
+
+    @classmethod
+    def from_windows(cls, dist: str, os_ver: str):
+        self = super().__new__(cls)
+        self._osnick = dist + os_ver
+        return self
+
+    @classmethod
+    def from_freebsd(cls, os: str, os_ver: str):
+        self = super().__new__(cls)
+        self._osnick = os + os_ver
+        return self
+
+    @classmethod
+    def from_solaris(cls, os: str, os_ver: str):
+        self = super().__new__(cls)
+        self._osnick = os + os_ver
+        return self
+
+    def __str__(self):
+        return self._osnick
+
+    def __repr__(self):
+        return self._osnick
+
+    def __eq__(self, other):
+        if isinstance(other, OSNick):
+            return self._osnick == other._osnick
+        if isinstance(other, str):
+            return self._osnick == other
+        return False
+
+    def __hash__(self):
+        return hash(self._osnick)
+
+#----------------------------------------------------------------------------------------------
+
 class Platform:
-
-    class OSRelease():
-        CUSTOM_BRANDS = [ 'elementary', 'pop' ] # , 'rocky', 'almalinux'
-        UBUNTU_BRANDS = [ 'elementary', 'pop' ]
-        RHEL_BRANDS = [ 'centos', 'rhel', 'redhat', 'rocky', 'almalinux' ]
-        ROLLING_BRANDS = [ 'arch', 'gentoo', 'manjaro' ]
-
-        def __init__(self, brand=False):
-            self.defs = {}
-            self.brand_mode = brand
-            with open("/etc/os-release") as f:
-                for line in f:
-                    try:
-                        k, v = line.rstrip().split("=")
-                        self.defs[k] = v.strip('"').strip("'")
-                    except:
-                        pass
-
-        def __repr__(self):
-            return str(self.defs)
-
-        #--------------------------------------------------------------------------------------
-
-        # e.g. "centos", "fedora", "rhel", "ubuntu", "debian"
-        def id(self):
-            if self.is_custom_brand() and not self.brand_mode:
-                like = self.id_like()
-                return like[0]
-            return self.defs.get("ID", "")
-
-        # possibly list of values, e.g. "rhel centos fedora"
-        def id_like(self):
-            return self.defs.get("ID_LIKE", "").split()
-
-        def version_id(self):
-            brand = self.brand_id()
-            if brand in self.ROLLING_BRANDS:
-                return "rolling"
-
-            if brand in self.UBUNTU_BRANDS:
-                ver_id = UBUNTU_VERSIONS.get(self.ubuntu_codename(), "")
-                if ver_id == "":
-                    raise Error("Cannot determine os version")
-                return ver_id
-
-            if brand in self.RHEL_BRANDS:
-                ver = self.defs.get("VERSION_ID", "").split('.')
-                return ver[0]
-
-            ver = self.defs.get("VERSION_ID", "")
-            if ver == "" and self.id() == 'debian':
-                ver, _ = self.debian_sid_version()
-            return ver
-
-        def debian_sid_version(self):  # returns version_id, codename
-            m = match(r'Debian GNU/Linux ([^/]+)/sid', self.pretty_name())
-            if m:
-                return DEBIAN_VERSIONS.get(m[1], ""), m[1]
-            else:
-                return "", ""
-
-        # e.g. "bionic", "focal", "jammy" - not always present
-        def version_codename(self):
-            brand = self.brand_id()
-            if brand in self.UBUNTU_BRANDS:
-                return self.ubuntu_codename()
-            codename = self.defs.get("VERSION_CODENAME", "")
-            if codename == "" and self.id() == 'debian':
-                _, codename = self.debian_sid_version()
-            return codename
-
-        #--------------------------------------------------------------------------------------
-
-        def variant_id(self):
-            # fedora-specific
-            return self.defs.get("VARIANT_ID")
-
-        # e.g. "bionic", "focal", "jammy"
-        def ubuntu_codename(self):
-            # ubuntu-specific
-            return self.defs.get("UBUNTU_CODENAME")
-
-        #--------------------------------------------------------------------------------------
-
-        def name(self):
-            return self.defs.get("NAME", "")
-
-        def pretty_name(self):
-            return self.defs.get("PRETTY_NAME", "")
-
-        def version(self):
-            # text
-            return self.defs.get("VERSION", "")
-
-        #--------------------------------------------------------------------------------------
-
-        def brand_id(self):
-            return self.defs.get("ID", "")
-
-        def brand_codename(self):
-            return self.defs.get("VERSION_CODENAME", "")
-
-        def brand_version_id(self):
-            return self.defs.get("VERSION_ID", "")
-
-        def is_custom_brand(self):
-            id = self.brand_id()
-            return id != "" and id in self.CUSTOM_BRANDS
-
-    #------------------------------------------------------------------------------------------
-
     def __init__(self, strict=False, brand=False):
         self.os = self.dist = self.os_ver = self.os_full_ver = self.osnick = self.arch = '?'
         self.strict = strict
@@ -242,10 +356,11 @@ class Platform:
 
     def _identify_linux(self):
         try:
-            os_release = Platform.OSRelease(brand=self.brand_mode)
+            os_release = OSRelease(brand=self.brand_mode)
             self.os_ver = os_release.version_id()
-            self.dist = self._identify_linux_dist(os_release)
-            self.osnick = self._identify_linux_osnick(os_release)
+            self.linux_dist = LinuxDist(os_release, self.brand_mode, self.strict)
+            self.dist = str(self.linux_dist)
+            self.osnick = OSNick.from_linux(self.linux_dist, os_release)
             self.os_full_ver = self._identify_linux_full_ver(os_release, self.dist)
         except:
             if self.strict:
@@ -253,7 +368,7 @@ class Platform:
             self.os_ver = self.os_full_ver = 'unknown'
 
     def _identify_linux_full_ver(self, os_release, dist):
-        if dist in Platform.OSRelease.RHEL_BRANDS + ['ol']:
+        if dist in OSRelease.RHEL_BRANDS + ['ol']:
             redhat_release = fread('/etc/redhat-release')
             m = match(r'.* release ([^\s]+)', redhat_release)
             if m:
@@ -268,49 +383,6 @@ class Platform:
                 return m[1]
         return os_release.version_id()
 
-    def _identify_linux_dist(self, os_release):
-        dist = os_release.id()
-        if dist == 'fedora' or dist == 'debian':
-            pass
-        elif dist == 'ubuntu':
-            pass
-        elif dist == 'mariner':
-            pass
-        elif dist == 'azurelinux':
-            pass
-        elif dist.startswith('rocky') or dist.startswith('almalinux') or dist.startswith('redhat') or dist == 'rhel':
-            if not self.brand_mode:
-                dist = 'centos'
-        elif dist.startswith('suse'):
-            dist = 'suse'
-        elif dist.startswith('amzn'):
-            dist = 'amzn'
-        else:
-            if 'arch' in os_release.id_like():
-                dist = 'arch'
-            if self.strict:
-                raise Error("Cannot determine distribution")
-            elif dist == '':
-                dist = 'unknown'
-        return dist
-
-    def _identify_linux_osnick(self, os_release):
-        osnick = ""
-        dist = self.dist
-        if dist == 'ubuntu' or dist == 'debian':
-            osnick = os_release.version_codename()
-            if osnick == "":
-                versions = DEBIAN_VERSIONS if dist == 'debian' else UBUNTU_VERSIONS
-                versions_nicks = {v: k for k, v in versions.items()}
-                osnick = versions_nicks.get(os_release.version_id(), "")
-            if osnick == 'ubuntu14.04':
-                osnick = 'trusty'
-        elif dist == 'ol':
-            osnick = dist + str(os_release.version_id().split('.')[0])
-        if osnick == "":
-            osnick = dist + str(os_release.version_id())
-        return osnick
-
     #------------------------------------------------------------------------------------------
 
     def _identify_macos(self):
@@ -320,25 +392,27 @@ class Platform:
         self.os_full_ver = mac_ver[0] # e.g. 10.14, but also 10.5.8
         self.os_ver = '.'.join(self.os_full_ver.split('.')[:2]) # major.minor
         self.darwin_ver = sh("uname -r")
-        self.osnick = DARWIN_VERSIONS_NICKS.get(self.darwin_ver.split('.')[0], self.os + str(self.os_ver))
+        self.osnick = OSNick.from_macos(self.darwin_ver, self.os, self.os_ver)
         # self.arch = mac_ver[2] # e.g. x64_64
 
     def _identify_windows(self):
         self.dist = self.os
         self.os_ver = platform.release()
         self.os_full_ver = os.version()
+        self.osnick = OSNick.from_windows(self.dist, self.os_ver)
 
     def _identify_freebsd(self):
         self.dist = ''
         ver = sh('freebsd-version')
         m = match(r'([^-]*)-(.*)', ver)
         self.os_ver = self.os_full_ver = m[1]
-        self.osnick = self.os + self.os_ver
+        self.osnick = OSNick.from_freebsd(self.os, self.os_ver)
 
     def _identify_solaris(self):
         self.os = 'solaris'
         self.os_ver = ''
         self.dist = ''
+        self.osnick = OSNick.from_solaris(self.os, self.os_ver)
 
     #------------------------------------------------------------------------------------------
 
@@ -356,12 +430,12 @@ class Platform:
     #------------------------------------------------------------------------------------------
 
     def triplet(self):
-        return '-'.join([self.os, self.osnick, self.arch])
+        return '-'.join([self.os, str(self.osnick), self.arch])
 
     # deprecated
-    def version(self, full=False):
-        v = (self.os_full_ver if full else self.os_ver).split(".")
-        return tuple(map(lambda x: int(x) if is_numeric(x) else x, v))
+#    def version(self, full=False):
+#        v = (self.os_full_ver if full else self.os_ver).split(".")
+#        return tuple(map(lambda x: int(x) if is_numeric(x) else x, v))
 
     @property
     def os_version(self):
@@ -411,7 +485,7 @@ class Platform:
         else:
             os = self.os
         if self.osnick != "":
-            nick = " (" + self.osnick + ")"
+            nick = " (" + str(self.osnick) + ")"
         else:
             nick = ""
         print(os + " " + self.os_ver + nick + " " + self.arch)
@@ -532,9 +606,6 @@ class OnPlatform:
         pass
 
     def macos(self):
-        self.macosx()
-
-    def macosx(self):
         pass
 
     def windows(self):

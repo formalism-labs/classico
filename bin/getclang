@@ -247,7 +247,7 @@ try:
         if args.just_fix_links:
             CLangSetup(args).create_symlinks()
             exit(0)
-        if paella.Setup.has_command('clang') and not args.force:
+        if paella.Setup.is_command('clang') and not args.force:
             vermsg = sh(f'clang --version')
             eprint(f"clang is present:\n{vermsg}")
             exit(0)

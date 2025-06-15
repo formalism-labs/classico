@@ -19,7 +19,7 @@ def current_filepath():
 
 class Env:
     def __getitem__(self, key):
-        if type(key) == tuple:
+        if key is tuple:
             v = os.getenv(key[0])
             default = key[1]
         else:

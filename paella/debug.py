@@ -6,10 +6,10 @@ import os
 env_bb = os.environ.get('BB', '')
 if env_bb == '1':
     try:
-        from pudb import set_trace as bb
+        from pudb import set_trace as bb  # type: ignore[import-untyped]
     except ImportError:
         try:
-            from ipdb import set_trace as bb
+            from ipdb import set_trace as bb  # type: ignore[import-untyped, import-not-found]
         except ImportError:
             from pdb import set_trace as bb
 elif env_bb == 'pudb':

@@ -43,14 +43,14 @@ def jjdoc(text, ctx=None):
 
 def is_int(x):
     try:
-        n = int(x)
+        n = int(x)  # noqa: F841
         return True
     except:
         return False
 
 def is_float(x):
     try:
-        n = float(x)
+        n = float(x)  # noqa: F841
         return True
     except:
         return False

@@ -25,7 +25,7 @@
 
 import functools
 import re
-import warnings
+import warnings  # noqa: F401
 
 
 def _has_leading_zero(value):

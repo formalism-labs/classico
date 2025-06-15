@@ -1,5 +1,4 @@
 
-import os
 import inspect
 
 def caller_info(back_frames=1):

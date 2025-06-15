@@ -7,7 +7,7 @@ import shutil
 import sys
 import tempfile
 try:
-    from urllib2 import urlopen
+    from urllib2 import urlopen  # type: ignore[import-not-found]
 except:
     from urllib.request import urlopen
 

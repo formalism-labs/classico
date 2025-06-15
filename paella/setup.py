@@ -1,15 +1,13 @@
 
 import os
 import sys
-import re
 from pathlib import Path
-import shutil
 import subprocess
 import tempfile
 import textwrap
 
 from .platform import OnPlatform, Platform
-from .error import *
+from .error import *  # noqa: F403
 import paella
 
 GIT_LFS_VER = '3.6.1'
@@ -19,9 +17,9 @@ GIT_LFS_VER = '3.6.1'
 class OutputMode:
     def __init__(self, x):
         lx = str(x).lower()
-        if x == True or x == 1 or lx == "yes" or lx == "true":
+        if x or x == 1 or lx == "yes" or lx == "true":
             self.mode = "True"
-        elif x == False or x == 0 or lx == "no" or lx == "false":
+        elif not x or x == 0 or lx == "no" or lx == "false":
             self.mode = "False"
         elif lx == "on_error":
             self.mode = "on_error"
@@ -98,7 +96,7 @@ class Runner:
             nop = self.nop
         if nop:
             return
-        if output != True:
+        if not output:
             fd, temppath = tempfile.mkstemp()
             os.close(fd)
             cmd = f"{{ {cmd}; }} >{temppath} 2>&1"
@@ -109,12 +107,12 @@ class Runner:
                 # rc = os.system(cmd)
                 rc = subprocess.call(["bash", "-l", "-e", "-c", cmd])
         if rc > 0:
-            if output != True:
+            if not output:
                 if output.on_error():
                     os.system(f"cat {temppath}")
                 eprint("command failed: " + cmd_for_log)
                 sys.stderr.flush()
-        if output != True:
+        if not output:
             os.remove(temppath)
         if cmd_file is not None:
             os.remove(cmd_file)
@@ -123,10 +121,10 @@ class Runner:
         return rc
 
     def has_command(self, cmd):
-        return Runner.has_command(cmd)
+        return Runner.is_command(cmd)
 
     @staticmethod
-    def has_command(cmd):
+    def is_command(cmd):
         return os.system("command -v " + cmd + " > /dev/null") == 0
 
 #----------------------------------------------------------------------------------------------
@@ -167,7 +165,7 @@ class PackageManager(object):
         return self.runner.run(cmd, at=at, output=output, nop=nop, _try=_try, sudo=sudo)
 
     def has_command(self, cmd):
-        return self.runner.has_command(cmd)
+        return Runner.is_command(cmd)
 
     def install(self, packs, group=False, output="on_error", _try=False):
         return False
@@ -424,8 +422,8 @@ class Setup(OnPlatform):
         return self.runner.run(cmd, at=at, output=output, nop=nop, _try=_try, sudo=sudo, echo=echo)
 
     @staticmethod
-    def has_command(cmd):
-        return Runner.has_command(cmd)
+    def is_command(cmd):
+        return Runner.is_command(cmd)
 
     @property
     def profile_d(self):

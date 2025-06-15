@@ -86,7 +86,7 @@ class DockerBuilder(object):
 
     def add_var_exp(self, exp):
         m = re.match(r'^([^=\s]+)=(.*)', exp)
-        if not m is None:
+        if m is not None:
             n = m.group(1)
             v = m.group(2)
             self.variables[n] = v
@@ -102,11 +102,11 @@ class DockerBuilder(object):
         if opts.ENV_VAR_PREFIX:
             self.variables.update({k: v for k, v in os.environ.items() if not k.find(opts.ENV_VAR_PREFIX)})
 
-        if not opts.ENV_VARS is None:
+        if opts.ENV_VARS is not None:
             for n in opts.ENV_VARS:
                 self.add_env_var(n)
 
-        if not opts.VARS is None:
+        if opts.VARS is not None:
             for d in opts.VARS:
                 self.add_var_exp(d)
 

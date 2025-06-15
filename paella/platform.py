@@ -3,9 +3,57 @@ from __future__ import absolute_import
 import platform
 import os
 import re
+from typing import Optional
 from .text import match, is_numeric
 from .files import fread
+from .error import Error
 from .error import *
+
+#----------------------------------------------------------------------------------------------
+
+OSNICKS = {
+	"centos7": { "docker": "centos:7" },
+	"centos8": { "docker": "quay.io/centos/centos:stream8" },
+	"centos9": { "docker": "quay.io/centos/centos:stream9" },
+	"fedora": { "docker": "fedora:latest" },
+	"fedora37": { "docker": "fedora:37" },
+	"fedora33": { "docker": "fedora:33" },
+	"fedora27": { "docker": "fedora:27" },
+	"noble": { "docker": "ubuntu:noble" },
+	"jammy": { "docker": "ubuntu:jammy" },
+	"lunar": { "docker": "ubuntu:lunar" },
+	"kinetic": { "docker": "ubuntu:kinetic" },
+	"hirsute": { "docker": "ubuntu:hirsute" },
+	"focal": { "docker": "ubuntu:focal" },
+	"bionic": { "docker": "ubuntu:bionic" },
+	"xenial": { "docker": "ubuntu:xenial" },
+	"trusty": { "docker": "ubuntu:trusty" },
+	"sid": { "docker": "debian:sid" },
+	"bookworm": { "docker": "debian:bookworm" },
+	"bullseye": { "docker": "debian:bullseye-slim" },
+	"buster": { "docker": "debian:buster-slim" },
+	"stretch": { "docker": "debian:stretch" },
+	"leap": { "docker": "opensuse/leap:latest" },
+	"leap15": { "docker": "opensuse/leap:15" },
+	"leap15.6": { "docker": "opensuse/leap:15.6" },
+	"tumbleweed": { "docker": "opensuse/tumbleweed" },
+	"archlinux": { "docker": "archlinux:latest" },
+	"manjaro": { "docker": "manjarolinux/base:latest" },
+	"alpine3": { "docker": "alpine:latest" },
+	"ol7": { "docker": "oraclelinux:7" },
+	"ol8": { "docker": "oraclelinux:8" },
+	"ol9": { "docker": "oraclelinux:9" },
+	"alma8": { "docker": "almalinux:8" },
+	"alma9": { "docker": "almalinux:9" },
+	"rocky8": { "docker": "rockylinux:8" },
+	"rocky9": { "docker": "rockylinux:9" },
+	"rhel9": { "docker": "redhat/ubi9:latest" },
+	"amzn2": { "docker": "amazonlinux:2" },
+	"amzn2022": { "docker": "amazonlinux:2022" },
+	"amzn2023": { "docker": "amazonlinux:2023" },
+	"mariner2.0": { "docker": "mcr.microsoft.com/cbl-mariner/base/core:2.0" },
+	"azurelinux3": { "docker": "mcr.microsoft.com/azurelinux/base/core:3.0" },
+}
 
 #----------------------------------------------------------------------------------------------
 
@@ -245,7 +293,7 @@ class LinuxDist:
         return self._dist
 
     def __repr__(self):
-        return self._dist
+        return f"Dist({self._dist})"
 
     def __eq__(self, other):
         if isinstance(other, LinuxDist):
@@ -259,17 +307,28 @@ class LinuxDist:
 
 #----------------------------------------------------------------------------------------------
 
-class NoCtor:
-    pass
-
 class OSNick:
-    def __init__(self, _: NoCtor):
-        pass
+    def __init__(self, nick: str = None):
+        try:
+            if nick is None:
+                self._osnick = Platform().osnick
+                return
+            _ = OSNICKS[nick]  # noqa: F841
+            self._osnick = nick
+        except:
+            raise Error(f"invalid osnick: {nick}")
 
     @classmethod
-    def from_linux(cls, dist: LinuxDist, os_release: OSRelease):
+    def from_host(cls):
+        self = super().__new__(cls)
+        self._osnick = Platform().osnick
+        return self
+    
+    @classmethod
+    def from_linux(cls, linux_dist: LinuxDist, os_release: OSRelease):
         self = super().__new__(cls)
         osnick = None
+        dist = str(linux_dist)
         if dist == 'ubuntu' or dist == 'debian':
             osnick = os_release.version_codename()
             if osnick == "":
@@ -287,7 +346,7 @@ class OSNick:
 
     @classmethod
     def from_macos(cls, darwin_ver: str, macos: str, macos_ver: str):
-        self = super().__new__(cls, darwin_ver, macos, macos_ver)
+        self = super().__new__(cls)
         self._osnick = DARWIN_VERSIONS_NICKS.get(darwin_ver.split('.')[0], macos + str(macos_ver))
         return self
 
@@ -313,7 +372,7 @@ class OSNick:
         return self._osnick
 
     def __repr__(self):
-        return self._osnick
+        return f"OSNick({self._osnick})"
 
     def __eq__(self, other):
         if isinstance(other, OSNick):
@@ -324,10 +383,26 @@ class OSNick:
 
     def __hash__(self):
         return hash(self._osnick)
+    
+    def docker_image(self):
+        try:
+            return OSNICKS[self._osnick]["docker"]
+        except:
+            raise Error("invalid osnick ({self._osnick}) or missing docker image")
 
 #----------------------------------------------------------------------------------------------
 
 class Platform:
+    os: str
+    strict: bool
+    brand_mode: bool
+    dist: str
+    linux_dist: Optional[LinuxDist] = None
+    osnick: Optional[OSNick]
+    os_ver: str
+    os_full_ver: str
+    arch: str
+    
     def __init__(self, strict=False, brand=False):
         self.os = self.dist = self.os_ver = self.os_full_ver = self.osnick = self.arch = '?'
         self.strict = strict
@@ -391,8 +466,8 @@ class Platform:
         mac_ver = platform.mac_ver()
         self.os_full_ver = mac_ver[0] # e.g. 10.14, but also 10.5.8
         self.os_ver = '.'.join(self.os_full_ver.split('.')[:2]) # major.minor
-        self.darwin_ver = sh("uname -r")
-        self.osnick = OSNick.from_macos(self.darwin_ver, self.os, self.os_ver)
+        darwin_ver = sh("uname -r")
+        self.osnick = OSNick.from_macos(darwin_ver, self.os, self.os_ver)
         # self.arch = mac_ver[2] # e.g. x64_64
 
     def _identify_windows(self):

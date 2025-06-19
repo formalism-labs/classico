@@ -10,6 +10,8 @@ OS.fedora=fedora:latest
 OS.fedora37=fedora:37
 OS.fedora33=fedora:33
 OS.fedora27=fedora:27
+OS.plucky=ubuntu:plucky
+OS.oracular=ubuntu:oracular
 OS.noble=ubuntu:noble
 OS.jammy=ubuntu:jammy
 OS.lunar=ubuntu:lunar
@@ -40,9 +42,9 @@ OS.rocky8=rockylinux:8
 OS.rocky9=rockylinux:9
 OS.rhel9=redhat/ubi9:latest
 OS.amzn2=amazonlinux:2
-OS.amzn2022=amazonlinux:2022
-OS.amzn2023=amazonlinux:2023
-OS.mariner2.0=mcr.microsoft.com/cbl-mariner/base/core:2.0
+OS.amzn22=amazonlinux:2022
+OS.amzn23=amazonlinux:2023
+OS.mariner2=mcr.microsoft.com/cbl-mariner/base/core:2.0
 OS.azurelinux3=mcr.microsoft.com/azurelinux/base/core:3.0
 
 endif # OS

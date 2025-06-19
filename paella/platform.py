@@ -12,46 +12,57 @@ from .error import *
 #----------------------------------------------------------------------------------------------
 
 OSNICKS = {
-	"centos7": { "docker": "centos:7" },
-	"centos8": { "docker": "quay.io/centos/centos:stream8" },
-	"centos9": { "docker": "quay.io/centos/centos:stream9" },
-	"fedora": { "docker": "fedora:latest" },
-	"fedora37": { "docker": "fedora:37" },
-	"fedora33": { "docker": "fedora:33" },
-	"fedora27": { "docker": "fedora:27" },
-	"noble": { "docker": "ubuntu:noble" },
-	"jammy": { "docker": "ubuntu:jammy" },
-	"lunar": { "docker": "ubuntu:lunar" },
-	"kinetic": { "docker": "ubuntu:kinetic" },
-	"hirsute": { "docker": "ubuntu:hirsute" },
-	"focal": { "docker": "ubuntu:focal" },
-	"bionic": { "docker": "ubuntu:bionic" },
-	"xenial": { "docker": "ubuntu:xenial" },
-	"trusty": { "docker": "ubuntu:trusty" },
-	"sid": { "docker": "debian:sid" },
+    "plucky":   { "docker": "ubuntu:plucky" },
+    "oracular": { "docker": "ubuntu:oracular" },
+	"noble":    { "docker": "ubuntu:noble" },
+	"jammy":    { "docker": "ubuntu:jammy" },
+	"lunar":    { "docker": "ubuntu:lunar" },
+	"kinetic":  { "docker": "ubuntu:kinetic" },
+	"hirsute":  { "docker": "ubuntu:hirsute" },
+	"focal":    { "docker": "ubuntu:focal" },
+	"bionic":   { "docker": "ubuntu:bionic" },
+	"xenial":   { "docker": "ubuntu:xenial" },
+	"trusty":   { "docker": "ubuntu:trusty" },
+
+	"sid":      { "docker": "debian:sid" },
 	"bookworm": { "docker": "debian:bookworm" },
 	"bullseye": { "docker": "debian:bullseye-slim" },
-	"buster": { "docker": "debian:buster-slim" },
-	"stretch": { "docker": "debian:stretch" },
-	"leap": { "docker": "opensuse/leap:latest" },
-	"leap15": { "docker": "opensuse/leap:15" },
-	"leap15.6": { "docker": "opensuse/leap:15.6" },
+	"buster":   { "docker": "debian:buster-slim" },
+	"stretch":  { "docker": "debian:stretch" },
+
+	"leap":       { "docker": "opensuse/leap:latest" },
+	"leap15":     { "docker": "opensuse/leap:15" },
+	"leap15.6":   { "docker": "opensuse/leap:15.6" },
 	"tumbleweed": { "docker": "opensuse/tumbleweed" },
+
 	"archlinux": { "docker": "archlinux:latest" },
-	"manjaro": { "docker": "manjarolinux/base:latest" },
+	"manjaro":   { "docker": "manjarolinux/base:latest" },
+
 	"alpine3": { "docker": "alpine:latest" },
+
+	"fedora":   { "docker": "fedora:latest" },
+	"fedora42": { "docker": "fedora:42" },
+	"fedora41": { "docker": "fedora:41" },
+	"rawhide":  { "docker": "fedora:rawhide" },
+
+	"centos7":  { "docker": "centos:7" },
+	"centos8":  { "docker": "quay.io/centos/centos:stream8" },
+	"centos9":  { "docker": "quay.io/centos/centos:stream9" },
+	"centos10": { "docker": "quay.io/centos/centos:stream10" },
 	"ol7": { "docker": "oraclelinux:7" },
 	"ol8": { "docker": "oraclelinux:8" },
 	"ol9": { "docker": "oraclelinux:9" },
-	"alma8": { "docker": "almalinux:8" },
-	"alma9": { "docker": "almalinux:9" },
+	"alma8":  { "docker": "almalinux:8" },
+	"alma9":  { "docker": "almalinux:9" },
+	"alma10": { "docker": "almalinux:10" },
 	"rocky8": { "docker": "rockylinux:8" },
 	"rocky9": { "docker": "rockylinux:9" },
-	"rhel9": { "docker": "redhat/ubi9:latest" },
-	"amzn2": { "docker": "amazonlinux:2" },
-	"amzn2022": { "docker": "amazonlinux:2022" },
-	"amzn2023": { "docker": "amazonlinux:2023" },
-	"mariner2.0": { "docker": "mcr.microsoft.com/cbl-mariner/base/core:2.0" },
+	"rhel9":  { "docker": "redhat/ubi9:latest" },
+	"rhel10": { "docker": "redhat/ubi10:latest" },
+	"amzn2":  { "docker": "amazonlinux:2" },
+	"amzn22": { "docker": "amazonlinux:2022" },
+	"amzn23": { "docker": "amazonlinux:2023" },
+	"mariner2":    { "docker": "mcr.microsoft.com/cbl-mariner/base/core:2.0" },
 	"azurelinux3": { "docker": "mcr.microsoft.com/azurelinux/base/core:3.0" },
 }
 
@@ -95,6 +106,7 @@ UBUNTU_VERSIONS = {
     'mantic':  '23.10',
     'noble':   '24.04',
     'oracular': '24.10',
+    'plucky':  '25.04',
 }
 
 MACOS_VERSIONS = {
@@ -119,6 +131,7 @@ MACOS_VERSIONS = {
     "ventura":      "13",
     "sonoma":       "14",
     "sequoia":      "15",
+    "tahoe":        "26",
 }
 
 DARWIN_VERSIONS = {
@@ -143,6 +156,7 @@ DARWIN_VERSIONS = {
     "ventura":      "22",
     "sonoma":       "23",
     "sequoia":      "24",
+    "tahoe":        "25",
 }
 
 MACOS_VERSIONS_NICKS = {v: k for k, v in MACOS_VERSIONS.items()}

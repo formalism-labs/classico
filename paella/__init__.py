@@ -3,6 +3,7 @@ import sys
 
 from .error import *
 from .classes import *
+from .meta import *
 from .debug import *
 from .utils import *
 from .files import *
@@ -11,6 +12,7 @@ from .text import *
 from .log import *
 from .platform import *
 from .setup import *
+from .cli import *
 
 #----------------------------------------------------------------------------------------------
 
@@ -41,3 +43,4 @@ Global.foldr = foldr
 Global.ENV = Env()
 Global.HH = heredoc
 Global.JJ = jjdoc
+Global.cli_app = cli_app

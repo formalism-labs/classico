@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+#!/usr/bin/env python
+
+import argparse
+import os
+import sys
+import paella
+from typer import Argument, Option
+from typing_extensions import Annotated
+
+#----------------------------------------------------------------------------------------------
+
+@cli_app
+class App:
+    def helptext(self):
+        """
+        **Command-line application**
+        """
+
+    def my_name(self):
+        return "cli"
+
+    @staticmethod
+    def common_options(
+        verbose: Annotated[
+            bool, Option("--verbose", "-v", help="Turn on extra logging")] = False,
+        nop: Annotated[
+            bool, Option("--nop", help="No operation")] = False,
+        ): pass
+
+    def init(self):
+        print(f"Hello from {self.my_name()}!")
+
+app = App()
+
+#----------------------------------------------------------------------------------------------
+
+@app.command(help="Read information")
+def read():
+    print("Hello from read!")
+
+#----------------------------------------------------------------------------------------------
+
+@app.command(help="Write information")
+def write(
+    name: Annotated[
+        str, Argument(..., help="Text name")],
+    for_: Annotated[
+        str, Option(..., help="For which user", metavar="USER")],
+    count: Annotated[
+        int, Option("-n", "--count", help="How many copies to write", show_default="1")]):
+    pass
+
+#----------------------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    app.run()

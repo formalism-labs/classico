@@ -48,4 +48,4 @@ CMakeCache.txt
 .project
 
 # LLMs
-.aider.*
+.aider*

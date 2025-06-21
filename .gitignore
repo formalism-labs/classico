@@ -1,6 +1,7 @@
 **/bin
 !/bin/
 !/wd40/src/bin/
+1/
 
 # Object files
 *.o
@@ -28,6 +29,7 @@
 *.d
 
 # Python
+venv/
 __pycache__/
 *\.egg-info/
 *.pyc
@@ -45,5 +47,5 @@ CMakeCache.txt
 .cproject
 .project
 
-venv/
-1/
+# LLMs
+.aider.*

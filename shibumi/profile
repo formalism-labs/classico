@@ -55,7 +55,9 @@ read_profile_d() {
 
 rearm() {
 	read_profile_d
-	[[ -n $ENVENIDO ]] && userdefs
+	if [[ -n $ENVENIDO ]]; then
+		userdefs
+	fi
 }
 
 activate_python() {

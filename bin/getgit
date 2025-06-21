@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys
 import os
@@ -34,7 +34,7 @@ class GitSetupModern(paella.Setup):
 
     def git_latest_ver(self):
         response = urllib.request.urlopen(self.SCM_GIT_BASE_URL)
-        versions = list(set(re.findall("[0-9]+\.[0-9]+\.[0-9]", response.read().decode("utf-8"))))
+        versions = list(set(re.findall(r"[0-9]+\.[0-9]+\.[0-9]+", response.read().decode("utf-8"))))
         versions.sort(key=lambda s: list(map(int, s.split('.'))))
         return versions[-1]
 
@@ -123,23 +123,37 @@ class GitExtSetup(paella.Setup):
 
 parser = argparse.ArgumentParser(description='Install Git')
 parser.add_argument('-n', '--nop', action="store_true", help='no operation')
-parser.add_argument('--version', metavar='VER', type=str, default=None, help="git version to install")
+parser.add_argument('-v', '--version', metavar='VER', type=str, default=None, help="git version to install")
+parser.add_argument('--classic', action="store_true", help='install git from system repo')
 parser.add_argument('--modern', action="store_true", help='install latest git')
 parser.add_argument('--github', action="store_true", help='install GitHub CLI (gh)')
 parser.add_argument('--docs', action="store_true", help='install Git documentation')
-parser.add_argument('--no-ext', action="store_true", help='skip instlaling extra utilities')
+parser.add_argument('--ext', action="store_true", help='install extra utilities')
+parser.add_argument('--no-ext', action="store_true", help='skip extra utilities')
+
 # parser.add_argument('--lfs', action="store_true", help='install Git LFS')
-# parser.add_argument('--tig', action="store_true", help='install tig (text-mode interface for Git)')
 args = parser.parse_args()
+
+if args.classic and args.modern:   
+    eprint("Cannot use --classic and --modern together. Choose one.")
+    exit(1)
+
+if args.no_ext:
+    args.ext = False
+
+if not args.classic and not args.modern and not args.github and not args.ext:
+    args.classic = True
+
+if (args.classic or args.modern) and not args.github and not args.no_ext:
+    args.ext = True
+
+if args.classic:
+    GitSetup(args).setup()
 
 if args.modern:
     GitSetupModern(args).setup()
-else:
-    GitSetup(args).setup()
-
 if args.github:
     GitHubCLISetup(args).setup()
 
-if not args.no_ext:
+if args.ext:
     GitExtSetup(args).setup()
-

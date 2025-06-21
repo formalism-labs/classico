@@ -6,7 +6,7 @@ on:
       platforms:
         description: 'Platforms'
         default: '["debian:10", "debian:11", "debian:12", "debian:sid",
-                   "ubuntu:14.04", "ubuntu:16.04", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:24.04", "ubuntu:24.10"]' # "elementary/docker:stable"
+                   "ubuntu:14.04", "ubuntu:16.04", "ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:24.04", "ubuntu:24.10", "ubuntu:plucky"]' # "elementary/docker:stable"
 
 jobs:
   debian-compat-matrix:
@@ -28,9 +28,9 @@ jobs:
 #    - run: |
 #        git config --global --add safe.directory '*'
 #        # git submodule update --init --recursive
-    - name: Python
+    - name: Set up Classico
       run: |
-        ./bin/getpy3
+        V=1 ./sbin/setup
     - name: Installations
       run: |
         ./bin/getgcc --modern
@@ -39,9 +39,9 @@ jobs:
         echo "/etc/os-release:"; cat /etc/os-release
         echo "uname -a: $(uname -a)"
         echo "bash: $BASH_VERSION"
-        echo "System Python: $(/usr/bin/python3 --version)"
-        echo "Python: $(python3 --version)"
-        echo "pip list:"; python3 -m pip list -v
+        echo "System Python: $(/usr/bin/python --version)"
+        echo "Python: $(python --version)"
+        echo "pip list:"; python -m pip list -v
         echo "System gcc: $(/usr/bin/gcc --version | head -1)"
         echo "gcc: $(gcc --version | head -1)"
         echo "glibc: $(./bin/glibcver)"

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-#!/usr/bin/env python
-
 import argparse
 import os
 import sys
@@ -13,7 +11,7 @@ from typing_extensions import Annotated
 
 @cli_app
 class App:
-    def helptext(self):
+    def prolog(self):
         """
         **Command-line application**
         """

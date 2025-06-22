@@ -44,6 +44,12 @@ class TyperApp(typer.Typer):
     def __app(self):
         return self
 
+    def prolog(self):
+        return ""
+
+    def epilog(self):
+        return ""
+    
     def run(self):
         super().__call__(obj={"typer": self.__app()})
         

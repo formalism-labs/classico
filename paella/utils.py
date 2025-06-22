@@ -30,7 +30,7 @@ class Env:
         return v
 
     def __setitem__(self, key, val):
-        os.environ[key] = val
+        os.environ[key] = str(val)
 
     def get(self, key, default=''):
         return os.getenv(key, default)

@@ -26,7 +26,7 @@ CLASSICO=$(cd $HERE/.. && pwd)
 ### Classico  in Python
 Start your script as follows, modifying the relative Paella root path specification if needed.
 ```python
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import os, sys
 

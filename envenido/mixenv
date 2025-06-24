@@ -1,9 +1,9 @@
 
-__help() {
+__help__() {
 	cat <<-'END'
 		mixenv: mix Envenido environment
 
-		[ARGVARS...] mixenv [--help|help]
+		[ARGVARS...] mixenv [--help|help] {<environment> | -d [directory]}
 
 		Argument variables:
 		START=0       Don't read start script
@@ -16,70 +16,123 @@ __help() {
 	END
 }
 
-if [[ $1 == --help || $1 == help || $HELP == 1 ]]; then
-	__help
-	unset -f __help
-	return 0
-fi
-
-unset -f __help
-
-[[ $V == 1 ]] && VERBOSE=1
-[[ $FORCE == 1 ]] && REMIX=1
-
-__mixenv() {
-	local n="$1"
-	if [[ $n == . ]]; then
-		n="${PWD//\//_}"
-		local d="$PWD"
-	else
-		local d="$ENVENIDO_ENV/$n"
+__mixenv__() {
+	if [[ $1 == --help || $1 == help || $HELP == 1 ]]; then
+		__help__
+		return 0
 	fi
-	local e="__ENV_${n//-/_}"
-	e="${e//\./_}"
-	shift
+
+	[[ $V == 1 ]] && VERBOSE=1
+	[[ $FORCE == 1 ]] && REMIX=1
 
 	local OP=""
 	[[ $NOP == 1 ]] && OP=echo
 
-	if [[ ${!e} == 1 && $REMIX == 0 ]]; then
-		[[ $VERBOSE == 1 ]] && echo "$n already installed"
-		return 0
+	local n="$1"
+	local fqn
+	local d
+	if [[ $n == . ]]; then
+		d="$PWD"
+		n="$(basename "$d")"
+		fqn="$(cd "$d" &>/dev/null && pwd)"
+		fqn="${fqn//\//_}"
+	elif [[ $n == "-d" ]]; then
+		shift
+		d="$1"
+		n="$(basename "$d")"
+		fqn="$(cd "$d" &>/dev/null && pwd)"
+		fqn="${fqn//\//_}"
+	else
+		d="$ENVENIDO_ENVS/$n"
+		fqn="$n"
 	fi
 
+	shift # now we're left with the arguments
+
 	if [[ ! -d $d ]]; then
-		>&2 echo "WARNING: environment $n does not exist"
+		>&2 echo "mixenv: ${RED}environment $n does not exist${BW}"
 		return 1
 	fi
 
-	if [[ ! -f $d/env ]]; then
-		[[ $VERBOSE == 1 ]] && >&2 echo "$d/env does not exist"
+	local e="__ENV_${fqn//-/_}"
+	e="${e//\./_}"
+
+	if [[ ${!e} == 1 && $REMIX == 0 ]]; then
+		[[ $VERBOSE == 1 ]] && echo "mixenv: $n already installed"
 		return 0
 	fi
 
-	$OP . $d/env "$@" || return 1
-	[[ $NOP == 1 || $VERBOSE == 1 ]] && { echo -e "\n# $d/env:"; cat $d/env; }
-	if [[ $START != 0 && -f $d/start ]]; then
-		$OP . $d/start "$@" || return 1
-		[[ $NOP == 1 || $VERBOSE == 1 ]] && { echo -e "\n# $d/start:"; cat $d/start; }
+	local envdir=""
+	local dotenv=""
+	local venv=""
+	
+	if [[ -f $d/env ]]; then
+		envdir="$d"
+	elif [[ -f $d/.env ]]; then
+		dotenv="$d/.env"
+	elif [[ -d $d/.env && -f $d/.env/env ]]; then
+		envdir="$d/.env"
+	elif [[ -d $d/env && -f $d/env/env ]]; then
+		envdir="$d/env"
+	else
+		>&2 echo "mixenv: ${RED}invalid environment in $d${BW}"
+		return 1
+	fi
+	if [[ -d $d/.venv ]]; then
+		venv="$d/.venv"
+	elif [[ -d $d/venv ]]; then
+		venv="$d/venv"
 	fi
 
+	if [[ -n $dotenv ]]; then
+		if [[ $NOP == 1 || $VERBOSE == 1 ]]; then
+			echo -e "\n# $dotenv:"
+			cat $d/env
+		fi
+		$OP . $dotenv
+	fi
+
+	if [[ -n $envdir ]]; then
+		if [[ $NOP == 1 || $VERBOSE == 1 ]]; then
+			echo -e "\n# $envdir/env:"
+			cat $envdir/env
+		fi
+		$OP . $envdir/env "$@" || return 1
+		if [[ $START != 0 && -f $envdir/start ]]; then
+			if [[ $NOP == 1 || $VERBOSE == 1 ]]; then
+				echo -e "\n# $envdir/start:"
+				cat $envdir/start
+			fi
+			$OP . $envdir/start "$@" || return 1
+		fi
+	fi
+
+	if [[ -n $venv ]]; then
+		if [[ $NOP == 1 || $VERBOSE == 1 ]]; then
+			echo -e "\n# $venv/pyvenv.cfg:"
+			cat $venv/pyvenv.cfg
+		fi
+		if [[ -f $venv/bin/activate ]]; then
+			. $venv/bin/activate
+		elif [[ -f $venv/Scripts/activate ]]; then
+			$venv/Scripts/activate
+		else
+			>&2 echo "mixenv: invalid virtual environment at $venv"
+		fi
+	fi
+	
 	$OP export $e=1
+	if declare -F envenido_debug >/dev/null; then
+		envenido_debug "mixenv: $n mixed"
+	fi
 	return 0
 }
 
-for __e in $@; do
-	# [[ $VERBOSE == 1 ]] && echo "# $__e"
-	
-	if ! __mixenv $__e; then
-		>&2 echo "ERROR in mixenv $__e"
-		unset __e
-		unset -f __mixenv
-		return 1
-	else
-		_debug "$__e mixed"
-	fi
-done
-
-unset __e
-unset -f __mixenv __e
+if [[ -z $_Dbg_DEBUGGER_LEVEL ]]; then
+	trap 'unset -f __mixenv__ __help__"' RETURN
+fi
+VERBOSE="$VERBOSE" REMIX="$REMIX" __mixenv__ $@ || true
+if [[ -z $_Dbg_DEBUGGER_LEVEL ]]; then
+	trap - RETURN
+fi
+unset -f __mixenv__ __help__

@@ -82,7 +82,7 @@ _debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 # ENVENIDO_MIXENV set by se to be mixed by a newly-invoked shell
 if [[ -n $ENVENIDO_MIXENV ]]; then
 	_debug "se/mixenv $ENVENIDO_MIXENV"
-	FORCE=1 mixenv $ENVENIDO_MIXENV
+	START=1 FORCE=1 mixenv $ENVENIDO_MIXENV
 	if [[ $? != 0 ]]; then
 		_debug "se/mixenv $ENVENIDO_MIXENV failed"
 		unset ENVENIDO_MIXENV

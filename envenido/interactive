@@ -9,9 +9,9 @@ set_win_title() {
 export -f set_win_title
 
 if [[ -z $ENVENIDO_TITLE ]]; then
-	export ENVENIDO_TITLE=Devka
-	export ENVENIDO_TITLE0=Devka
+	export ENVENIDO_TITLE=Classico
 fi
+export ENVENIDO_FULL_TITLE="$ENVENIDO_TITLE"
 
 if [[ -n $ENVENIDO_MC ]]; then
 	export ENVENIDO_PS1_CONTEXT="${GREEN}${BOLD}mc${GREEN}:"
@@ -35,13 +35,13 @@ ENVENIDO_PS1_HOST="$ENVENIDO_HOST"
 [[ -n $ENVENIDO_PS1_HOST ]] && ENVENIDO_PS1_HOST+=': '
 
 if [[ -z $ENVENIDO_TERM_TITLE ]]; then
-	export ENVENIDO_PS1_TITLE="${ENVENIDO_PS1_HOST}${ENVENIDO_TITLE0}"
+	export ENVENIDO_PS1_TITLE="${ENVENIDO_PS1_HOST}${ENVENIDO_TITLE}"
 else
 	export ENVENIDO_PS1_TITLE="$ENVENIDO_TERM_TITLE"
 fi
 
 # prompt (used in starship.toml)
-export ENVENIDO_PS1_PROMPT="[$ENVENIDO_TITLE]${ENVENIDO_PS1_SHLVL}"
+export ENVENIDO_PS1_PROMPT="[$ENVENIDO_FULL_TITLE]${ENVENIDO_PS1_SHLVL}"
 
 _debug "setting up Sharship"
 export STARSHIP_CONFIG="$ENVENIDO/starship.toml"

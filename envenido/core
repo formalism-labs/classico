@@ -12,15 +12,12 @@ _debug "reading core"
 
 #------------------------------------------------------------------------------------ Locations
 
-[[ -z $ENVENIDO_ENV ]] && export ENVENIDO_ENV=$HOME/.env
+[[ -z $ENVENIDO_ENVS ]] && export ENVENIDO_ENVS=$HOME/.envs
 
 #------------------------------------------------------------------------------------- Classico
 
 export CLASSICO="$DEVKA/classico"
-. $CLASSICO/shibumi/term
-. $CLASSICO/shibumi/profile
-. $CLASSICO/shibumi/vars
-. $CLASSICO/shibumi/traps
+. $CLASSICO/shibumi/exports
 
 #------------------------------------------------------------------------------------ User/Host
 

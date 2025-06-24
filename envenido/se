@@ -1,124 +1,216 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys
 import os
 import argparse
 import re
 from pathlib import Path
+from typing import Optional, List
 
 HERE = os.path.dirname(__file__)
-CLASSICO = os.getenv('CLASSICO')
+CLASSICO = os.path.abspath(os.path.join(HERE, ".."))
+ENVENIDO = HERE
+# CLASSICO = os.getenv('CLASSICO')
 sys.path.insert(0, CLASSICO)
 import paella  # noqa: F401
 
-def setenv(env, envpath, args):
-    title = ''
+#----------------------------------------------------------------------------------------------
 
-    envpath = Path(envpath)
-    if not envpath.exists():
-        return 0
+SE=r'''
+                 _,._     
+             __.'   _)    
+            <_,)'.-"a\    -- se שה --
+              /' (    \   смотреть как баран на новые ворота
+  _.-----..,-'   (`"--^   
+ //              |        
+(|   `;      ,   |        
+  \   ;.----/  ,/         
+   ) // /   | |\ \        
+   \ \\`\   | |/ /        
+    \ \\ \  | |\/         
+     `" `"  `"`           
 
-    envfile = ''
-    if (envpath/'start').is_file():
-        envfile = "start"
-    elif (envpath/'env').is_file():
-        envfile = "env"
-    else:
-        return 0
-    
-    set_title(str(envpath))
-    
-    args = ' '.join(args)
-    ENV['ENVENIDO_MIXENV'] = f"-d {envpath} {args}" if not env else f"{env} {args}"
-    ENV['ENVENIDO_SHLVL'] = str(int(ENV['SHLVL']) + 1)
+'''
 
-    # exit(os.system(ENV['SHELL'] + " -i"))
-    os.execv("/bin/bash",  ["/bin/bash", "-i"])
+env_root = ENV['ENVENIDO_ENVS']
 
-def get_title(envpath):
-    with open(f"{envpath}/env", 'r') as file:
-        line = file.readline()
-        m = re.match(r'#\s*(.+)', line)
-        if m:
-            return m.group(1).strip()
+NOP = False
+
+#----------------------------------------------------------------------------------------------
+
+class Environment:
+    def __init__(self, name, path):
+        if name is None and path is None:
+            raise paella.Error("invalid environment: both name and path are empty")
+
+        self.name = name
+
+        if path is None:
+            path = f"{env_root}/{name}" 
+        path = Path(path)
+
+        if not path.exists():
+            raise paella.Error(f"environment in {path} does not exist")
+
+        self.path = path
+
+        title_file = None
+
+        if (path/"env").is_file():
+            title_file = path/"env"
+        elif (path/".env").is_file():
+            title_file = path/".env"
+        elif (path/".env").is_dir():
+            title_file = path/".env"/"env"
+        elif (path/"env").is_dir():
+            title_file = path/"env"/"env"
+
+        if Path(title_file).is_file():
+            self.title_file = title_file
         else:
-            return ""
+            self.title_file = None
 
-def set_title(envpath):
-    title = get_title(envpath)
-    if not title:
-        title = "'" + os.path.basename(os.getcwd()) + "'"
+    def title(self):
+        if self.title_file is None:
+            return self.path.name if self.name is None else self.name
+        try:
+            with open(self.title_file, 'r') as file:
+                line = file.readline()
+                m = re.match(r'#\s*(.+)', line)
+                return m.group(1).strip() if m else ""
+        except:
+            return self.path.name
 
-    t = ENV['ENVENIDO_TITLE']
-    t0 = t
-    if t == "":
-        t = title
-    else:
-        t += f" : {title}"
+    def set_envenido_title(self):
+        title_ = self.title()
+        if not title_:
+            title_ = f"{os.path.basename(os.getcwd())}"
 
-    ENV['ENVENIDO_TITLE0'] = title
-    ENV['ENVENIDO_TITLE'] = t
+        t = ENV['ENVENIDO_FULL_TITLE']
+        t0 = t
+        if t == "":
+            t = title_
+        else:
+            t += f" : {title_}"
 
-def help():
-    all = {}
-    maxlen = 0
-    for d in os.scandir(root):
-        if os.path.isdir(d):
-            d = d.path
-            env = os.path.basename(d)
-            all[env] = get_title(d)
-            n = len(env)
-            if n > maxlen:
-                maxlen = n
-#           print(f"{env}\t{title(env)}")
+        ENV['ENVENIDO_TITLE'] = title_
+        ENV['ENVENIDO_FULL_TITLE'] = t
 
-    print(r'''
-Start a new shell session with the selected environment.
+    def setenv(self, args: List[str]):
+        if not self.path.exists():
+            raise paella.Error(f"invalid environment: {self.path}")
 
-Usage:
-  se <environment> <args>   Invoke <environment>
-  se . <args>               Pick up environment in working dir
-  se -e <dir> <args>        Pick up environment in <dir>
-  se -h [<environment>]     Explain <environment> or print this screen
+        path = self.path
+        
+        self.set_envenido_title()
+        
+        mix = self.name if self.name is not None else f"-d {path}"
+        # mix = f"-d {path}" if self.path is not None else f"{self.name}"
+        if len(args) > 0:
+            mix += "f {' '.join(args)}"
+        if NOP:
+            print(f"# command: mixenv {mix}")
 
-See also: mixenv
+        ENV['ENVENIDO'] = ENVENIDO
+        ENV['ENVENIDO_MIXENV'] = mix
+        ENV['ENVENIDO_SHLVL'] = str(int(ENV['SHLVL']) + 1)
 
-Available environments:
-''')
+        if not NOP:
+            if ENV['DEBUG'] == "1":
+                os.system(f"bashdb {ENVENIDO}/mixenv {mix}")
+            else:
+                os.execv("/bin/bash",  ["/bin/bash", "-i"])
 
-    for env in sorted(all.keys()):
-        print(f"{env:<{maxlen}}  {all[env]}")
+#----------------------------------------------------------------------------------------------
+
+class Environments:
+    def __init__(self):
+        self.all = {}
+        self.maxlen = 0
+        for d in os.scandir(env_root):
+            if os.path.isdir(d):
+                d = d.path
+                env = Environment(os.path.basename(d), d)
+                self.all[env.name] = env.title()
+                n = len(env.name)
+                if n > self.maxlen:
+                    self.maxlen = n
     
-    print()
+    def table(self):
+        tab = ""
+        for env in sorted(self.all.keys()):
+            tab += f"{env:<{self.maxlen}}  {self.all[env]}\n"
+        return tab
 
+#----------------------------------------------------------------------------------------------
 
-# root = ENV['ENVENIDO'] + "/env"
-root = ENV['ENVENIDO_ENV']
+class Arguments(argparse.ArgumentParser):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, formatter_class=argparse.RawTextHelpFormatter, **kwargs)
+    
+    def format_help(self):
+        suffix = HH(r'''
 
-args = sys.argv[1:]
+            Usage:
+              se <environment> <args>   Invoke <environment>
+              se . <args>               Pick up environment in working dir
+              se -d <dir> <args>        Pick up environment in <dir>
 
-env = None
-envpath = None
+            See also: mixenv
 
-if len(args) == 0:
-    help()
+            Available environments:
+            ''')
+
+        envs = Environments()
+        suffix += envs.table() + "\n"
+        self.epilog = suffix
+        return SE + super().format_help()
+
+parser = Arguments(description='Start a new shell session with the selected environment.')
+parser.add_argument('-n', '--nop', action="store_true", help='No operation')
+parser.add_argument('-d', '--dir', metavar="DIR", help='Pick up environment in DIR')
+parser.add_argument('-v', '--verbose', action="store_true", help='Explain environment')
+parser.add_argument('--debug', action="store_true", help='Run mixenv with bashdb')
+parser.add_argument('environment', nargs='?', type=str, help='Name of environment')
+parser.add_argument("args", nargs=argparse.REMAINDER, help='Environment arguments')
+if len(sys.argv) == 1:
+    parser.print_help()
     exit(0)
+args = parser.parse_args()
 
-arg = args.pop(0)
-if arg == "" or arg == "-h" or arg == "--help":
-    help()
+if args.nop:
+    NOP = True
+
+try:
+    env_dir = None
+    env_name = None
+    if args.dir:
+        env_dir = args.dir
+    if args.environment:
+        if env_dir is not None:
+            eprint("both environment name and directory are specified. choose one.")
+            exit(1)
+        if args.environment == '.':
+            env_name = None
+            env_dir = '.'
+        else:
+            env_name = args.environment
+            env_dir = None
+
+    env = Environment(env_name, env_dir)
+
+    if args.verbose:
+        ENV['VERBOSE'] = "1"
+        print(f"# name: {env.name}")
+        print(f"# path: {env.path}")
+        print(f"# title: {env.title()}")
+
+    # debug mixenv with bashdb
+    if args.debug:
+        ENV['DEBUG'] = 1
+
+    env.setenv(args.args)
     exit(0)
-
-if arg == "-e":
-    envpath = args.pop(0)
-else:
-    env = arg
-    if env == ".":
-        envpath = "."
-
-if envpath is None:
-    envpath = f"{root}/{env}" 
-
-if not setenv(env, envpath, args):
-    fatal(f"invalid environment {env}")
-exit(0)
+except Exception as x:
+    eprint(x)
+    exit(1)

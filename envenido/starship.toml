@@ -23,6 +23,6 @@ variable = 'ENVENIDO_PS1_PROMPT'
 format = "[$env_value](purple)"
 
 # [env_var.envenido_title]
-# variable = 'ENVENIDO_TITLE'
+# variable = 'ENVENIDO_FULL_TITLE'
 # format = "[$env_value](red)"
 

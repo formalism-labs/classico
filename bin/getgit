@@ -45,14 +45,14 @@ class GitSetupModern(paella.Setup):
         self.prefix = "~/.local"
 
     def debian_compat(self):
-        self.run("{pwd}/getgcc".format(pwd=HERE))
+        self.run(f"{HERE}/getgcc")
         self.install("dh-autoreconf libcurl4-gnutls-dev libexpat1-dev \
                       gettext libz-dev libssl-dev")
         if self.install_git_docs:
             self.install("install-info gettext asciidoc xmlto docbook2x")
 
     def redhat_compat(self):
-        self.run("{pwd}/getgcc --modern".format(pwd=HERE))
+        self.run(f"{HERE}/getgcc --modern")
         self.install("dh-autoreconf curl-devel expat-devel gettext-devel \
                       gettext-devel openssl-devel perl-devel zlib-devel getopt")
         if self.install_git_docs:
@@ -117,7 +117,7 @@ class GitExtSetup(paella.Setup):
         paella.Setup.__init__(self, nop=args.nop)
 
     def common_first(self):
-        self.install("tig")
+        self.install("tig git-delta")
 
 #----------------------------------------------------------------------------------------------
 

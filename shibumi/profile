@@ -17,7 +17,7 @@ setup_profile_d() {
 	[[ -n $DEVKA || -n $ENVENIDO ]] && return
 
 	cat <<-END >> $profile
-		export CLASSICO="$CLASSICO"
+		export CLASSICO
 		[[ -d \$CLASSICO ]] && . \$CLASSICO/shibumi/functions
 		read_profile_d
 		END

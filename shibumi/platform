@@ -37,3 +37,5 @@ platform_arch() {
 }
 
 #----------------------------------------------------------------------------------------------
+
+export -f platform_os platform_windows platform_arch

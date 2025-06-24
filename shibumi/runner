@@ -69,14 +69,14 @@ posh() {
 #----------------------------------------------------------------------------------------------
 
 # run $2 command file in docker container with id $1 by base64 decoding it and piping to bash
-# remove command file after execution
 
 run_in_docker() {
 	local did=$1
 	local cmdf=$2
 	local cmd="$(cat $cmdf | base64 -w0)"
-	rm $cmdf
 	docker exec $did bash -c "echo '$cmd' | base64 -d | bash"
 }
 
 #----------------------------------------------------------------------------------------------
+
+export -f is_command runn

@@ -1,0 +1,10 @@
+
+. $CLASSICO/shibumi/platform
+
+. $CLASSICO/shibumi/profile
+. $CLASSICO/shibumi/runner
+. $CLASSICO/shibumi/term
+. $CLASSICO/shibumi/time
+. $CLASSICO/shibumi/traps
+. $CLASSICO/shibumi/vars
+. $CLASSICO/shibumi/xinstall

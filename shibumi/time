@@ -20,3 +20,5 @@ timestampx() {
 }
 
 #----------------------------------------------------------------------------------------------
+
+export -f timer_set timer_elapsed timestamp timestampx

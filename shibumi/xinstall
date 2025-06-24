@@ -1,4 +1,8 @@
 
+if [[ $(platform_os) == windows ]]; then
+
+#----------------------------------------------------------------------------------------------
+
 winget_install() {
 	local packs="$@"
 	for pack in "$packs"; do
@@ -54,6 +58,14 @@ xinstall_windows_native() {
 		fi
 	fi
 }
+
+#----------------------------------------------------------------------------------------------
+
+export -f winget_install choco_install scoop_install xinstall_windows_native
+
+fi # windows
+
+#----------------------------------------------------------------------------------------------
 
 xinstall() {
 	local packs="$@"
@@ -139,6 +151,10 @@ pip_install() {
 		[[ $CACHE == 0 ]] && args+=" --no-cache-dir"
 		[[ -z $VIRTUAL_ENV ]] && args+=" --user"
 
-		runn python3 -m pip install "$args" "$@"
+		runn python -m pip install "$args" "$@"
 	fi
 }
+
+#----------------------------------------------------------------------------------------------
+
+export -f xinstall pip_install

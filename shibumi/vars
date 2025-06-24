@@ -26,3 +26,5 @@ append_to_var() {
 }
 
 #----------------------------------------------------------------------------------------------
+
+export -f prepend_to_path append_to_path prepend_to_var append_to_var

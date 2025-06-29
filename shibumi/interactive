@@ -43,34 +43,4 @@ title() {
 
 #----------------------------------------------------------------------------------------------
 
-spin_while() {
-	local cmd="$@"
-	if [[ -n $TEXT ]]; then
-		local text="$TEXT"
-	else
-		local text="Working..."
-	fi
-
-	{
-		spin='-\|/'
-		local i=0
-		tput civis
-		while true; do
-			i=$(( (i+1) % 4 ))
-			printf "\r[%c] $TEXT" "${spin:$i:1}"
-			sleep 0.1
-		done
-	} &
-	local spinner_pid=$!
-
-	{ $cmd; }
-
-	kill $spinner_pid
-	wait $spinner_pid 2>/dev/null
-	tput cnorm
-	printf "\r\033[K[✔] Done.\n"
-}
-
-#----------------------------------------------------------------------------------------------
-
 export -f eset etmp var ppath

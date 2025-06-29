@@ -11,7 +11,7 @@ export -f set_win_title
 if [[ -z $ENVENIDO_TITLE ]]; then
 	export ENVENIDO_TITLE=Classico
 fi
-export ENVENIDO_FULL_TITLE
+[[ -z $ENVENIDO_FULL_TITLE ]] && export ENVENIDO_FULL_TITLE="$ENVENIDO_TITLE"
 
 if [[ -n $ENVENIDO_MC ]]; then
 	export ENVENIDO_PS1_CONTEXT="${GREEN}${BOLD}mc${GREEN}:"

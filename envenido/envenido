@@ -32,7 +32,12 @@ if [[ -n $__ENVENIDO__ ]]; then
 fi
 __ENVENIDO__=1
 
-[[ -z $ENVENIDO ]] && export ENVENIDO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -z $ENVENIDO ]]; then
+	export ENVENIDO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+if [[ -z $CLASSICO ]]; then
+	export CLASSICO="$(cd "$ENVENIDO/.." && pwd)"
+fi
 
 _debug "args: '$*'"
 
@@ -58,7 +63,11 @@ fi
 unset ENVENIDO_CONTAINER
 if [[ $($CLASSICO/bin/iscontainer) == 1 ]]; then
 	export ENVENIDO_CONTAINER=1
-	export ENVENIDO_DOCKER_NAME="$DOCKER_NAME"
+	if [[ -n $DOCKER_NAME ]]; then
+		export ENVENIDO_DOCKER_NAME="$DOCKER_NAME"
+	else
+		export ENVENIDO_DOCKER_NAME="$HOSTNAME"
+	fi
 fi
 
 unset ENVENIDO_SUDO

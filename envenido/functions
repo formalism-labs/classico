@@ -10,7 +10,17 @@ export -f mixenv
 #----------------------------------------------------------------------------------------------
 
 se() {
-	$ENVENIDO/se "$@"
+	local pudb
+	if is_command pudb; then
+		local arg
+		for arg in "$@"; do
+		  if [[ $arg == "--debug" ]]; then
+			pudb=pudb
+			break
+		  fi
+		done
+	fi
+	$pudb $ENVENIDO/se "$@"
 }
 
 export -f se
@@ -35,3 +45,14 @@ sush() {
 }
 
 export -f sush
+
+#----------------------------------------------------------------------------------------------
+
+envenido_rearm() {
+	. $ENVENIDO/functions
+	read_profile_d "$ENVENIDO_HOME/.profile.d"
+	read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
+	userdefs
+}
+
+export -f envenido_rearm

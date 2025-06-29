@@ -16,7 +16,6 @@ _debug "reading core"
 
 #------------------------------------------------------------------------------------- Classico
 
-export CLASSICO="$DEVKA/classico"
 . $CLASSICO/shibumi/exports
 
 #------------------------------------------------------------------------------------ User/Host
@@ -52,7 +51,6 @@ _debug "user is $ENVENIDO_USER; home is $ENVENIDO_HOME; host is $ENVENIDO_HOST"
 #------------------------------------------------------------------------- Default environments
 
 START=1 mixenv devka
-# START=0 mixenv classico
 
 #--------------------------------------------------------------------------------------- Shells
 
@@ -65,13 +63,8 @@ read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
 
 #-------------------------------------------------------------------------------------- Aliases
 
-# not ok for login shell, aliases should be defined for any interactive shell
-# however, they should be captured on (first?) interactive login shell
-
-#if [[ -n $ENVENIDO_IACT ]]; then
-	_debug "processing user defs"
-	userdefs
-#fi
+_debug "processing user defs"
+userdefs
 
 #-------------------------------------------------------------------------------------- On exit
 

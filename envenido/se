@@ -82,19 +82,19 @@ class Environment:
             return self.path.name
 
     def set_envenido_title(self):
-        title_ = self.title()
-        if not title_:
-            title_ = f"{os.path.basename(os.getcwd())}"
+        title = self.title()
+        if title == "":
+            title = "?"
 
-        t = ENV['ENVENIDO_FULL_TITLE']
-        t0 = t
-        if t == "":
-            t = title_
+        full_title = ENV['ENVENIDO_FULL_TITLE']
+        t0 = full_title
+        if full_title == "":
+            full_title = title
         else:
-            t += f" : {title_}"
+            full_title += f" : {title}"
 
-        ENV['ENVENIDO_TITLE'] = title_
-        ENV['ENVENIDO_FULL_TITLE'] = t
+        ENV['ENVENIDO_TITLE'] = title
+        ENV['ENVENIDO_FULL_TITLE'] = full_title
 
     def setenv(self, args: List[str]):
         if not self.path.exists():

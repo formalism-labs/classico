@@ -56,11 +56,14 @@ read_profile_d() {
 #----------------------------------------------------------------------------------------------
 
 rearm() {
-	read_profile_d
-	if [[ -n $ENVENIDO ]]; then
-		userdefs
+	if [[ -z $ENVENIDO ]]; then
+		read_profile_d
+	else
+		envenido_rearm
 	fi
 }
+
+#----------------------------------------------------------------------------------------------
 
 activate_python() {
 	local d="$(get_profile_d)"

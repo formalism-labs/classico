@@ -90,7 +90,7 @@ else
 	VENV_BINDIR="$VENV_DIR/bin"
 fi
 cat <<-END > $profile_d/python.sh
-	append_to_path "$VENV_BINDIR"
+	prepend_to_path "$VENV_BINDIR"
 	append_to_path "$UV_DIR"
 	
 	if [[ -f $VENV_BINDIR/activate ]]; then

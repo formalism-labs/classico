@@ -17,6 +17,7 @@ runn() {
 		[[ $NOP == 1 ]] && { rm -f "$cmd"; return; }
 		if (( V < 2 )); then
 			local log="$(mktemp)"
+			local E
 			{ bash "$cmd" > "$log" 2>&1 ; E=$?; } || true
 			[[ $E != 0 && $LOG != 0 ]] && cat "$log"
 			rm -f "$cmd" "$log"
@@ -30,6 +31,7 @@ runn() {
 		[[ $NOP == 1 ]] && { return; }
 		if (( V < 2 )); then
 			local log="$(mktemp)"
+			local E
 			{ eval "$@" > "$log" 2>&1 ; E=$?; } || true
 			[[ $E != 0 && $LOG != 0 ]] && cat "$log"
 			rm -f "$log"
@@ -62,12 +64,14 @@ spin_while() {
 	} &
 	local spinner_pid=$!
 
-	{ $cmd; }
+	local E
+	{ $cmd; E=$?; } || true
 
 	kill $spinner_pid
 	wait $spinner_pid 2>/dev/null
 	tput cnorm
 	printf "\r\033[K[✔] Done.\n"
+	return $E
 }
 
 #----------------------------------------------------------------------------------------------

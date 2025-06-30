@@ -56,11 +56,11 @@ class BunSetup(paella.Setup):
         self.install_downloaders()
 
         self.run("curl -fsSL https://bun.sh/install | SHELL=none bash")
-        self.cat_to_profile_d(r'''
-            export BUN_INSTALL="{HOME}/.bun"
-            append_to_path $BUN_INSTALL/bin
-            '''.format(HOME=Path.home()), "bun.sh")
         home = Path.home()
+        self.cat_to_profile_d(f'''
+            export BUN_INSTALL="{home}/.bun"
+            prepend_to_path $BUN_INSTALL/bin
+            ''', "bun.sh")
         jasmine_dir = f"{home}/.jasmine/"
         paella.mkdir_p(jasmine_dir)
         shutil.copy(f"{ROOT}/jasmine/package.json", jasmine_dir)
@@ -77,10 +77,11 @@ class VoltaSetup(paella.Setup):
         self.install_downloaders()
 
         self.run("curl https://get.volta.sh | bash -s -- --skip-setup")
-        self.cat_to_profile_d(r'''
-            export VOLTA_HOME="$HOME/.volta"
-            append_to_path $VOLTA_HOME/bin
-            '''.format(HOME=Path.home()), "volta.sh")
+        home = Path.home()
+        self.cat_to_profile_d(f'''
+            export VOLTA_HOME="{home}/.volta"
+            prepend_to_path $VOLTA_HOME/bin
+            ''', "volta.sh")
         self.run(f"volta install node@{NODE_VERSION}")
         self.run("volta install yarn")
 

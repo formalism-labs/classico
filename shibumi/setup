@@ -1,0 +1,14 @@
+#!/bin/bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+ROOT="$(cd $HERE/.. && pwd)"
+export CLASSICO=$ROOT
+ERR_TRAP=0 . $CLASSICO/shibumi/defs
+
+# CBL-Mariner is missing awk, which is required for error_trap()
+if [[ -d /etc/os-release && $(source /etc/os-release; echo "${ID}") == mariner ]]; then
+	$SUDO tdnf install -q -y awk
+fi
+
+setup_profile_d

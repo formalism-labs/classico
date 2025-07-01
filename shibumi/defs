@@ -45,17 +45,11 @@ error_trap() {
 	exit $exit_code
 }
 
-# CBL-Mariner is missing awk, which is required for error_trap()
-# this should move into system-setup
-[[ -d /etc/os-release && $(source /etc/os-release; echo "${ID}") == mariner ]] && $SUDO tdnf install -q -y awk
-
 # avoid trap with bashdb or in interactive mode
-if [[ -z $PS1 && $IACT != 1 && -z $_Dbg_DEBUGGER_LEVEL ]]; then
+if [[ $ERR_TRAP != 0 && -z $PS1 && $IACT != 1 && -z $_Dbg_DEBUGGER_LEVEL ]]; then
 	trap 'error_trap $LINENO' ERR
 fi
 
 if [[ -d $CLASSICO ]]; then
 	. $CLASSICO/shibumi/functions 
 fi
-
-setup_profile_d

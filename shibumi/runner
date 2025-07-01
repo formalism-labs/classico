@@ -68,9 +68,13 @@ spin_while() {
 	{ $cmd; E=$?; } || true
 
 	kill $spinner_pid
-	wait $spinner_pid 2>/dev/null
+	wait $spinner_pid &> /dev/null || true
 	tput cnorm
-	printf "\r\033[K[✔] Done.\n"
+	if [[ $E == 0 ]]; then
+		printf "\r\033[K[${GREEN}✔${BW}] Done.\n"
+	else
+		printf "\r\033[K[${RED}x${BW}] There are errors.\n"
+	fi
 	return $E
 }
 

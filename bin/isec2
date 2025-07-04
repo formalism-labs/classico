@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ -f /sys/hypervisor/uuid ]]; then
 	if [[ `head -c 3 /sys/hypervisor/uuid` == ec2 ]]; then

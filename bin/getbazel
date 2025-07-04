@@ -22,7 +22,7 @@ class BazeliskeSetup(paella.Setup):
 
     def install_bazel(self):
         cmd = r"""
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ `uname -s` == Darwin ]]; then
 	profile_d="$HOME/.profile.d"

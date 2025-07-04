@@ -15,7 +15,7 @@ Clone the Classico repo into your codebase.
 ### Classico in bash
 Start your script as follows, modifying the relative `CLASSICO` path specification if needed.
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 
 PROGNAME="${BASH_SOURCE[0]}"
 HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # envenido is invoked from serveral initialization scripts, typically:
 # ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc, /etc/profile

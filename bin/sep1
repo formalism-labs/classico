@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PRE=1
 while [[ -n $1 ]]; do

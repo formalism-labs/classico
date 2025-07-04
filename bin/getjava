@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # https://adoptium.net/temurin/releases
 OPENJDK_VERSION=${OPENJDK_VERSION:-"23_37"}

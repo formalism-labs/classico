@@ -21,7 +21,7 @@ if [[ $OS == linux || $OS == windows ]]; then
 	fi
 elif [[ $OS == macos ]]; then
 	if (( BASH_VERSINFO == 5 )); then
-		url="https://s3.tebi.io/classico/bashdb/bashdb-5.0-1.1.2-linux-bin.tgz"
+		xinstall bashdb
 	elif (( BASH_VERSINFO == 3 )); then
 		url="https://s3.tebi.io/classico/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
 	fi

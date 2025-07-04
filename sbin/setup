@@ -6,6 +6,11 @@ ROOT="$(cd $HERE/.. && pwd)"
 CLASSICO=$ROOT
 . $CLASSICO/shibumi/defs
 
+if [[ $BASH_VERSINFO == 3 ]]; then
+	perror "Bash version is too old - please install Bash 5 and retry."
+	exit 1
+fi
+
 export HOMEBREW_NO_AUTO_UPDATE=1
 
 $CLASSICO/shibumi/setup

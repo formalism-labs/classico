@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO="$(cd $HERE/.. && pwd)"
+. $CLASSICO/shibumi/defs
+
+BINDIR=~/.local/bin
+mkdir -p $BINDIR
+
+os="$(platform_os)"
+if [[ $os == macos ]]; then
+	PACKS="make coreutils findutils gnu-sed gnu-tar gawk gpatch"
+elif [[ $os == freebsd ]]; then
+	PACKS="gmake coreutils findutils gsed gtar gawk"
+else
+	exit
+fi
+xinstall $PACKS
+
+for x in make find xargs sed tar mktemp du; do
+	dest="$BINDIR/g${x}"
+	if [[ ! -f $dest ]]; then
+		src="$(command -v g${x})"
+		ln -s $src $dest
+	fi
+done

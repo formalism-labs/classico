@@ -16,6 +16,7 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 $CLASSICO/shibumi/setup
 
 $CLASSICO/bin/getget
+$CLASSICO/bin/getgnu
 
 profile_d="$(get_profile_d)"
 

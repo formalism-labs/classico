@@ -119,7 +119,7 @@ class Environment:
             if ENV['DEBUG'] == "1":
                 os.system(f"bashdb {ENVENIDO}/mixenv {mix}")
             else:
-                os.execv("/bin/bash",  ["/bin/bash", "-i"])
+                os.execv("/usr/bin/env", ["env", "bash", "-i"])
 
 #----------------------------------------------------------------------------------------------
 

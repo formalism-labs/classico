@@ -471,21 +471,22 @@ class Setup(OnPlatform):
     #------------------------------------------------------------------------------------------
 
     def pip(self, cmd, output="on_error", _try=False):
-        return self.run(self.python + " -m pip --disable-pip-version-check " + cmd,
+        return self.run(f"{self.python} -m pip --disable-pip-version-check {cmd}",
                         output=output, _try=_try, sudo=False)
 
     def pip_install(self, cmd, output="on_error", _try=False):
+        if self.is_command("uv"):
+            return self.run(f"uv pip install {cmd}", output=output, _try=_try, sudo=False)
         pip_user = ''
-        # if self.os == 'macos' and 'VIRTUAL_ENV' not in os.environ:
         if 'VIRTUAL_ENV' not in os.environ:
             pip_user = '--user '
-        return self.run("{PYTHON} -m pip install --disable-pip-version-check {PIP_USER} {CMD}".
-                        format(PYTHON=self.python, PIP_USER=pip_user, CMD=cmd),
+        return self.run(f"{self.python} -m pip install --disable-pip-version-check {pip_user} {cmd}",
                         output=output, _try=_try, sudo=False)
 
     def pip_uninstall(self, cmd, output="on_error", _try=False):
-        return self.run("{PYTHON} -m pip uninstall --disable-pip-version-check -y {CMD} || true".
-                        format(PYTHON=self.python, CMD=cmd),
+        if self.is_command("uv"):
+            return self.run(f"uv pip uninstall {cmd}", output=output, _try=_try, sudo=False)
+        return self.run(f"{self.python} -m pip uninstall --disable-pip-version-check -y {cmd} || true",
                         output=output, _try=_try, sudo=False)
 
     #------------------------------------------------------------------------------------------
@@ -557,6 +558,6 @@ class Setup(OnPlatform):
             """, sudo=True)
 
     def setup_dotlocal(self):
-        self.cat_to_profile_d(r'''
-                prepend_to_path {HOME}/.local/bin
-            '''.format(HOME=Path.home()), "dotlocal.sh")
+        self.cat_to_profile_d(f'''
+                prepend_to_path {Path.home()}/.local/bin
+            ''', "dotlocal.sh")

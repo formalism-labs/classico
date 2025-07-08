@@ -1,8 +1,8 @@
-
 from contextlib import contextmanager
 import errno
 import os
 import os.path
+import re
 import shutil
 import sys
 import tempfile
@@ -22,6 +22,46 @@ def fread(fname, mode='r'):
 def fwrite(fname, text, mode='w', encode=True):
     with open(fname, mode) as file:
         return file.write(text)
+
+#----------------------------------------------------------------------------------------------
+
+def fappend(fname, text, mode='a', encode=True):
+    with open(fname, mode) as file:
+        return file.write(text)
+
+#----------------------------------------------------------------------------------------------
+
+def freplace(fname, between, text, all=False, append_if_missing=True, mode='r+', encode=True):
+    """
+    Replace text between two patterns (including the pattern lines) with the provided text.
+    `between` should be a tuple/list: (from_pattern, to_pattern)
+    If append_if_missing is True and the patterns are not found, append the text at the end.
+    """
+    from_pat, to_pat = between
+    replaced = False
+    output_lines = []
+    found = False
+    with open(fname, 'r') as file:
+        in_block = False
+        for line in file:
+            if not in_block and re.search(from_pat, line):
+                in_block = True
+                found = True
+                if not replaced or all:
+                    output_lines.append(text if text.endswith('\n') else text + '\n')
+                    replaced = True
+                continue
+            if in_block and re.search(to_pat, line):
+                in_block = False
+                continue
+            if not in_block:
+                output_lines.append(line)
+    if append_if_missing and not found:
+        if output_lines and not output_lines[-1].endswith('\n'):
+            output_lines[-1] += '\n'
+        output_lines.append(text if text.endswith('\n') else text + '\n')
+    with open(fname, 'w') as file:
+        file.writelines(output_lines)
 
 #----------------------------------------------------------------------------------------------
 

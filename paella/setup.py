@@ -24,7 +24,7 @@ class OutputMode:
         elif lx == "on_error":
             self.mode = "on_error"
         else:
-            raise Error("Wrong output mode: %s" % x)
+            raise Error(f"Wrong output mode: {x}")
 
     def __eq__(self, x):
         return self.mode == OutputMode(x).mode
@@ -74,7 +74,7 @@ class Runner:
                 cmd_file = paella.tempfilepath()
                 paella.fwrite(cmd_file, cmd)
                 cmd = f"bash -l {cmd_file}"
-                cmd_for_log = "sudo { %s }" % cmd_for_log
+                cmd_for_log = f"sudo {cmd_for_log}"
         else:
             if venv != '':
                 cmd = f"{{ . {venv}/bin/activate; {cmd}; }}"
@@ -84,7 +84,7 @@ class Runner:
                 cmd_file = paella.tempfilepath()
                 paella.fwrite(cmd_file, cmd)
                 cmd = f"sudo bash -l {cmd_file}"
-                cmd_for_log = "sudo { %s }" % cmd_for_log
+                cmd_for_log = f"sudo {cmd_for_log}"
             else:
                 cmd = f"sudo bash -l -c '{cmd}'"
         if echo:
@@ -153,13 +153,13 @@ class PackageManager(object):
             elif platform.dist == 'alpine':
                 return Alpine(runner)
             else:
-                raise Error("Cannot determine package manager for distibution %s" % platform.dist)
+                raise Error(f"Cannot determine package manager for distibution {platform.dist}")
         elif platform.os == 'macos':
             return Brew(runner)
         elif platform.os == 'freebsd':
             return Pkg(runner)
         else:
-            raise Error("Cannot determine package manager for OS %s" % platform.os)
+            raise Error(f"Cannot determine package manager for OS {platform.os}")
 
     def run(self, cmd, at=None, output="on_error", nop=None, _try=False, sudo=False, echo=True):
         return self.runner.run(cmd, at=at, output=output, nop=nop, _try=_try, sudo=sudo)
@@ -329,7 +329,7 @@ class Brew(PackageManager):
             sys.exit(1)
         if sys.version_info < (3, 0):
             if 'VIRTUAL_ENV' not in os.environ:
-                # required because osx pip installed are done with --user
+                # required because macos pip installed are done with --user
                 os.environ["PATH"] = os.environ["PATH"] + ':' + os.environ["HOME"] + '/Library/Python/2.7/bin'
 
     def install(self, packs, group=False, output="on_error", _try=False):
@@ -401,7 +401,6 @@ class Setup(OnPlatform):
         self.dist = self.platform.dist
         self.ver = self.platform.os_ver
         self.os_version = self.platform.os_version
-        # self.version = self.platform.version(full=True) # deprecated
         self.repo_refresh = True
 
         self.package_manager = PackageManager.detect(self.platform, self.runner)
@@ -431,7 +430,7 @@ class Setup(OnPlatform):
 
     def cp_to_profile_d(self, file, as_file=None):
         if not os.path.isfile(file):
-            raise Error("file not found: %s" % file)
+            raise Error(f"file not found: {file}")
         d = self.profile_d
         if as_file is None:
             as_file = os.path.basename(file)

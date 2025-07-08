@@ -31,7 +31,7 @@ platform_arch() {
 		armv6l*)  echo "arm32v6" ;;
 		ppc64*)   echo "ppc" ;;
 		s390*)    echo "s390_31" ;;
-		s390x*)   echo "s390" ;;
+		s390x*)   echo "s390x" ;;
 		*)        echo "?" ;;
 	esac
 }

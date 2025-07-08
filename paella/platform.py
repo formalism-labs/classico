@@ -515,6 +515,8 @@ class Platform:
             self.arch = 'arm64v8'
         elif self.arch == 'armv7l':
             self.arch = 'arm32v7'
+        elif self.arch == 's390x':
+            pass
 
     #------------------------------------------------------------------------------------------
 

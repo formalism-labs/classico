@@ -39,6 +39,10 @@ ifneq ($(MK.configure),)
 include $(MK)/configure.rules
 endif
 
+ifneq ($(MK.docker),)
+include $(MK)/docker.rules
+endif
+
 .PHONY: default
 
 endif # HELP

@@ -17,7 +17,7 @@ override ROOT:=$(shell cd $(ROOT) && pwd)
 export MK_ROOT:=$(ROOT)
 
 ifneq ($(V),)
-VERBOSE?=$(V)
+VERBOSE ?= $(V)
 endif
 
 ifneq ($(filter help,$(MAKECMDGOALS)),)
@@ -27,39 +27,31 @@ MK_ALL_TARGETS:=help
 endif
 
 ifeq ($(CLASSICO),)
-ifneq ($(wildcard $(ROOT)/deps/classico),)
-CLASSICO:=$(ROOT)/deps/classico
-else ifneq ($(wildcard $(ROOT)/classico),)
-CLASSICO:=$(ROOT)/classico
-else ifneq ($(wildcard $(ROOT)/mk),)
-CLASSICO:=$(ROOT)
+	ifneq ($(wildcard $(ROOT)/deps/classico),)
+		CLASSICO:=$(ROOT)/deps/classico
+	else ifneq ($(wildcard $(ROOT)/classico),)
+		CLASSICO:=$(ROOT)/classico
+	else ifneq ($(wildcard $(ROOT)/mk),)
+		CLASSICO:=$(ROOT)
+	else
+		__:=$(error Cannot find Classico root)
+	endif
 else
-__:=$(error Cannot find Classico root)
-endif
-else
-override CLASSICO:=$(shell cd $(CLASSICO) && pwd)
+	override CLASSICO:=$(shell cd $(CLASSICO) && pwd)
 endif
 export CLASSICO
 
-# ifeq ($(wildcard $(CLASSICO)/*),)
-# ___:=$(shell git submodule update --init --recursive &> /dev/null)
-# endif
-
 export MK:=$(CLASSICO)/mk
 
-MK.pyver ?= 3
-MK.getpy=getpy$(MK.pyver)
-
-ifneq ($(shell { command -v python3 &> /dev/null; echo -n $$?; }),0)
-ifneq ($(filter setup,$(MAKECMDGOALS)),)
-MK.nobindir:=1
-else
-define PYERROR
-Cannot find python$(MK.pyver) interpreter.
-You can install one by running 'make setup'.
-endef
-__:=$(error $(PYERROR))
+define nobindir_check
+ifeq ($(MK.$(1)),1)
+MK.nobindir := 1
 endif
+endef
+
+$(foreach env,docker,$(eval $(call nobindir_check,$(env))))
+
+ifneq ($(shell { command -v python &> /dev/null; echo -n $$?; }),0)
 __NO_PYTHON=1
 endif
 

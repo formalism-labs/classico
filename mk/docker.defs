@@ -1,0 +1,28 @@
+
+ifneq ($(MK.docker),)
+#----------------------------------------------------------------------------------------------
+
+DOCKER ?= docker
+
+ifeq ($(CACHE),0)
+DOCKER_BUILD_ARGS += --no-cache
+endif
+
+ifneq ($(FAST),1)
+export BUILDKIT_MAX_PARALLELISM=1
+DOCKER_BUILD_ARGS += --progress=plain
+endif
+
+define HELPTEXT
+Commands:
+  build    Build Docker image
+  run      Run container
+  stop     Stop and remove container
+  logs     View container logs
+  status   Show container status
+  shell    Open shell in container
+  help     Show this help message
+endef
+
+#----------------------------------------------------------------------------------------------
+endif # MK.docker

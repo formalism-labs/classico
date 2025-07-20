@@ -1,0 +1,33 @@
+
+ifneq ($(MK.docker),)
+#----------------------------------------------------------------------------------------------
+
+DOCKER ?= docker
+
+build:
+	$(SHOW)$(DOCKER) build $(DOCKER_BUILD_ARGS) \
+		--build-context here=$(PWD) \
+		--build-context classico=$(CLASSICO) \
+		-t $(IMAGE_NAME) .
+
+run:
+	$(SHOW)docker run $(DOCKER_RUN_ARGS) --name $(CONTAINER_NAME) --rm $(IMAGE_NAME)
+
+stop:
+	$(SHOW)-$(DOCKER) stop $(CONTAINER_NAME)
+
+# restart: stop run
+
+logs:
+	$(SHOW)$(DOCKER) logs -f $(CONTAINER_NAME)
+
+status:
+	$(SHOW)$(DOCKER) ps -a | grep $(CONTAINER_NAME) || echo "Container not running"
+
+sh:
+	$(SHOW)$(DOCKER) exec -it $(CONTAINER_NAME) /bin/bash
+
+.PHONY: build run stop logs status sh help
+
+#----------------------------------------------------------------------------------------------
+endif # MK.docker

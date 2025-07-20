@@ -1,7 +1,6 @@
 
-ROOT=../../../..
-MK.pyver:=3
-include $(ROOT)/readies/mk/main
+ROOT=../../..
+include $(ROOT)/mk/main
 
 REDIS_VERSION=6.2.6
 REPO=redisfoo

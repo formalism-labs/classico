@@ -5,8 +5,8 @@ import os
 import argparse
 
 HERE = os.path.dirname(__file__)
-ROOT = os.path.abspath(os.path.join(HERE, ".."))
-CLASSICO = ROOT
+CLASSICO = os.path.abspath(os.path.join(HERE, "../.."))
+sys.path.insert(0, CLASSICO)
 import paella
 
 #----------------------------------------------------------------------------------------------

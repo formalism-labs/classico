@@ -3,9 +3,16 @@
 import argparse
 import os
 import sys
+# import paella
+# from typer import Argument
+# from typing_extensions import Annotated
+
+HERE = os.path.dirname(__file__)
+CLASSICO = os.path.abspath(os.path.join(HERE, "../.."))
+sys.path.insert(0, CLASSICO)
 import paella
-from typer import Argument, Option
-from typing_extensions import Annotated
+
+from paella import Option, Annotated, Argument
 
 #----------------------------------------------------------------------------------------------
 
@@ -21,10 +28,8 @@ class App:
 
     @staticmethod
     def common_options(
-        verbose: Annotated[
-            bool, Option("--verbose", "-v", help="Turn on extra logging")] = False,
-        nop: Annotated[
-            bool, Option("--nop", help="No operation")] = False,
+        verbose: II[bool, Option("--verbose", "-v", help="Turn on extra logging")] = False,
+        nop: II[bool, Option("--nop", help="No operation")] = False,
         ): pass
 
     def init(self):
@@ -42,12 +47,19 @@ def read():
 
 @app.command(help="Write information")
 def write(
-    name: Annotated[
-        str, Argument(..., help="Text name")],
-    for_: Annotated[
-        str, Option(..., help="For which user", metavar="USER")],
-    count: Annotated[
-        int, Option("-n", "--count", help="How many copies to write", show_default="1")]):
+    name: II[str, Argument(..., help="Text name")],
+    for_: II[str, Option(..., help="For which user", metavar="USER")],
+    count: II[int, Option("-n", "--count", help="How many copies to write", show_default="1")]):
+    pass
+
+#----------------------------------------------------------------------------------------------
+
+@app.command(help="Option groups")
+def groups(
+        one: II[int, Option(help="First number.", group="Numbers")] = 0,
+        two: II[int, Option(help="Second number.", group="Numbers")] = 0,
+        red: II[bool, Option(help="Red color.", group="Colors")] = False,
+        green: II[bool, Option(help="Green color.", group="Colors")] = False):
     pass
 
 #----------------------------------------------------------------------------------------------

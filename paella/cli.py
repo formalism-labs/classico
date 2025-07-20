@@ -1,6 +1,7 @@
 
 import textwrap
 from typing import Optional
+import typing_extensions
 from typing_extensions import Annotated
 import typer
 import click
@@ -91,3 +92,14 @@ def cli_app(cls):
             return getattr(self._app, name)
 
     return _App
+
+#----------------------------------------------------------------------------------------------
+
+def Option(*args, **kwargs):
+    group = kwargs.pop("group", None)
+    if group is not None:
+        kwargs["rich_help_panel"] = group
+    return typer.Option(*args, **kwargs)
+
+Annotated = typing_extensions.Annotated
+Argument = typer.Argument

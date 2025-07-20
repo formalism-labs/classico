@@ -44,3 +44,4 @@ Global.ENV = Env()
 Global.HH = heredoc
 Global.JJ = jjdoc
 Global.cli_app = cli_app
+Global.II = paella.Annotated

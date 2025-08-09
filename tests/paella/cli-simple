@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import sys
+
+HERE = os.path.dirname(__file__)
+CLASSICO = os.path.abspath(os.path.join(HERE, "../.."))
+sys.path.insert(0, CLASSICO)
+import paella
+
+from paella import Option, Argument
+
+#----------------------------------------------------------------------------------------------
+
+@cli_app
+class App:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def prolog(self):
+        return "**Simple command-line application**"
+
+    def epilog(self):
+        return "**That's all, folks!**"
+
+app = App()
+
+@app.command(main=True)
+def command(
+        name: II[str, Argument(help="Your name")] = "jojo",
+        verbose: II[bool, Option("--verbose", "-v", help="Turn on extra logging")] = False,
+        nop: II[bool, Option("--nop", help="No operation")] = False):
+    print(f"hello {name}!")
+
+#----------------------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    app()

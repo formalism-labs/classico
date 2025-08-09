@@ -3,66 +3,62 @@
 import argparse
 import os
 import sys
-# import paella
-# from typer import Argument
-# from typing_extensions import Annotated
 
 HERE = os.path.dirname(__file__)
 CLASSICO = os.path.abspath(os.path.join(HERE, "../.."))
 sys.path.insert(0, CLASSICO)
 import paella
 
-from paella import Option, Annotated, Argument
+from paella import Option, Argument
 
 #----------------------------------------------------------------------------------------------
+
+#def common_args(
+#    verbose: II[bool, Option("--verbose", "-v", help="Turn on extra logging")] = False,
+#    nop: II[bool, Option("--nop", help="No operation")] = False): pass
 
 @cli_app
 class App:
     def prolog(self):
-        """
-        **Command-line application**
-        """
+        return "**Command-line application with commands**"
 
-    def my_name(self):
-        return "cli"
-
-    @staticmethod
-    def common_options(
-        verbose: II[bool, Option("--verbose", "-v", help="Turn on extra logging")] = False,
-        nop: II[bool, Option("--nop", help="No operation")] = False,
-        ): pass
-
-    def init(self):
-        print(f"Hello from {self.my_name()}!")
+    def epilog(self):
+        return "**That's all, folks!**"
 
 app = App()
 
 #----------------------------------------------------------------------------------------------
 
-@app.command(help="Read information")
+@app.command(help="Read information", epilog="end of read")
+#@with_args_from(common_args)
 def read():
     print("Hello from read!")
+    print(app.to_json())
 
 #----------------------------------------------------------------------------------------------
 
 @app.command(help="Write information")
+#@with_args_from(common_args)
 def write(
-    name: II[str, Argument(..., help="Text name")],
-    for_: II[str, Option(..., help="For which user", metavar="USER")],
-    count: II[int, Option("-n", "--count", help="How many copies to write", show_default="1")]):
-    pass
+        name: II[str, Argument(..., help="Text name")],
+        for_: II[str, Option("--for", help="For which user", metavar="USER")],
+        count: II[int, Option("-n", "--count", help="How many copies to write", show_default="1")] = 1):
+    print(locals())
+#    if nop:
+#        print("write running in NOP mode")
 
 #----------------------------------------------------------------------------------------------
 
 @app.command(help="Option groups")
+#@with_args_from(common_args)
 def groups(
         one: II[int, Option(help="First number.", group="Numbers")] = 0,
         two: II[int, Option(help="Second number.", group="Numbers")] = 0,
         red: II[bool, Option(help="Red color.", group="Colors")] = False,
         green: II[bool, Option(help="Green color.", group="Colors")] = False):
-    pass
+    print(locals())
 
 #----------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app.run()
+    app()

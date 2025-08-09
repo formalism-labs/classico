@@ -12,19 +12,8 @@ from .meta import *
 
 #----------------------------------------------------------------------------------------------
 
-# This gets overridden by App constructor
-def App_common_options(): pass
-
-#----------------------------------------------------------------------------------------------
-
 class TyperApp(typer.Typer):
-    @staticmethod
-    def callback(ctx: typer.Context):
-        app = ctx.obj["typer"]
-        app.init()
-
     def __init__(self, help=None, epilog=None):
-        cb = add_fn_args(TyperApp.callback, App_common_options)
         if help is None:
             help = self.prolog()
         if epilog is None:
@@ -34,26 +23,22 @@ class TyperApp(typer.Typer):
             no_args_is_help=False, #True,
             add_completion=False,
             invoke_without_command=True,
-            callback=cb,
             context_settings={
                 "help_option_names": ["-h", "-?", "--help"],
                 "max_content_width": 120})
 
-    def init(self):
-        pass
-    
-    def __app(self):
-        return self
-
+#    def __app(self):
+#        return self
+#
+#    def run(self):
+#        super().__call__(obj={"typer": self.__app()})
+        
     def prolog(self):
         return ""
 
     def epilog(self):
         return ""
     
-    def run(self):
-        super().__call__(obj={"typer": self.__app()})
-        
     def to_json(self):
         return click.get_current_context().params
 
@@ -61,35 +46,44 @@ class TyperApp(typer.Typer):
 
 def cli_app(cls):
     class _App(TyperApp):
-        def __init__(self, *args, **kwargs):
-            try:
-                globals()['App_common_options'] = cls.common_options
-            except:
-                pass
+        App = cls
 
-            self._app = cls(*args, **kwargs)
+        def __init__(self, *args, **kwargs):
+            self.app = cls(*args, **kwargs)
             super().__init__(*args, **kwargs)
+
+        def __getattr__(self, name):
+            return getattr(self.app, name)
 
         def __app(self):
             return self
 
-        def init(self):
-            return self._app.init()
+        def command(self, *args, **kwargs):
+            _super = super()
+            is_main = kwargs.pop('main', False)
+            if is_main:
+                self._fix_help_text(kwargs)
+            def decorator(func):
+                return _super.command(*args, **kwargs)(func)
+            return decorator
+
+        def _fix_help_text(self, kwargs):
+            if 'help' not in kwargs:
+                kwargs['help'] = self.prolog()
+            if 'epilog' not in kwargs:
+                kwargs['epilog'] = self.epilog()
 
         def prolog(self):
             try:
-                return textwrap.dedent(self._app.prolog())
+                return textwrap.dedent(self.app.prolog())
             except:
                 return ""
-            
-        def epilogtext(self):
+
+        def epilog(self):
             try:
-                return textwrap.dedent(self._app.epilog())
+                return textwrap.dedent(self.app.epilog())
             except:
                 return ""
-            
-        def __getattr__(self, name):
-            return getattr(self._app, name)
 
     return _App
 
@@ -100,6 +94,8 @@ def Option(*args, **kwargs):
     if group is not None:
         kwargs["rich_help_panel"] = group
     return typer.Option(*args, **kwargs)
+
+#----------------------------------------------------------------------------------------------
 
 Annotated = typing_extensions.Annotated
 Argument = typer.Argument

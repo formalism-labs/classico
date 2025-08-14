@@ -14,7 +14,7 @@ if [[ $os == macos ]]; then
 elif [[ $os == freebsd ]]; then
 	PACKS="gmake coreutils findutils gsed gtar gawk"
 else
-	exit
+	exit 0
 fi
 xinstall $PACKS
 
@@ -25,3 +25,4 @@ for x in make find xargs sed tar mktemp du; do
 		ln -s $src $dest
 	fi
 done
+exit 0

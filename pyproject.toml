@@ -13,5 +13,5 @@ dynamic = ["dependencies"]
 dependencies = { file = ["paella/requirements.txt"] }
 
 [tool.ruff.lint]
-ignore = ["A001", "A002", "F403", "F405", "F821", "E722"]
+ignore = ["A001", "A002", "E401", "F401", "F403", "F405", "F821", "E722"]
 

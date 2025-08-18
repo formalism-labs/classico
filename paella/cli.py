@@ -17,8 +17,8 @@ class Command(typer.core.TyperCommand):
     def __init__(self, *args, **kwargs):
         ctx_settings = kwargs.get("context_settings", None)
         if ctx_settings is not None:
-            typer_app = ctx_settings.pop("typer_app", None)
-            self.typer_app = typer_app
+            self.typer_app = ctx_settings.pop("typer_app", None)
+            self.extra_args_desc = ctx_settings.pop("extra_args_desc", None)
         super().__init__(*args, **kwargs)
 
 #    def __getattr__(self, name):
@@ -26,16 +26,19 @@ class Command(typer.core.TyperCommand):
 
     def collect_usage_pieces(self, ctx):
         pieces = super().collect_usage_pieces(ctx)
-        extra_args = self.typer_app.extra_args_desc()
-        if extra_args is not None:
-            pieces.append(f"[-- {extra_args}]")
+        try:
+            if self.extra_args_desc is not None:
+                pieces.append(f"[-- {self.extra_args_desc}]")
+        except:
+            pass
         return pieces
         
 class CommandInfo:
-    def __init__(self, typer_app, cmd_info):
+    def __init__(self, cmd_info, typer_app=None, extra_args_desc=None):
         self.cls = Command
-        self.typer_app = typer_app
         self.cmd_info = cmd_info
+        self.typer_app = typer_app
+        self.extra_args_desc = extra_args_desc
 
     def __getattr__(self, name):
         return getattr(self.cmd_info, name)
@@ -44,6 +47,7 @@ class CommandInfo:
         super().__setattr__(name, value)
         if name == "context_settings":
             self.context_settings["typer_app"] = self.typer_app
+            self.context_settings["extra_args_desc"] = self.extra_args_desc
 
 class TyperApp(typer.Typer):
     def __init__(self, help=None, epilog=None):
@@ -76,12 +80,6 @@ class TyperApp(typer.Typer):
         self.extract_extra_args()
         return super().__call__(*args, **kwargs)
 
-#    def __app(self):
-#        return self
-#
-#    def run(self):
-#        super().__call__(obj={"typer": self.__app()})
-
     def prolog(self):
         return ""
 
@@ -112,6 +110,7 @@ def cli_app(cls):
             is_main = kwargs.pop('main', False)
             if is_main:
                 self._fix_help_text(kwargs)
+            extra_args_desc = kwargs.pop('extra_args_desc', False)
             def decorator(func):
                 # this registers the command with the app
                 # upon app() invocation, registered commands are being transformed
@@ -120,7 +119,7 @@ def cli_app(cls):
                 i = 0
                 for cmd in self.registered_commands:
                     if cmd.callback == x:
-                        self.registered_commands[i] = CommandInfo(self, cmd)
+                        self.registered_commands[i] = CommandInfo(cmd, typer_app=self, extra_args_desc=extra_args_desc)
                         break
                     i += 1
                 return x

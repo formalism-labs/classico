@@ -26,21 +26,18 @@ jobs:
       image: ${{ matrix.os }}
       options: --cpus 2
     steps:
-    - name: Prerequisites
-      run: |
-        yum install -y tar gzip
+#    - name: Prerequisites
+#      run: |
+#        yum install -y tar gzip
     - uses: actions/checkout@v3
       with:
         submodules: false
 #    - run: |
 #        git config --global --add safe.directory '*'
 #        # git submodule update --init --recursive
-    - name: Python
+    - name: Set up Classico
       run: |
-        ./bin/getpy3
-    - name: Setup repositories
-      run: |
-        V=1 ./bin/getepel
+        V=1 ./sbin/setup
     - name: Installations
       run: |
         ./bin/getgcc --modern
@@ -50,9 +47,9 @@ jobs:
         echo "/etc/redhat-release:"; cat /etc/redhat-release || true
         echo "uname -a: $(uname -a)"
         echo "bash: $BASH_VERSION"
-        echo "System Python: $(/usr/bin/python3 --version)"
-        echo "Python: $(python3 --version)"
-        echo "pip list:"; python3 -m pip list -v
+        echo "System Python: $(/usr/bin/python --version)"
+        echo "Python: $(python --version)"
+        echo "pip list:"; python -m pip list -v
         echo "System gcc: $(/usr/bin/gcc --version | head -1)"
         echo "gcc: $(gcc --version | head -1)"
         echo "glibc: $(./bin/glibcver)"

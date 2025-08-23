@@ -27,7 +27,7 @@ if [[ $os == rocky || $os == almalinux || $os == rhel ]]; then
 	if [[ $(echo "$osver >= 9.0" | bc -l) ]]; then
 		packs="${packs/curl/}"
 	fi
-elif [[ $os == mariner ]]; then
+elif [[ $os == fedora || $os == mariner ]]; then
 	packs+=" awk"
 fi
 

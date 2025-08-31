@@ -2,7 +2,7 @@
 $classico = "$env:LOCALAPPDATA\FormalismLab\classico"
 if (Test-Path -Path $classico) {
     Write-Output "Classico installed in $classico"
-	exit 1
+	return 1
 }
 
 push-location
@@ -18,12 +18,12 @@ try {
 	Write-Output "Classico installed in $classico"
 } catch {
 	pop-location
-	exit 1
+	return 1
 } finally {
 	if ($tmpdir -ne "" -and (Test-Path -Path $tmpdir)) {
 		cd $env:TEMP
 		Remove-Item -Path $tmpdir -Recurse -Force
 	}
 	pop-location
-	exit 0
+	return 0
 }

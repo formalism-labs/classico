@@ -26,8 +26,8 @@ function install-classico {
 			Remove-Item -Path $tmpdir -Recurse -Force
 		}
 		pop-location
-		return 0
 	}
+	return 0
 }
 
 install-classico

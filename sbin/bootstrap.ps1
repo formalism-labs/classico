@@ -3,7 +3,7 @@ function install-classico {
 	$classico = "$env:LOCALAPPDATA\FormalismLab\classico"
 	if (Test-Path -Path $classico) {
 		Write-Output "Classico installed in $classico"
-		return 1
+		return
 	}
 
 	push-location
@@ -19,7 +19,8 @@ function install-classico {
 		Write-Output "Classico installed in $classico"
 	} catch {
 		pop-location
-		return 1
+		Write-Error "Error downloading Classico"
+		return
 	} finally {
 		if ($tmpdir -ne "" -and (Test-Path -Path $tmpdir)) {
 			cd $env:TEMP
@@ -27,7 +28,6 @@ function install-classico {
 		}
 		pop-location
 	}
-	return 0
 }
 
 install-classico

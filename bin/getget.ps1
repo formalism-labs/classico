@@ -1,4 +1,5 @@
 param (
+	[switch] $UPDATE,
     [switch] $NOP
 )
 
@@ -17,10 +18,19 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 
 if (! (is_command "choco")) {
-	op { iex "& {$(irm https://community.chocolatey.org/install.ps1)}" }
+	if (! $UPDATE) {
+		op { iex "& {$(irm https://community.chocolatey.org/install.ps1)}" }
+	} else {
+		op { choco upgrade -y chocolatey }
+	}
 }
 if (! (is_command "scoop")) {
-	op { iex "& {$(irm get.scoop.sh)} -RunAsAdmin" }
+	if (! $UPDATE) {
+		op { iex "& {$(irm get.scoop.sh)} -RunAsAdmin" }
+	} else {
+		# this requires git
+		op { scoop update }
+	}
 }
 if (! (is_command "winget")) {
 	op { 

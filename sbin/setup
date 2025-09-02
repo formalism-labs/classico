@@ -11,29 +11,44 @@ if [[ $BASH_VERSINFO == 3 ]]; then
 	exit 1
 fi
 
+os="$(platform_os)"
+
 export HOMEBREW_NO_AUTO_UPDATE=1
 
 $CLASSICO/shibumi/setup
 
+if [[ $os == windows ]]; then
+	posh <<-'END'
+		$CLASSICO/bin/getget.ps1
+		END
+fi
 $CLASSICO/bin/getget
+$CLASSICO/bin/getbashdb
 $CLASSICO/bin/getgnu
 
 profile_d="$(get_profile_d)"
 
-tmp_profiled=$(mktemp -d)
-cat <<-'END' > $tmp_profiled/dotlocal.sh
-	if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-	    export PATH="$HOME/.local/bin${PATH:+":$PATH"}"
-	fi
+cat <<-'END' > $profile_d/dotlocal.sh
+	prepend_to_path $HOME/.local/bin
 	END
-add_to_profile_d $tmp_profiled/dotlocal.sh
-rm -rf $tmp_profiled
+
+if [[ $os == windows ]]; then
+	cat <<-'END' > $profile_d/windows.sh
+		append_to_path /c/ProgramData/chocolatey/bin:$(cygpath $USERPROFILE)/scoop/shims
+		append_to_path $(cygpath $USERPROFILE)/AppData/Local/Microsoft/WindowsApps
+		END
+fi
+
 rearm
 
 runn $CLASSICO/bin/getpy
 rearm
 
-runn $CLASSICO/bin/getnode --modern --bun
+if [[ $os == windows ]]; then
+	runn $CLASSICO/bin/getnode --modern
+else
+	runn $CLASSICO/bin/getnode --modern --bun
+fi
 rearm
 
 runn $HERE/system-setup
@@ -43,5 +58,5 @@ if [[ $VERBOSE == 1 ]]; then
 	uv pip list
 	node --version
 	npm --version
-	bun --version
+	[[ $os != windows ]] && bun --version
 fi

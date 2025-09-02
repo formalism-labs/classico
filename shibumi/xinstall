@@ -78,7 +78,7 @@ xinstall() {
 
 		case $(platform_windows) in
 			msys2)
-				runn pacman --noconfirm --needed "$packs"
+				runn pacman --noconfirm --needed -S "$packs"
 				;;
 			cygwin)
 				[[ -f /usr/local/bin/apt-cyg ]] && cp $CLASSICO/win/cygwin/apt-cyg /usr/local/bin/apt-cyg

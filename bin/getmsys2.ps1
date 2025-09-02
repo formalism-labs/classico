@@ -21,13 +21,14 @@ try {
 	cd c:\
 	op { & $t\msys2-sfx.exe }
 
-	$env:MSYS = "winsymlinks:native enable_pcon"
-	op { & setx MSYS "winsymlinks:native enable_pcon" /m }
+	$env:MSYS = "winsymlinks:native"
+	op { & setx MSYS "winsymlinks:native" /m }
 
 	$env:HOME = "/home/" + $env:USERNAME
 	$env:TZ = "Asia/Tel_Aviv"
 
 	op { & c:\msys64\usr\bin\bash -l -c true }
+	op { & c:\msys64\usr\bin\bash -l -c "mkdir -p ~/.local; ln -s $(cygpath $CLASSIC)) ~/.local/classico" }
 } catch {
 	Print-Error "Error occured during msys2 installation."
 	exit 1

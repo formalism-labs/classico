@@ -5,9 +5,12 @@ HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
 CLASSICO=$(cd $HERE/.. && pwd)
 . $CLASSICO/shibumi/defs
 
+os=$(platform_os)
 if [[ -f /etc/os-release ]]; then
-	os=$(source /etc/os-release; echo "${ID}")
+	# os=$(source /etc/os-release; echo "${ID}")
 	osver=$(source /etc/os-release; echo "${VERSION_ID}")
+else
+	os=$(platform_os)
 fi
 arch=$(uname -m)
 
@@ -29,6 +32,8 @@ if [[ $os == rocky || $os == almalinux || $os == rhel ]]; then
 	fi
 elif [[ $os == fedora || $os == mariner ]]; then
 	packs+=" awk"
+elif [[ $os == windows ]]; then
+	packs="${packs/ca-certificates/}"
 fi
 
 if [[ $FORCE != 1 ]]; then

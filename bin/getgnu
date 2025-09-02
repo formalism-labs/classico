@@ -13,10 +13,16 @@ if [[ $os == macos ]]; then
 	PACKS="make coreutils findutils gnu-sed gnu-tar gawk gpatch"
 elif [[ $os == freebsd ]]; then
 	PACKS="gmake coreutils findutils gsed gtar gawk"
+elif [[ $os == windows ]]; then
+	PACKS="make patch"
 else
 	exit 0
 fi
 xinstall $PACKS
+
+if [[ $os == windows ]]; then
+	exit 0
+fi
 
 for x in make find xargs sed tar mktemp du; do
 	dest="$BINDIR/g${x}"

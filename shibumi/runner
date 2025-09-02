@@ -80,6 +80,13 @@ spin_while() {
 
 #----------------------------------------------------------------------------------------------
 
+# usage:
+# posh command...
+# or:
+# posh <<-'END'
+#     commands...
+#     END
+
 posh() {
 	local ps_exe=powershell.exe
 	if is_command pwsh.exe; then
@@ -91,7 +98,17 @@ posh() {
 	PREFIX=posh SUFFIX=.ps1 heredoc <<-'END'; local cmd="$FILE"
 		$ErrorActionPreference = 'Stop'
 		END
-	cat >> "$cmd"
+
+	if [[ $(platform_os) == windows ]]; then
+		W_CLASSICO="$(cygpath -m $CLASSICO)"
+		echo "\$CLASSICO=\"$W_CLASSICO\"" >> $cmd
+	fi
+	
+	if [[ -t 0 ]]; then
+		echo "$@" >> "$cmd"
+	else
+		cat >> "$cmd"
+	fi
 	(( NOP == 1 || V >= 1 )) && cat "$cmd"
 	[[ $NOP == 1 ]] && return
 	if (( V < 2 )); then

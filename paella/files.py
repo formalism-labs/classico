@@ -13,9 +13,16 @@ except:
 
 #----------------------------------------------------------------------------------------------
 
-def fread(fname, mode='r'):
-    with open(fname, mode) as file:
-        return file.read()
+def fread(fname, mode='r', fail=True):
+    def _open():
+        with open(fname, mode) as file:
+            return file.read()
+    if not fail:
+        try:
+            return _open()
+        except:
+            return ""
+    return _open();
 
 #----------------------------------------------------------------------------------------------
 

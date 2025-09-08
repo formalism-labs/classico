@@ -12,11 +12,17 @@ platform_os() {
 }
 
 platform_windows() {
-	case "$OSTYPE" in
-		msys*)    echo "msys2" ;;
-		cygwin*)  echo "cygwin" ;;
-		*)        if cat /proc/version | grep -i wsl2 >& /dev/null ]]; then echo "wsl"; else echo "unknown"; fi ;;
-	esac
+	if [[ -n $MSYSTEM ]]; then
+		echo "msys2"
+	elif [[ $OSTYPE == cygwin ]]; then
+		echo "cygwin"
+	elif cat /proc/version | grep -i wsl2 >& /dev/null ]]; then
+		echo "wsl"
+	elif [[ -d $WINDIR ]]; then
+		echo "windows"
+	else
+		echo "unknown"
+	fi
 }
 
 platform_arch() {

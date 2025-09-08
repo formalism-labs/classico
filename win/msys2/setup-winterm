@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO=$(cd $HERE/../.. && pwd)
+. $CLASSICO/shibumi/defs
+
+termfile=$(mktemp /tmp/term.json.XXXXXX)
+uuid=$(uuidgen)
+cat <<-END > $termfile
+	{
+		"guid": "{$uuid}",
+		"name": "MINGW64",
+		"tabTitle": "msys2",
+		"commandline": "C:/msys64/msys2_shell.cmd -defterm -here -no-start -mingw64 -shell bash",
+		"startingDirectory": "C:/msys64/home/%USERNAME%",
+		"closeOnExit": "always",
+		"font": {
+			"size": 10
+		},
+		"icon": "C:/msys64/mingw64.ico",
+		"hidden": false
+	}
+	END
+settings="$(cygpath -m $LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json)"
+jq --slurpfile frag $termfile '.profiles.list += $frag' $settings | sponge $settings
+rm $termfile

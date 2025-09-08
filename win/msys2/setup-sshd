@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO="$(cd $HERE/../.. && pwd)"
+. $CLASSICO/shibumi/defs
+
+if [[ $UNINSTALL == 1 ]]; then
+	net stop msys2_sshd || :
+	cygrunsrv -R msys2_sshd 2>/dev/null || :
+	net user sshd //delete || :
+	exit 0
+fi
+
+pacman --noconfirm --needed -S openssh cygrunsrv mingw-w64-x86_64-editrights
+$HERE/msys2-sshd-setup.sh

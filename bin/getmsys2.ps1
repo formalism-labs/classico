@@ -28,9 +28,9 @@ try {
 	$env:TZ = "Asia/Tel_Aviv"
 
 	op { & c:\msys64\usr\bin\bash -l -c true }
-	op { & c:\msys64\usr\bin\bash -l -c "mkdir -p ~/.local; ln -s $(cygpath $CLASSIC)) ~/.local/classico" }
+	op { & c:\msys64\usr\bin\bash -l -c "mkdir -p ~/.local; cd ~/.local; ln -s `$(cygpath '$CLASSICO') ~/.local/classico" }
 } catch {
-	Print-Error "Error occured during msys2 installation."
+	Print-Error "Error occured during msys2 installation: $($_.Exception.Message)"
 	exit 1
 } finally {
 	pop-location

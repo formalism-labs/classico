@@ -3,11 +3,13 @@ from __future__ import absolute_import
 import platform
 import os
 import re
+from subprocess import Popen, PIPE
 from typing import Optional
 from .text import match, is_numeric
 from .files import fread
 from .error import Error
 from .error import *
+from .range_dict import *
 
 #----------------------------------------------------------------------------------------------
 
@@ -109,6 +111,8 @@ UBUNTU_VERSIONS = {
     'plucky':  '25.04',
 }
 
+#----------------------------------------------------------------------------------------------
+
 MACOS_VERSIONS = {
     "cheetah":      "10.0",
     "puma":         "10.1",
@@ -161,6 +165,145 @@ DARWIN_VERSIONS = {
 
 MACOS_VERSIONS_NICKS = {v: k for k, v in MACOS_VERSIONS.items()}
 DARWIN_VERSIONS_NICKS = {v: k for k, v in DARWIN_VERSIONS.items()}
+
+#----------------------------------------------------------------------------------------------
+
+WINDOWS_BUILDS = RangeDict({
+     2125:  { "version": "2000",  "internal": "5.0",  "code": "" },
+     2600:  { "version": "xp",    "internal": "5.1",  "code": "" },
+     3790:  { "version": "xp",    "internal": "5.2",  "code": "" },
+    (6000,
+     6003): { "version": "vista", "internal": "6.0",  "code": "" },
+     7600:  { "version": "7",     "internal": "6.1",  "code": "" },
+     7601:  { "version": "7-sp1", "internal": "6.1",  "code": "" },
+     9200:  { "version": "8",     "internal": "6.2",  "code": "" },
+     9600:  { "version": "8.1",   "internal": "6.3",  "code": "" },
+    10240:  { "version": "10",    "internal": "10.0", "code": "1507" },
+    10586:  { "version": "10",    "internal": "10.0", "code": "1511" },
+    14393:  { "version": "10",    "internal": "10.0", "code": "1607" },
+    15063:  { "version": "10",    "internal": "10.0", "code": "1703" },
+    16299:  { "version": "10",    "internal": "10.0", "code": "1709" },
+    17134:  { "version": "10",    "internal": "10.0", "code": "1803" },
+    17763:  { "version": "10",    "internal": "10.0", "code": "1809" },
+    18362:  { "version": "10",    "internal": "10.0", "code": "1903" },
+    18363:  { "version": "10",    "internal": "10.0", "code": "1909" },
+    19041:  { "version": "10",    "internal": "10.0", "code": "2004" },
+    19042:  { "version": "10",    "internal": "10.0", "code": "20H2" },
+    19043:  { "version": "10",    "internal": "10.0", "code": "21H1" },
+    19044:  { "version": "10",    "internal": "10.0", "code": "21H2" },
+    19045:  { "version": "10",    "internal": "10.0", "code": "22H2" },
+    22000:  { "version": "11",    "internal": "10.0", "code": "21H2" },
+    22621:  { "version": "11",    "internal": "10.0", "code": "22H2" },
+    22631:  { "version": "11",    "internal": "10.0", "code": "23H2" },
+    26100:  { "version": "11",    "internal": "10.0", "code": "24H2" },
+    26200:  { "version": "11",    "internal": "10.0", "code": "24H2" }, # dev
+    27928:  { "version": "11",    "internal": "10.0", "code": "25H2" }, # canary
+    })
+
+WINDOWS_SERVER_BUILDS = RangeDict({
+      2125:  { "version": "2000",        "internal": "5.0",  "code": "" },
+      3790:  { "version": "2003",        "internal": "5.2",  "code": "" },
+     (6000,
+      6003): { "version": "2008",        "internal": "6.0",  "code": "" },
+      7600:  { "version": "2008-r2",     "internal": "6.1",  "code": "" },
+      7601:  { "version": "2008-r2-sp1", "internal": "6.1",  "code": "" },
+      9200:  { "version": "2012",        "internal": "6.2",  "code": "" },
+      9600:  { "version": "2012-r2",     "internal": "6.3",  "code": "" },
+     14393:  { "version": "2016",        "internal": "10.0", "code": "1607" },
+     16299:  { "version": "sac-1709",    "internal": "10.0", "code": "1709" },
+     17134:  { "version": "sac-1803",    "internal": "10.0", "code": "1803" },
+     17763:  { "version": "2019",        "internal": "10.0", "code": "1809" },
+     18362:  { "version": "sac-1903",    "internal": "10.0", "code": "1903" },
+     19041:  { "version": "sac-2004",    "internal": "10.0", "code": "2004" },
+     19042:  { "version": "sac-20H2",    "internal": "10.0", "code": "20H2" },
+     20348:  { "version": "2022-ltsc",   "internal": "10.0", "code": "" },
+     22621:  { "version": "2022",        "internal": "10.0", "code": "22H2" },
+     22631:  { "version": "2025",        "internal": "10.0", "code": "23H2" },
+    (26100,
+     26404): { "version": "2025",        "internal": "10.0", "code": "24H2" },
+    })
+
+#----------------------------------------------------------------------------------------------
+
+def platform_os():
+    specs = {
+        "linux": ["linux"],
+        "macos": ["darwin"],
+        "solaris": ["solaris"],
+        "bsd": ["bsd"],
+        "windows": ["cygwin", "msys"]
+    }
+
+    ostype = os.getenv("OSTYPE")
+    if ostype is None:
+        windir = os.getenv("WINDIR")
+        if windir is not None and os.path.isdir(windir):
+            return "windows"
+    for os_, prefixes in specs.items():
+        p = next((prefix for prefix in prefixes if ostype.startswith(prefix)), None)
+        if p is not None:
+            return os_
+    return None
+
+    #os = next((x for x in ["linux", "solaris", "bsd"] if ostype.startswith(x)), None)
+    #if os is not None:
+    #    return os
+    #if ostype.startswith("darwin"):
+    #    return "macos"
+    #if ostype.startswith("msys") or ostype.startswith("cygwin"):
+    #    return "windows"
+    #return None
+
+def detect_windows_system_shell():
+    if platform_os() != "windows":
+        return None
+    proc = Popen("cat /proc/version", shell=True, stdout=PIPE, stderr=PIPE)
+    out, err = proc.communicate()
+    out = out.decode('utf-8').strip()    
+    if 'MINGW64' in out:
+        return 'msys2'
+    if 'CYGWIN' in out:
+        return 'cygwin'
+    if 'wsl' in out:
+        return 'wsl'
+    return 'native'
+
+def platform_shell():
+    if platform_os() != "windows":
+        return None
+    return WINDOWS_SYSTEM_SHELL
+
+#    if ENV["MSYSTEM"]:
+#        return "msys2"
+#    if ENV["OSTYPE"] == "cygwin":
+#        return "cygwin"
+#    if "wsl" in fread("/proc/version", fail=False).lower():
+#        return "wsl"
+#    if os.path.isdir(ENV["WINDIR"]):
+#        return "windows"
+#    return None
+
+def platform_arch():
+    specs = {
+        "x86_64": ["x86_64", "amd64"],
+        "x86": ["i386", "i686"],
+        "arm64v8": ["aarch64"],
+        "arm32v7": ["armv7hl", "armv7l"],
+        "arm32v6": ["armv6l"],
+        "ppc": ["ppc64"],
+        "s390_31": ["s390"],
+        "s390x": ["s390x"],
+    }
+    
+    mach = sh("uname -m")
+    for arch, prefixes in specs.items():
+        p = next((prefix for prefix in prefixes if mach.startswith(prefix)), None)
+        if p is not None:
+            return arch
+    return None
+
+if platform_os() == "windows":
+    WINDOWS_SYSTEM_SHELL = detect_windows_system_shell()
 
 #----------------------------------------------------------------------------------------------
 
@@ -365,9 +508,9 @@ class OSNick:
         return self
 
     @classmethod
-    def from_windows(cls, dist: str, os_ver: str):
+    def from_windows(cls, ostype: str, os_ver: str):
         self = super().__new__(cls)
-        self._osnick = dist + os_ver
+        self._osnick = f"{ostype}-{os_ver}"
         return self
 
     @classmethod
@@ -422,7 +565,7 @@ class Platform:
         self.strict = strict
         self.brand_mode = brand
 
-        self.os = platform.system().lower()
+        self.os = platform.system().lower()  # this would be later modify by _identify methods
         if self.os == 'linux':
             self._identify_linux()
         elif self.os == 'darwin':
@@ -439,7 +582,8 @@ class Platform:
             self.os_ver = ''
             self.dist = ''
 
-        self._identify_arch()
+        self.arch = platform_arch()
+        # self._identify_arch()
 
     #------------------------------------------------------------------------------------------
 
@@ -485,10 +629,52 @@ class Platform:
         # self.arch = mac_ver[2] # e.g. x64_64
 
     def _identify_windows(self):
-        self.dist = self.os
-        self.os_ver = platform.release()
-        self.os_full_ver = os.version()
+        self.shell = platform_shell()
+        #if ENV["MSYSTEM"]:
+        #    self.dist = "msys2"
+        #elif ENV["OSTYPE"] == "cygwin":
+        #    self.dist = "cygwin"
+        #elif "wsl" in fread("/proc/version", fail=False).lower():
+        #    self.dist = "wsl"
+        #elif os.path.isdir(ENV["WINDIR"]):
+        #    self.dist = "windows"
+        #else:
+        #    self.dist = "?"
+        
+        self.os_full_ver = platform.version()
+        self.os_ver = self.os_full_ver
+        v = self.os_ver.split(".")
+        # major = v[0]
+        build = int(v[2])
+
+        # prod = sh("reg query 'HKLM\\SYSTEM\\CurrentControlSet\\Control\\ProductOptions' //v ProductType | grep ProductType | awk '{print $3}'")
+        # is_server = prod != "WinNT"
+        # self.dist = "windows" if not is_server else "windows-server"
+
+        dist = sh("reg query 'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion' //v InstallationType | grep InstallationType | awk '{print $3}'")
+        if dist == 'Client':
+            self.dist = "windows"
+        elif dist == 'Server':
+            self.dist = "windows-server"
+        elif dist == 'Server Core':
+            self.dist = "windows-server-core"
+
+        builds_dict = WINDOWS_BUILDS if not is_server else WINDOWS_SERVER_BUILDS
+        if build in builds_dict:
+            build_info = builds_dict[build]
+        else:
+            last_build = 0
+            for rng in builds_dict:
+                if rnd.end > build:
+                    break
+                last_build = rng.start
+            if last_build > 0:
+                last_build = list(builds_dict.keys())[-1][1]
+            build_info = builds_dict[last_build]
+
+        self.os_ver = build_info['version']
         self.osnick = OSNick.from_windows(self.dist, self.os_ver)
+        self.build = build
 
     def _identify_freebsd(self):
         self.dist = ''

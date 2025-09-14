@@ -14,6 +14,7 @@ parser.add_argument('--os', action="store_true", help='Operating system')
 parser.add_argument('--version', action="store_true", help='OS/Distribution version (deprecated: use --osver instead)')
 parser.add_argument('--osver', action="store_true", help='OS/Distribution version')
 parser.add_argument('--osfullver', action="store_true", help='OS/Distribution full version')
+parser.add_argument('--build', action="store_true", help='Build number (applicable to Windows)')
 parser.add_argument('--dist', action="store_true", help='Linux distribution (if applicable)')
 parser.add_argument('--osnick', action="store_true", help='Term describing OS/distribution/version')
 parser.add_argument('--arch', action="store_true", help='CPU Architecture')
@@ -56,36 +57,37 @@ if args.__dict__['arch?']:
     print(1 if platform.is_arch_compat() else 0)
     sys.exit(0)
 
-ret = ""
+ret = []
 if args.triplet:
-    ret += " " + platform.triplet()
+    ret += platform.triplet()
 if args.os:
-    ret += " " + platform.os
+    ret += platform.os
 if args.osnick:
-    ret += " " + str(platform.osnick)
+    ret += str(platform.osnick)
 if args.dist:
-    ret += " " + platform.dist
+    ret += platform.dist
 if args.version or args.osver:
-    ret += " " + platform.os_ver
+    ret += platform.os_ver
+if args.build and platform.build != "":
+    ret += platform.build
 if args.osfullver:
-    ret += " " + platform.os_full_ver
+    ret += platform.os_full_ver
 if args.arch:
-    ret += " " + platform.arch
+    ret += platform.arch
 if args.docker:
-    ret += " " + platform.osnick.docker_image()
+    ret += platform.osnick.docker_image()
 if args.kernel:
     pass
 if args.glibc:
     pass
-if ret == "":
-    os = platform.os
-    dist = platform.dist
-    if dist != "":
-        os = dist + " " + os
-    if platform.osnick != "":
-        nick = " (" + str(platform.osnick) + ")"
+if ret == []:
+    if os == "windows":
+        ret = [platform.dist, platform.os_ver, 'build', platform.build]
     else:
-        nick = ""
-    ret = os + " " + platform.os_ver + nick + " " + platform.arch
-if ret.strip() != "":
-    print(ret.strip())
+        ret += platform.os
+        if platform.dist:
+            ret += platform.dist
+    if platform.osnick:
+        ret += f"({platform.osnick})"
+    ret += platform.arch
+print(' '.join(ret))

@@ -25,6 +25,14 @@ platform_windows() {
 	fi
 }
 
+platform_shell() {
+	if [[ $(platform_os) == windows ]]; then
+		echo "$(platform_windows)"
+	else
+		echo ""
+	fi
+}
+
 platform_arch() {
 	case "$(uname -m)" in
 		x86_64*)  echo "x64" ;;

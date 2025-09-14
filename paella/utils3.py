@@ -18,11 +18,17 @@ def sh(cmd, join=False, lines=False, fail=True):
     if shell:
         # Popen with shell=True defaults to /bin/sh so in order to use bash and
         # avoid quoting problems we write cmd into a temp file
-        fd, cmd_file = tempfile.mkstemp(prefix='/tmp/sh')
+        fd, cmd_file = tempfile.mkstemp(prefix=tempfile.gettempdir() + '/sh.')
         with open(cmd_file, 'w') as file:
             file.write(cmd)
         os.close(fd)
-        cmd = f"/usr/bin/env bash {cmd_file}"
+        if ENV['MSYSTEM']:
+            cmd = "c:/msys64/usr/bin/env"
+        elif ENV['OSTYPE'] == 'cygwin':
+            cmd = "c:/cygwin64/usr/bin/env"
+        else:
+            cmd = "/usr/bin/env"
+        cmd += f" bash {cmd_file}"
     proc = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     out, err = proc.communicate()
     if shell:

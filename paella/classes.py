@@ -33,9 +33,9 @@ ctor=CtorDecorator
 def add_base_class(base_cls, *, base_first=True):
     """
     Decorator factory.
-    `base_cls` – the class you want the decorated class to inherit from.
-    `base_first` – if True:  (base_cls, original_cls, …)
-                   if False: (original_cls, base_cls, …)
+    `base_cls` - the class you want the decorated class to inherit from.
+    `base_first` - if True:  (base_cls, original_cls, ...)
+                   if False: (original_cls, base_cls, ...)
     """
     def decorator(original_cls):
         # Avoid work if it's already a subclass

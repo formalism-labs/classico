@@ -1,9 +1,12 @@
 
 import os
+from .platform import platform_os
 
 #----------------------------------------------------------------------------------------------
 
 env_bb = os.environ.get('BB', '')
+if platform_os() == 'windows' and env_bb == '1':
+    env_bb = 'pdb'
 if env_bb == '1':
     try:
         from pudb import set_trace as bb  # type: ignore[import-untyped]

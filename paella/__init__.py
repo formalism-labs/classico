@@ -13,6 +13,7 @@ from .log import *
 from .platform import *
 from .setup import *
 from .cli import *
+from .range_dict import *
 
 #----------------------------------------------------------------------------------------------
 

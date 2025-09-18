@@ -5,6 +5,8 @@ import os
 import re
 from subprocess import Popen, PIPE
 from typing import Optional
+
+from .playform_base import *
 from .text import match, is_numeric
 from .files import fread
 from .error import Error
@@ -216,94 +218,12 @@ WINDOWS_SERVER_BUILDS = RangeDict({
      18362:  { "version": "sac-1903",    "internal": "10.0", "code": "1903" },
      19041:  { "version": "sac-2004",    "internal": "10.0", "code": "2004" },
      19042:  { "version": "sac-20H2",    "internal": "10.0", "code": "20H2" },
-     20348:  { "version": "2022-ltsc",   "internal": "10.0", "code": "" },
-     22621:  { "version": "2022",        "internal": "10.0", "code": "22H2" },
+     20348:  { "version": "2022-ltsc",   "internal": "10.0", "code": "21H2" },
+     22621:  { "version": "2025",        "internal": "10.0", "code": "22H2" },
      22631:  { "version": "2025",        "internal": "10.0", "code": "23H2" },
     (26100,
      26404): { "version": "2025",        "internal": "10.0", "code": "24H2" },
     })
-
-#----------------------------------------------------------------------------------------------
-
-def platform_os():
-    specs = {
-        "linux": ["linux"],
-        "macos": ["darwin"],
-        "solaris": ["solaris"],
-        "bsd": ["bsd"],
-        "windows": ["cygwin", "msys"]
-    }
-
-    ostype = os.getenv("OSTYPE")
-    if ostype is None:
-        windir = os.getenv("WINDIR")
-        if windir is not None and os.path.isdir(windir):
-            return "windows"
-    for os_, prefixes in specs.items():
-        p = next((prefix for prefix in prefixes if ostype.startswith(prefix)), None)
-        if p is not None:
-            return os_
-    return None
-
-    #os = next((x for x in ["linux", "solaris", "bsd"] if ostype.startswith(x)), None)
-    #if os is not None:
-    #    return os
-    #if ostype.startswith("darwin"):
-    #    return "macos"
-    #if ostype.startswith("msys") or ostype.startswith("cygwin"):
-    #    return "windows"
-    #return None
-
-def detect_windows_system_shell():
-    if platform_os() != "windows":
-        return None
-    proc = Popen("cat /proc/version", shell=True, stdout=PIPE, stderr=PIPE)
-    out, err = proc.communicate()
-    out = out.decode('utf-8').strip()    
-    if 'MINGW64' in out:
-        return 'msys2'
-    if 'CYGWIN' in out:
-        return 'cygwin'
-    if 'wsl' in out:
-        return 'wsl'
-    return 'native'
-
-def platform_shell():
-    if platform_os() != "windows":
-        return None
-    return WINDOWS_SYSTEM_SHELL
-
-#    if ENV["MSYSTEM"]:
-#        return "msys2"
-#    if ENV["OSTYPE"] == "cygwin":
-#        return "cygwin"
-#    if "wsl" in fread("/proc/version", fail=False).lower():
-#        return "wsl"
-#    if os.path.isdir(ENV["WINDIR"]):
-#        return "windows"
-#    return None
-
-def platform_arch():
-    specs = {
-        "x86_64": ["x86_64", "amd64"],
-        "x86": ["i386", "i686"],
-        "arm64v8": ["aarch64"],
-        "arm32v7": ["armv7hl", "armv7l"],
-        "arm32v6": ["armv6l"],
-        "ppc": ["ppc64"],
-        "s390_31": ["s390"],
-        "s390x": ["s390x"],
-    }
-    
-    mach = sh("uname -m")
-    for arch, prefixes in specs.items():
-        p = next((prefix for prefix in prefixes if mach.startswith(prefix)), None)
-        if p is not None:
-            return arch
-    return None
-
-if platform_os() == "windows":
-    WINDOWS_SYSTEM_SHELL = detect_windows_system_shell()
 
 #----------------------------------------------------------------------------------------------
 
@@ -659,7 +579,7 @@ class Platform:
         elif dist == 'Server Core':
             self.dist = "windows-server-core"
 
-        builds_dict = WINDOWS_BUILDS if not is_server else WINDOWS_SERVER_BUILDS
+        builds_dict = WINDOWS_BUILDS if self.dist == "windows" else WINDOWS_SERVER_BUILDS
         if build in builds_dict:
             build_info = builds_dict[build]
         else:

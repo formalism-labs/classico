@@ -116,7 +116,7 @@ posh() {
 		{ "$ps_exe" -File "$cmd" > "$log" 2>&1 ; E=$?; } || true
 		[[ $E != 0 && $LOG != 0 ]] && cat "$log"
 	else
-		{ "$ps_exe" -File "$cmd"; E=$?; } || true
+		{ "$ps_exe" -File $(cygpath -m "$cmd"); E=$?; } || true
 	fi
 	return $E
 }

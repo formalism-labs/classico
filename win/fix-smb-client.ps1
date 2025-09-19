@@ -42,6 +42,9 @@ foreach ($service in $services) {
 # Configure Local Security Policy settings via registry
 Write-Host "Configuring Local Security Policy settings..." -ForegroundColor Yellow
 
+# Allow insecure guest authentication
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters" -Name AllowInsecureGuestAuth -Value 1
+
 # Allow anonymous SID/Name translation
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "TurnOffAnonymousBlock" -Value 0 -Type DWord -Force
 

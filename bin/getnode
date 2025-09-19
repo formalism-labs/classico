@@ -26,25 +26,31 @@ class NodeSetup(paella.Setup):
         self.run("npm install -g corepack@latest")
         self.run("corepack enable; corepack prepare yarn@stable --activate")
         self.run("npm install -g --force pnpm@latest-10")
+        if self.typescript:
+            self.run("npm install typescript -g --save-dev")
 
 #----------------------------------------------------------------------------------------------
 
 class ModernSetup(paella.Setup):
     def __init__(self, args):
         paella.Setup.__init__(self, nop=args.nop)
+        self.typescript = args.ts
 
     def common_first(self):
         self.install_downloaders()
         
         self.run("mkdir -p $HOME/.fnm")
         self.run("curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell")
-        self.cat_to_profile_d(r'''
-            prepend_to_path "{HOME}/.fnm"
+        self.cat_to_profile_d(f'''
+            prepend_to_path "{paella.ux_homedir()}/.fnm"
             eval "$(fnm env)"
-            '''.format(HOME=Path.home()), "node.sh")
+            ''', "node.sh")
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")
         self.run("corepack enable; corepack prepare yarn@stable --activate")
         self.run("npm install -g --force pnpm@latest")
+        if self.typescript:
+            self.run("npm install typescript -g --save-dev")
+
 
 #----------------------------------------------------------------------------------------------
 
@@ -84,6 +90,8 @@ class VoltaSetup(paella.Setup):
             ''', "volta.sh")
         self.run(f"volta install node@{NODE_VERSION}")
         self.run("volta install yarn")
+        if self.typescript:
+            self.run("volta install typescript")
 
 #----------------------------------------------------------------------------------------------
 
@@ -95,16 +103,11 @@ parser.add_argument('--volta', action="store_true", help='Install Volta')
 parser.add_argument('--bun', action="store_true", help='Install Bun')
 args = parser.parse_args()
 
-if not args.volta:
-    if args.modern:
-        ModernSetup(args).setup()
-    else:
-        NodeSetup(args).setup()
-else:
+if args.volta:
     VoltaSetup(args).setup()
-    
-if args.ts:
-    self.run("npm install typescript -g --save-dev")
-
-if args.bun:
+elif args.bun:
     BunSetup(args).setup()
+elif args.modern:
+    ModernSetup(args).setup()
+else:
+    NodeSetup(args).setup()

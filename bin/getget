@@ -7,14 +7,10 @@ CLASSICO=$(cd $HERE/.. && pwd)
 
 os=$(platform_os)
 if [[ -f /etc/os-release ]]; then
-	# os=$(source /etc/os-release; echo "${ID}")
+	dist=$(source /etc/os-release; echo "${ID}")
 	osver=$(source /etc/os-release; echo "${VERSION_ID}")
-else
-	os=$(platform_os)
 fi
 arch=$(uname -m)
-
-xinstall bc
 
 packs="ca-certificates wget curl unzip gzip xz"
 
@@ -25,14 +21,19 @@ elif is_command yum; then
 elif is_command brew; then
 	packs="${packs/ca-certificates/}"
 fi
-if [[ $os == rocky || $os == almalinux || $os == rhel ]]; then
+
+if [[ $dist == rocky || $dist == almalinux || $dist == rhel ]]; then
+    xinstall bc
+
 	# has curl-minimal which conflicts with curl
 	if [[ $(echo "$osver >= 9.0" | bc -l) ]]; then
 		packs="${packs/curl/}"
 	fi
-elif [[ $os == fedora || $os == mariner ]]; then
+elif [[ $dist == fedora || $dist == mariner ]]; then
 	packs+=" awk"
-elif [[ $os == windows ]]; then
+fi
+
+if [[ $os == windows ]]; then
 	packs="${packs/ca-certificates/}"
 fi
 
@@ -44,8 +45,15 @@ if [[ $FORCE != 1 ]]; then
 			break
 		fi
 	done
-	[[ $missing == 0 ]] && exit 0
+else
+    missing=1
 fi
 
-xinstall $packs
+if [[ $missing == 1 ]]; then
+    xinstall $packs
+fi
+
+if [[ $os == windows ]]; then
+    posh "& \$CLASSICO/bin/getget.ps1"
+fi
 exit 0

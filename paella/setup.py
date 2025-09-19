@@ -6,126 +6,16 @@ import subprocess
 import tempfile
 import textwrap
 
-from .platform import OnPlatform, Platform
+from .platform import OnPlatform, Platform, platform_os, platform_shell
 from .error import *  # noqa: F403
+from .runner import Runner, OutputMode
+from .files import cygpath_m
 import paella
 
-GIT_LFS_VER = '3.6.1'
+HERE = os.path.dirname(__file__)
+CLASSICO = cygpath_m(os.path.abspath(os.path.join(HERE, "..")))
 
-#----------------------------------------------------------------------------------------------
-
-class OutputMode:
-    def __init__(self, x):
-        lx = str(x).lower()
-        if x or x == 1 or lx == "yes" or lx == "true":
-            self.mode = "True"
-        elif not x or x == 0 or lx == "no" or lx == "false":
-            self.mode = "False"
-        elif lx == "on_error":
-            self.mode = "on_error"
-        else:
-            raise Error(f"Wrong output mode: {x}")
-
-    def __eq__(self, x):
-        return self.mode == OutputMode(x).mode
-
-    def __ne__(self, x):
-        return not self.__eq__(x)
-
-    def __bool__(self):
-        return self.mode == "True"
-
-    def on_error(self):
-        return self.mode == "on_error"
-
-#----------------------------------------------------------------------------------------------
-
-class Runner:
-    def __init__(self, nop=False, output="on_error"):
-        self.nop = nop
-        self.is_root = os.geteuid() == 0
-        self.has_sudo = sh('command -v sudo', fail=False) != ''
-        self.output = OutputMode(output)
-
-    # sudo: True/False/"file"
-    def run(self, cmd, at=None, output=None, nop=None, _try=False, sudo=False, echo=True):
-        # We're running cmd(s) with a login shell ("bash -l") in order to run profile.d
-        # scripts (installation commands may add such scripts and subsequent installation
-        # commands may rely on them).
-        # Howerver, "bash -l" will wreck PATH of active virtualenvs, thus python scripts will
-        # fail. So if we're in one (i.e. VIRTUAL_ENV is not empty) PATH sould be restored
-        # by re-invoking the activation script.
-        if (self.is_root or not self.has_sudo) and sudo is not False:
-            sudo = False
-        if output is None:
-            output = self.output
-        else:
-            output = OutputMode(output)
-        venv = ENV['VIRTUAL_ENV']
-        cmd_file = None
-        if cmd.find('\n') > -1:
-            cmds1 = str.lstrip(textwrap.dedent(cmd))
-            cmds = list(filter(lambda s: str.lstrip(s) != '', cmds1.split("\n")))
-            if venv != '':
-                cmds = [f". {venv}/bin/activate"] + cmds
-            cmd = "; ".join(cmds)
-            cmd_for_log = cmd
-            if sudo is not False:
-                cmd_file = paella.tempfilepath()
-                paella.fwrite(cmd_file, cmd)
-                cmd = f"bash -l {cmd_file}"
-                cmd_for_log = f"sudo {cmd_for_log}"
-        else:
-            if venv != '':
-                cmd = f"{{ . {venv}/bin/activate; {cmd}; }}"
-            cmd_for_log = cmd
-        if sudo is not False:
-            if sudo == "file":
-                cmd_file = paella.tempfilepath()
-                paella.fwrite(cmd_file, cmd)
-                cmd = f"sudo bash -l {cmd_file}"
-                cmd_for_log = f"sudo {cmd_for_log}"
-            else:
-                cmd = f"sudo bash -l -c '{cmd}'"
-        if echo:
-            print(cmd)
-        if cmd_file is not None:
-            print(f"# {cmd_for_log}")
-        sys.stdout.flush()
-        if nop is None:
-            nop = self.nop
-        if nop:
-            return
-        if not output:
-            fd, temppath = tempfile.mkstemp()
-            os.close(fd)
-            cmd = f"{{ {cmd}; }} >{temppath} 2>&1"
-        if at is None:
-            rc = subprocess.call(["bash", "-l", "-e", "-c", cmd])
-        else:
-            with cwd(at):
-                # rc = os.system(cmd)
-                rc = subprocess.call(["bash", "-l", "-e", "-c", cmd])
-        if rc > 0:
-            if not output:
-                if output.on_error():
-                    os.system(f"cat {temppath}")
-                eprint("command failed: " + cmd_for_log)
-                sys.stderr.flush()
-        if not output:
-            os.remove(temppath)
-        if cmd_file is not None:
-            os.remove(cmd_file)
-        if rc > 0 and not _try:
-            sys.exit(1)
-        return rc
-
-    def has_command(self, cmd):
-        return Runner.is_command(cmd)
-
-    @staticmethod
-    def is_command(cmd):
-        return os.system("command -v " + cmd + " > /dev/null") == 0
+GIT_LFS_VER = '3.7.0'
 
 #----------------------------------------------------------------------------------------------
 
@@ -135,7 +25,8 @@ class PackageManager(object):
 
     @staticmethod
     def detect(platform, runner):
-        if platform.os == 'linux':
+        _os = platform_os()
+        if _os == 'linux':
             if platform.is_debian_compat():
                 return Apt(runner)
             elif platform.is_redhat_compat():
@@ -154,10 +45,12 @@ class PackageManager(object):
                 return Alpine(runner)
             else:
                 raise Error(f"Cannot determine package manager for distibution {platform.dist}")
-        elif platform.os == 'macos':
+        elif _os == 'macos':
             return Brew(runner)
-        elif platform.os == 'freebsd':
+        elif _os == 'freebsd':
             return Pkg(runner)
+        elif _os == 'windows':
+            return WinInstaller(runner)
         else:
             raise Error(f"Cannot determine package manager for OS {platform.os}")
 
@@ -187,15 +80,15 @@ class Yum(PackageManager):
 
     def install(self, packs, group=False, output="on_error", _try=False):
         if not group:
-            return self.run("yum install -q -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"yum install -q -y {packs}", output=output, _try=_try, sudo=True)
         else:
-            return self.run("yum groupinstall -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"yum groupinstall -y {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
         if not group:
-            return self.run("yum remove -q -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"yum remove -q -y {packs}", output=output, _try=_try, sudo=True)
         else:
-            return self.run("yum group remove -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"yum group remove -y {packs}", output=output, _try=_try, sudo=True)
 
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         if not self.has_command("yum-config-manager"):
@@ -210,15 +103,15 @@ class Dnf(PackageManager):
 
     def install(self, packs, group=False, output="on_error", _try=False):
         if not group:
-            return self.run("dnf install -q -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"dnf install -q -y {packs}", output=output, _try=_try, sudo=True)
         else:
-            return self.run("dnf groupinstall -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"dnf groupinstall -y {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
         if not group:
-            return self.run("dnf remove -q -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"dnf remove -q -y {packs}", output=output, _try=_try, sudo=True)
         else:
-            return self.run("dnf group remove -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"dnf group remove -y {packs}", output=output, _try=_try, sudo=True)
 
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         if self.run("dnf config-manager 2>/dev/null", output=output, _try=True):
@@ -233,15 +126,15 @@ class TDnf(PackageManager):
 
     def install(self, packs, group=False, output="on_error", _try=False):
         if not group:
-            return self.run("tdnf install -q -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"tdnf install -q -y {packs}", output=output, _try=_try, sudo=True)
         else:
-            return self.run("tdnf groupinstall -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"tdnf groupinstall -y {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
         if not group:
-            return self.run("tdnf remove -q -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"tdnf remove -q -y {packs}", output=output, _try=_try, sudo=True)
         else:
-            return self.run("tdnf group remove -y " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"tdnf group remove -y {packs}", output=output, _try=_try, sudo=True)
 
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         if self.run("tdnf config-manager 2>/dev/null", output=output, _try=True):
@@ -258,10 +151,10 @@ class Apt(PackageManager):
         os.environ["DEBIAN_FRONTEND"] = 'noninteractive'
 
     def install(self, packs, group=False, output="on_error", _try=False):
-        return self.run("apt-get -qq install --fix-missing -y " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"apt-get -qq install --fix-missing -y {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
-        return self.run("apt-get -qq remove -y " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"apt-get -qq remove -y {packs}", output=output, _try=_try, sudo=True)
 
     def add_repo(self, repo_url, repo="", output="on_error", _try=False):
         if not self.has_command("add-apt-repository"):
@@ -280,10 +173,10 @@ class Zypper(PackageManager):
         super(Zypper, self).__init__(runner)
 
     def install(self, packs, group=False, output="on_error", _try=False):
-        return self.run("zypper --non-interactive install " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"zypper --non-interactive install {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
-        return self.run("zypper --non-interactive remove " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"zypper --non-interactive remove {packs}", output=output, _try=_try, sudo=True)
 
     def add_repo(self, repo_url, repo="", output="on_error", _try=False):
         return self.run(f"zypprt addrepo {repo_url} {repo}", output=output, _try=_try, sudo=True)
@@ -296,7 +189,7 @@ class Pacman(PackageManager):
 
     def install(self, packs, group=False, output="on_error", _try=False, aur=False):
         if aur is False:
-            return self.run("pacman --noconfirm -S " + packs, output=output, _try=_try, sudo=True)
+            return self.run(f"pacman --noconfirm -S {packs}", output=output, _try=_try, sudo=True)
         else:
             if os.path.isfile("/usr/bin/yay"):
                 aurbin = "yay"
@@ -307,7 +200,7 @@ class Pacman(PackageManager):
             return self.run(f"{aurbin} --noconfirm -S {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
-        return self.run("pacman --noconfirm -R " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"pacman --noconfirm -R {packs}", output=output, _try=_try, sudo=True)
 
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         return False
@@ -362,10 +255,10 @@ class Pkg(PackageManager):
         super(Pkg, self).__init__(runner)
 
     def install(self, packs, group=False, output="on_error", _try=False):
-        return self.run("pkg install -q -y " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"pkg install -q -y {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
-        return self.run("pkg delete -q -y " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"pkg delete -q -y {packs}", output=output, _try=_try, sudo=True)
 
     def add_repo(self, repourl, repo="", output="on_error", _try=False):
         return False
@@ -377,11 +270,24 @@ class Alpine(PackageManager):
         super(Alpine, self).__init__(runner)
 
     def install(self, packs, group=False, output="on_error", _try=False):
-        return self.run("apk add -q " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"apk add -q {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
-        return self.run("apk del -q " + packs, output=output, _try=_try, sudo=True)
+        return self.run(f"apk del -q {packs}", output=output, _try=_try, sudo=True)
 
+#----------------------------------------------------------------------------------------------
+
+# A virtual package manager, aggregate of winget, choco, and scoop
+class WinInstaller(PackageManager):
+    def __init__(self, runner):
+        super(WinInstaller, self).__init__(runner)
+
+    def install(self, packs, group=False, output="on_error", _try=False):
+        return self.run(f"choco install {packs} --yes", output=output, _try=_try, sudo=True)
+
+    def uninstall(self, packs, group=False, output="on_error", _try=False):
+        return self.run(f"choco uninstall {packs} --yes", output=output, _try=_try, sudo=True)
+    
 #----------------------------------------------------------------------------------------------
 
 class Setup(OnPlatform):
@@ -491,12 +397,13 @@ class Setup(OnPlatform):
     #------------------------------------------------------------------------------------------
 
     def install_downloaders(self, _try=False):
-        if self.os == 'linux':
-            self.install("ca-certificates", _try=_try)
-        if not (self.platform.is_redhat_compat() and self.platform.os_version[0] >= 9):
-            # has curl-minimal which conflicts with curl
-            self.install("curl", _try=_try)
-        self.install("wget unzip", _try=_try)
+        self.run(f"{CLASSICO}/bin/getget")
+        #if self.os == 'linux':
+        #    self.install("ca-certificates", _try=_try)
+        #if not (self.platform.is_redhat_compat() and self.platform.os_version[0] >= 9):
+        #    # has curl-minimal which conflicts with curl
+        #    self.install("curl", _try=_try)
+        #self.install("wget unzip", _try=_try)
 
     def install_git_lfs_on_linux(self, _try=False):
         if self.arch == 'x64':

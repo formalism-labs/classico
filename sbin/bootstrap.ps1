@@ -18,7 +18,7 @@ function install-classico {
 		New-Item -ItemType Directory -Path "$env:LOCALAPPDATA\FormalismLab" -Force
 		Move-Item -Path classico-master -Destination $classico
 		Write-Output "Classico downloaded into ${classico}"
-		cd $env:LocalAppData\Local\FormalismLab\classico\bin
+		cd $env:LocalAppData\FormalismLab\classico\bin
 		Write-Output "Installing MSYS2 ..."
 		& .\getmsys2.ps1
 		Write-Output "Setting up Classico ..."

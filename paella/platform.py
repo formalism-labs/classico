@@ -6,7 +6,7 @@ import re
 from subprocess import Popen, PIPE
 from typing import Optional
 
-from .playform_base import *
+from .platform_base import *
 from .text import match, is_numeric
 from .files import fread
 from .error import Error
@@ -68,6 +68,51 @@ OSNICKS = {
 	"amzn23": { "docker": "amazonlinux:2023" },
 	"mariner2":    { "docker": "mcr.microsoft.com/cbl-mariner/base/core:2.0" },
 	"azurelinux3": { "docker": "mcr.microsoft.com/azurelinux/base/core:3.0" },
+
+    "cheetah":      { 'macos': True },
+    "puma":         { 'macos': True },
+    "jaguar":       { 'macos': True },
+    "panther":      { 'macos': True },
+    "tiger":        { 'macos': True },
+    "leopard":      { 'macos': True },
+    "snowleopard":  { 'macos': True },
+    "lion":         { 'macos': True },
+    "mountainlion": { 'macos': True },
+    "mavericks":    { 'macos': True },
+    "yosemite":     { 'macos': True },
+    "elcapitan":    { 'macos': True },
+    "sierra":       { 'macos': True },
+    "highsierra":   { 'macos': True },
+    "mojave":       { 'macos': True },
+    "catalina":     { 'macos': True },
+    "bigsur":       { 'macos': True },
+    "monterey":     { 'macos': True },
+    "ventura":      { 'macos': True },
+    "sonoma":       { 'macos': True },
+    "sequoia":      { 'macos': True },
+    "tahoe":        { 'macos': True },
+
+    "win-g0":  { 'windows': True }, # <xp, <s2003
+    "win-g5":  { 'windows': True }, # xp, s2003
+    "win-g7":  { 'windows': True }, # 7.1, s2008r2
+    "win-g8":  { 'windows': True }, # 8.1, s2022r2
+    "win-g10": { 'windows': True }, # 10, s2016-22
+    "win-g11": { 'windows': True }, # 11, s2025
+
+    "windows-xp": { 'windows': True },
+    "windows-7":  { 'windows': True },
+    "windows-8":  { 'windows': True },
+    "windows-10": { 'windows': True },
+    "windows-11": { 'windows': True },
+
+    "windows-server-2000":    { 'windows': True },
+    "windows-server-2003":    { 'windows': True },
+    "windows-server-2008-r2": { 'windows': True },
+    "windows-server-2012":    { 'windows': True },
+    "windows-server-2016":    { 'windows': True },
+    "windows-server-2019":    { 'windows': True },
+    "windows-server-2022":    { 'windows': True },
+    "windows-server-2025":    { 'windows': True },
 }
 
 #----------------------------------------------------------------------------------------------
@@ -385,10 +430,12 @@ class LinuxDist:
 #----------------------------------------------------------------------------------------------
 
 class OSNick:
-    def __init__(self, nick: str = None):
+    _osnick: str
+
+    def __init__(self, nick: Optional[str] = None):
         try:
             if nick is None:
-                self._osnick = Platform().osnick
+                self._osnick = str(Platform().osnick)
                 return
             _ = OSNICKS[nick]  # noqa: F841
             self._osnick = nick
@@ -434,15 +481,15 @@ class OSNick:
         return self
 
     @classmethod
-    def from_freebsd(cls, os: str, os_ver: str):
+    def from_freebsd(cls, _os: str, os_ver: str):
         self = super().__new__(cls)
-        self._osnick = os + os_ver
+        self._osnick = _os + os_ver
         return self
 
     @classmethod
-    def from_solaris(cls, os: str, os_ver: str):
+    def from_solaris(cls, _os: str, os_ver: str):
         self = super().__new__(cls)
-        self._osnick = os + os_ver
+        self._osnick = _os + os_ver
         return self
 
     def __str__(self):
@@ -475,7 +522,7 @@ class Platform:
     brand_mode: bool
     dist: str
     linux_dist: Optional[LinuxDist] = None
-    osnick: Optional[OSNick]
+    osnick: OSNick
     os_ver: str
     os_full_ver: str
     arch: str
@@ -550,26 +597,12 @@ class Platform:
 
     def _identify_windows(self):
         self.shell = platform_shell()
-        #if ENV["MSYSTEM"]:
-        #    self.dist = "msys2"
-        #elif ENV["OSTYPE"] == "cygwin":
-        #    self.dist = "cygwin"
-        #elif "wsl" in fread("/proc/version", fail=False).lower():
-        #    self.dist = "wsl"
-        #elif os.path.isdir(ENV["WINDIR"]):
-        #    self.dist = "windows"
-        #else:
-        #    self.dist = "?"
         
         self.os_full_ver = platform.version()
         self.os_ver = self.os_full_ver
         v = self.os_ver.split(".")
         # major = v[0]
         build = int(v[2])
-
-        # prod = sh("reg query 'HKLM\\SYSTEM\\CurrentControlSet\\Control\\ProductOptions' //v ProductType | grep ProductType | awk '{print $3}'")
-        # is_server = prod != "WinNT"
-        # self.dist = "windows" if not is_server else "windows-server"
 
         dist = sh("reg query 'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion' //v InstallationType | grep InstallationType | awk '{print $3}'")
         if dist == 'Client':
@@ -629,11 +662,6 @@ class Platform:
     def triplet(self):
         return '-'.join([self.os, str(self.osnick), self.arch])
 
-    # deprecated
-#    def version(self, full=False):
-#        v = (self.os_full_ver if full else self.os_ver).split(".")
-#        return tuple(map(lambda x: int(x) if is_numeric(x) else x, v))
-
     @property
     def os_version(self):
         return tuple(map(lambda x: int(x) if is_numeric(x) else x, self.os_full_ver.split('.')))
@@ -678,14 +706,14 @@ class Platform:
 
     def report(self):
         if self.dist != "":
-            os = self.dist + " " + self.os
+            _os = self.dist + " " + self.os
         else:
-            os = self.os
+            _os = self.os
         if self.osnick != "":
             nick = " (" + str(self.osnick) + ")"
         else:
             nick = ""
-        print(os + " " + self.os_ver + nick + " " + self.arch)
+        print(_os + " " + self.os_ver + nick + " " + self.arch)
 
 #----------------------------------------------------------------------------------------------
 
@@ -695,7 +723,7 @@ class OnPlatform:
         self.platform = Platform()
 
     def invoke(self):
-        os = self.os = self.platform.os
+        _os = self.os = self.platform.os
         dist = self.dist = self.platform.dist
         self.ver = self.platform.os_ver
         self.common_first()
@@ -703,7 +731,7 @@ class OnPlatform:
         for stage in self.stages:
             self.stage = stage
             self.common()
-            if os == 'linux':
+            if _os == 'linux':
                 self.linux_first()
                 self.linux()
 
@@ -747,10 +775,12 @@ class OnPlatform:
                     assert(False), "Cannot determine installer"
 
                 self.linux_last()
-            elif os == 'macos' or os == 'macos':
+            elif _os == 'macos' or os == 'macos':
                 self.macos()
-            elif os == 'freebsd':
+            elif _os == 'freebsd':
                 self.freebsd()
+            elif _os == 'windows':
+                self.windows()
 
         self.common_last()
 

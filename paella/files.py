@@ -11,6 +11,8 @@ try:
 except:
     from urllib.request import urlopen
 
+from .platform_base import platform_os, platform_shell, platform_root
+
 #----------------------------------------------------------------------------------------------
 
 def fread(fname, mode='r', fail=True):
@@ -22,7 +24,7 @@ def fread(fname, mode='r', fail=True):
             return _open()
         except:
             return ""
-    return _open();
+    return _open()
 
 #----------------------------------------------------------------------------------------------
 
@@ -149,3 +151,53 @@ def rm_rf(path, careful=True):
 
 def relpath(dir, rel):
     return os.path.abspath(os.path.join(dir, rel))
+
+#----------------------------------------------------------------------------------------------
+
+def homedir():
+    if platform_os() != 'windows':
+        return Path.home()
+    shell = platform_shell()
+    if shell in ['msys2', 'cygwin', 'wsl']:
+        return platform_root() + f"home/{os.getenv('USERNAME')}"
+    return cygpath_m(Path.home())
+        
+def ux_homedir():
+    if platform_os() != 'windows':
+        return Path.home()
+    return f"/home/{os.getenv('USERNAME')}"
+
+def win_homedir():
+    if platform_os() != 'windows':
+        return homedir()
+    return cygpath_m(os.getenv('USERPROFILE'))
+
+#----------------------------------------------------------------------------------------------
+
+def cygpath_m(path: str) -> str:
+    r'''
+    Convert Windows path to cygpath -m style:
+    - Drive letter: C:\Users\Admin -> /c/Users/Admin
+    - UNC path: \\server\share\folder -> //server/share/folder
+    - POSIX-like paths are returned unchanged
+    '''
+    path = path.replace('\\', '/')
+
+    # Windows drive letter
+    if len(path) >= 2 and path[1] == ':' and path[0].isalpha():
+        drive = path[0].lower()
+        rest = path[2:].lstrip('/')
+        return f'{drive}:/{rest}'
+
+    # UNC paths
+    if path.startswith('//') or path.startswith('\\\\'):
+        # Remove leading slashes
+        path = path.lstrip('/').lstrip('\\')
+        parts = path.split('/', 2)  # server, share, rest
+        if len(parts) >= 2:
+            server, share = parts[0], parts[1]
+            rest = parts[2] if len(parts) == 3 else ''
+            return f'//{server}/{share}/{rest}'.rstrip('/')
+        return f'//{path}'
+
+    return path

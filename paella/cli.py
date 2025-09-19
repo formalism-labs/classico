@@ -155,6 +155,3 @@ def Option(*args, **kwargs):
     return typer.Option(*args, **kwargs)
 
 #----------------------------------------------------------------------------------------------
-
-Annotated = typing_extensions.Annotated
-Argument = typer.Argument

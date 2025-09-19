@@ -1,13 +1,13 @@
 
 import os
 import sys
+import pytest
 
 HERE = os.path.dirname(__file__)
 CLASSICO = os.path.abspath(os.path.join(HERE, "../.."))
 sys.path.insert(0, CLASSICO)
 
-from paella import RangeDict
-import pytest
+from paella import RangeDict  # noqa
 
 @pytest.fixture
 def rd():

@@ -2,7 +2,7 @@
 function install-classico {
 	$classico = "$env:LOCALAPPDATA\FormalismLab\classico"
 	if (Test-Path -Path $classico) {
-		Write-Output "Classico found in $classico: not downloading"
+		Write-Output "Classico found in ${classico}: not downloading"
 		return
 	}
 
@@ -17,7 +17,7 @@ function install-classico {
 		Expand-Archive -Path classico-master.zip -DestinationPath . *>$null
 		New-Item -ItemType Directory -Path "$env:LOCALAPPDATA\FormalismLab" -Force
 		Move-Item -Path classico-master -Destination $classico
-		Write-Output "Classico downloaded into $classico"
+		Write-Output "Classico downloaded into ${classico}"
 		cd $env:LocalAppData\Local\FormalismLab\classico\bin
 		Write-Output "Installing MSYS2 ..."
 		& .\getmsys2.ps1

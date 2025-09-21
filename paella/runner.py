@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-from .platform import OnPlatform, Platform, platform_os, platform_shell
+from .platform import OnPlatform, Platform, platform_os, platform_shell, platform_root
 from .error import *  # noqa: F403
 import paella
 

@@ -5,11 +5,12 @@ from pathlib import Path
 import subprocess
 import tempfile
 import textwrap
+from typing import Optional
 
 from .platform import OnPlatform, Platform, platform_os, platform_shell
 from .error import *  # noqa: F403
 from .runner import Runner, OutputMode
-from .files import cygpath_m
+from .files import cygpath_m, homedir
 import paella
 
 HERE = os.path.dirname(__file__)
@@ -332,9 +333,9 @@ class Setup(OnPlatform):
 
     @property
     def profile_d(self):
-        return os.path.abspath(os.path.join(os.path.expanduser('~'), ".profile.d"))
+        return os.path.abspath(os.path.join(homedir(), ".profile.d"))
 
-    def cp_to_profile_d(self, file, as_file=None):
+    def cp_to_profile_d(self, file: str, as_file: Optional[str] = None):
         if not os.path.isfile(file):
             raise Error(f"file not found: {file}")
         d = self.profile_d
@@ -344,16 +345,14 @@ class Setup(OnPlatform):
             self.run(f'mkdir -p "{d}"')
         self.run(f'cp "{file}" "{os.path.join(d, as_file)}"')
 
-    def cat_to_profile_d(self, text, as_file=None):
-        file = paella.tempfilepath()
-        paella.fwrite(file, textwrap.dedent(text))
+    def cat_to_profile_d(self, text: str, as_file: str):
         d = self.profile_d
-        if as_file is None:
-            as_file = os.path.basename(file)
         if not os.path.isdir(d):
             self.run(f'mkdir -p "{d}"')
-        self.run(f'cp "{file}" "{os.path.join(d, as_file)}"')
-        os.unlink(file)
+        file = os.path.join(d, as_file)
+        if os.path.exists(file):
+            raise Error(f"{file} exists - not overwriting")
+        paella.fwrite(file, textwrap.dedent(text))
 
     def sudoIf(self, sudo=True):
         if sudo:

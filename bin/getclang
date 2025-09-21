@@ -132,9 +132,9 @@ class CLangSetup(paella.Setup):
         # self.install_latest_from_github()
         self.install("llvm@19")
         llvm_prefix = sh("brew --prefix llvm@19")
-        self.cat_to_profile_d(r'''
-            prepend_to_path "{PREFIX}/bin"
-            '''.format(PREFIX=llvm_prefix), "llvm-19.sh")
+        self.cat_to_profile_d(f'''
+            prepend_to_path "{llvm_prefix}/bin"
+            ''', "llvm-19.sh")
 
     def common_last(self):
         pass

@@ -1,4 +1,6 @@
 
+# irm https://raw.githubusercontent.com/formalism-labs/classico/refs/heads/master/sbin/bootstrap.ps1 | iex
+
 function install-classico {
 	$classico = "$env:LOCALAPPDATA\FormalismLab\classico"
 	if (Test-Path -Path $classico) {

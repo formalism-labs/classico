@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# curl -fsSL https://raw.githubusercontent.com/formalism-labs/classico/refs/heads/master/sbin/bootstrap | bash
+
 set -eo pipefail -o errtrace
 
 if [[ -d $HOME/.local/classico ]]; then

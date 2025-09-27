@@ -11,7 +11,7 @@ try:
 except:
     from urllib.request import urlopen
 
-from .platform_base import platform_os, platform_shell, platform_root
+from .platform_base import platform_os, platform_shell, platform_root, WINDOWS
 
 #----------------------------------------------------------------------------------------------
 
@@ -200,4 +200,24 @@ def cygpath_m(path: str) -> str:
             return f'//{server}/{share}/{rest}'.rstrip('/')
         return f'//{path}'
 
+    return path
+
+def cygpath_am(path):
+    if not WINDOWS:
+        return os.path.abspath(path)
+    if path.startswith('/') and not path[1:].startswith('/'):
+        path = platform_root() + path[1:]
+    return cygpath_m(os.path.abspath(path))
+
+def cygpath_u(path):
+    if not WINDOWS:
+        return path
+    path = cygpath_m(path)
+    root = platform_root()
+    if path.startswith(root):
+        return path[len(root)-1:]
+    if len(path) >= 2 and path[1] == ':' and path[0].isalpha():
+        drive = path[0].lower()
+        rest = path[2:].lstrip('/')
+        return f'/{drive}/{rest}'
     return path

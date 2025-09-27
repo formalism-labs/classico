@@ -48,3 +48,5 @@ Global.HH = heredoc
 Global.JJ = jjdoc
 Global.cli_app = cli_app
 Global.II = paella.Annotated
+Global.WINDOWS = paella.WINDOWS
+Global.PP = paella.cygpath_am

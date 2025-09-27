@@ -25,15 +25,8 @@ def platform_os():
             return os_
     return None
 
-    #os = next((x for x in ["linux", "solaris", "bsd"] if ostype.startswith(x)), None)
-    #if os is not None:
-    #    return os
-    #if ostype.startswith("darwin"):
-    #    return "macos"
-    #if ostype.startswith("msys") or ostype.startswith("cygwin"):
-    #    return "windows"
-    #return None
-
+# one could possibly condier using MSYSTEM on msys2, however this pseudo environment
+# varialbe only exists in bash
 def detect_windows_system_shell():
     if platform_os() != "windows":
         return None
@@ -52,16 +45,6 @@ def platform_shell():
     if platform_os() != "windows":
         return None
     return WINDOWS_SYSTEM_SHELL
-
-#    if ENV["MSYSTEM"]:
-#        return "msys2"
-#    if ENV["OSTYPE"] == "cygwin":
-#        return "cygwin"
-#    if "wsl" in fread("/proc/version", fail=False).lower():
-#        return "wsl"
-#    if os.path.isdir(ENV["WINDIR"]):
-#        return "windows"
-#    return None
 
 def platform_arch():
     specs = {
@@ -94,3 +77,5 @@ def platform_root():
     elif shell == 'cygwin':
         return "c:/cygwin64/"
     return "/"
+
+WINDOWS = platform_os() == 'windows'

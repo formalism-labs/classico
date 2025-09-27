@@ -7,4 +7,5 @@
 . $CLASSICO/shibumi/time
 . $CLASSICO/shibumi/traps
 . $CLASSICO/shibumi/vars
+. $CLASSICO/shibumi/types
 . $CLASSICO/shibumi/xinstall

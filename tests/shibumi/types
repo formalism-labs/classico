@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO=$(cd $HERE//../.. && pwd)
+. $CLASSICO/shibumi/defs
+
+count_nl() {
+	local x=$1
+	local x1="${x//$'\n'/*}"
+	local x2="${x1//[^*]}"
+	echo ${#x2}
+}
+
+on_error() {
+	echo failed
+}
+
+#------------------------------------------------------------------------------
+
+test_simple() {
+	trap on_error ERR
+	echo "test_simple ... "
+
+	local t1=$(echo /c/foo; echo /c/bar; echo /c/tmp)
+	local a2=(/c/foo /c/bar /c/tmp)
+	local q3="'/c/foo' '/c/bar' '/c/tmp'"
+
+	echo -n 't2a ... '
+	t2a "$t1" a1
+	[[ "$(str_t "$t1")" == "$(str_a a1)" ]]
+	[[ "$(str_t "$t1")" == "$(str_a a2)" ]]
+	echo ok
+
+	echo -n 'a2q ... '
+	local q1="$(a2q a1)"
+	[[ "$q1" == "$q3" ]]
+	[[ "$(str_a a1)" == "$(str_q "$q1")" ]]
+	[[ "$(str_a a1)" == "$(str_q "$q3")" ]]
+	echo ok
+	
+	echo -n 'q2t ... '
+	local t1a=$(q2t "$q3")
+	[[ $(count_nl "$t1a") == 2 ]]
+	[[ "$(str_q "$q1")" == "$(str_t "$t1a")" ]]
+	[[ "$(str_q "$q1")" == "$(str_t "$t1")" ]]
+	echo ok
+	
+	echo -n 't2q ... '
+	local q1a=$(t2q "$t1")
+	[[ "$(str_q "$q1a")" == "$(str_q "$q1")" ]]
+	[[ "$(str_q "$q1a")" == "$(str_q "$q3")" ]]
+	echo ok
+	
+	echo -n 'a2t ... '
+	local t1b=$(a2t a1)
+	[[ $(count_nl "$t1b") == 2 ]]
+	[[ "$(str_t "$t1b")" == "$(str_a a1)" ]]
+	echo ok
+	
+	echo -n 'q2a ... '
+	q2a "$q1" a1a
+	[[ "$(str_a a1a)" == "$(str_a a1)" ]]
+	echo ok
+}
+
+#------------------------------------------------------------------------------
+
+test_winpath() {
+	trap on_error ERR
+	echo "test_winpath ... "
+
+	local t1=$(echo 'C:\Windows\system32\WindowsPowerShell\v1.0\Modules'; echo 'C:\Program Files\Intel')
+	local a2=('C:\Windows\system32\WindowsPowerShell\v1.0\Modules' 'C:\Program Files\Intel')
+	local q3="'C:\Windows\system32\WindowsPowerShell\v1.0\Modules' 'C:\Program Files\Intel'"
+	
+	echo -n 't2a ... '
+	t2a "$t1" a1
+	[[ "$(str_t "$t1")" == "$(str_a a1)" ]]
+	[[ "$(str_t "$t1")" == "$(str_a a2)" ]]
+	echo ok
+	
+	echo -n 'a2q ... '
+	local q1=$(a2q a1)
+	[[ "$q1" == "$q3" ]]
+	[[ "$(str_a a1)" == "$(str_q "$q1")" ]]
+	[[ "$(str_a a1)" == "$(str_q "$q3")" ]]
+	echo ok
+	
+	echo -n 'q2t ... '
+	local t1a=$(q2t "$q1")
+	[[ $(count_nl "$t1a") == 1 ]]
+	[[ "$(str_q "$q1")" == "$(str_t "$t1a")" ]]
+	[[ "$(str_q "$q1")" == "$(str_t "$t1")" ]]
+	echo ok
+	
+	echo -n 't2q ... '
+	local q1a=$(t2q "$t1")
+	[[ "$(str_q "$q1a")" == "$(str_q "$q1")" ]]
+	[[ "$(str_q "$q1a")" == "$(str_q "$q3")" ]]
+	echo ok
+	
+	echo -n 'a2t ... '
+	local t1b=$(a2t a1)
+	[[ $(count_nl "$t1b") == 1 ]]
+	[[ "$(str_t "$t1b")" == "$(str_a a1)" ]]
+	echo ok
+	
+	echo -n 'q2a ... '
+	q2a "$q1" a1a
+	[[ "$(str_a a1a)" == "$(str_a a1)" ]]
+	echo ok
+}
+
+#------------------------------------------------------------------------------
+
+test_multiline() {
+	trap on_error ERR
+	echo "test_multiline ... "
+
+	local a1=($'foo\nbar' $'jojo\nvivi\n' $'\nabc\ndef')
+	local q2="$'foo\nbar' $'jojo\nvivi\n' $'\nabc\ndef'"
+
+	echo -n 'a2t ... '
+	local q1=$(a2q a1)
+	[[ "$q1" == "$q2" ]]
+	# set -x
+	q2a "$q2" a2
+	echo
+	declare -p a1
+	declare -p a2
+	[[ "$a2" == "$a1" ]]
+	echo ok
+	
+#	echo -n 't2q ... '
+#	local q1=$(t2q "$t1")
+#	[[ "$(str_q "$q1")" == "$(str_t "$t1")" ]]
+#	[[ "$(str_q "$q1")" == "$(str_q "$q3")" ]]
+#	echo ok
+}
+
+#------------------------------------------------------------------------------
+
+
+test_simple
+echo
+test_winpath
+echo
+test_multiline

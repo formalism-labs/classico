@@ -1,7 +1,12 @@
 
+# s: space-separated string
+# a: bash array: a=(a b c)
+# t: newline-seperated strings: t=$(echo a; echo b; echo c)
+# q: quoted strings (can contain newlines): q="$'a' $'b' $'c'"
+
 #----------------------------------------------------------------------------------------------
 
-join() { # delim args
+join_s() { # delim args
 	local d=$1
 	shift
 	echo -n "$1"
@@ -20,24 +25,41 @@ join_t() { # delim t-exp
 	done <<< "$2"
 }
 
-# join_dirs() # (dirs_array)
-# {
+# join_dirs() { # (dirs_array)
 # 	join_t ';' "$(a2t $1)"
 # }
 
-join_dirs() # (dirs_array)
-{
+if [[ $(platform_os) != windows ]]; then
+
+join_dirs() { # (dirs_array)
 	local __t=
 	join_t ':' "$(a2t $@)"
 }
 
-join_path() # (dirs_array)
-{
+else
+
+join_dirs() { # (dirs_array)
+	local __t=
+	join_t ';' "$(a2t $@)"
+}
+
+fi
+
+if [[ $(platform_os) != windows ]]; then
+
+join_path() { # (dirs_array)
 	join_t ':' "$(a2t $@)"
 }
 
-join_path_a() # (dirs_array)
-{
+else
+
+join_path() { # (dirs_array)
+	join_t ':' "$(map_t cygpath "$(a2t $@)")"
+}
+
+fi
+
+join_path_a() { # (dirs_array)
 	join_t ':' "$(a2t $@)"
 }
 
@@ -49,9 +71,11 @@ to_path_t() {
 	join_t ':' "$1"
 }
 
+export -f join_s join_t join_dirs join_path join_path_a join_path_t to_path_t
+
 #----------------------------------------------------------------------------------------------
 
-split() { # char, text
+split_s() { # char, text
 	local x
 	while IFS="$1" read -ra x; do
 		echo "${x[@]}"
@@ -68,6 +92,8 @@ split_t() { # char, text
 	done <<< "$2"
 }
 
+export -f split_s split_t
+
 #----------------------------------------------------------------------------------------------
 
 map_t() { # func t-exp
@@ -77,6 +103,8 @@ map_t() { # func t-exp
 		$f "$x"
 	done <<< $2
 }
+
+export -f map_t
 
 #----------------------------------------------------------------------------------------------
 
@@ -96,6 +124,8 @@ str_q() { # q-exp
 	echo "${q//\'/}"
 }
 
+export -f str_t str_a str_q
+
 #----------------------------------------------------------------------------------------------
 
 quote_a() {
@@ -105,6 +135,8 @@ quote_a() {
 	local q=$(printf "'%s' " "${__a__[@]}")
 	echo "${q%%*( )}"
 }
+
+export -f quote_a
 
 #----------------------------------------------------------------------------------------------
 
@@ -173,6 +205,8 @@ q2a() {
 	done <<< "$1"
 }
 
+export -f t2a t2q a2t a2q q2t q2a
+
 #----------------------------------------------------------------------------------------------
 
 in_a () { # str a-var
@@ -188,5 +222,7 @@ in_a () { # str a-var
 	done
 	return 1
 }
+
+export -f in_a
 
 #----------------------------------------------------------------------------------------------

@@ -3,10 +3,11 @@ _debug "interactive mode"
 
 #------------------------------------------------------------------------------------- Starship
 
-set_win_title() {
+envenido_starship_precmd() {
 	echo -ne "\033]0; "$ENVENIDO_PS1_TITLE" \007"
 }
-export -f set_win_title
+
+export -f envenido_starship_precmd
 
 if [[ -z $ENVENIDO_TITLE ]]; then
 	export ENVENIDO_TITLE=Classico
@@ -30,7 +31,7 @@ else
 	ENVENIDO_PS1_SHLVL=""
 fi
 
-# terminal title (used in set_win_title)
+# terminal title (used in envenido_starship_precmd)
 ENVENIDO_PS1_HOST="$ENVENIDO_HOST"
 [[ -n $ENVENIDO_PS1_HOST ]] && ENVENIDO_PS1_HOST+=': '
 
@@ -44,8 +45,10 @@ fi
 export ENVENIDO_PS1_PROMPT="[$ENVENIDO_FULL_TITLE]${ENVENIDO_PS1_SHLVL}"
 
 _debug "setting up Sharship"
-export STARSHIP_CONFIG="$ENVENIDO/starship.toml"
-export starship_precmd_user_func="set_win_title"
+STARSHIP_VARIANT=
+[[ $(platform_os) == windows ]] && STARSHIP_VARIANT=.windows
+export STARSHIP_CONFIG="$ENVENIDO/starship${STARSHIP_VARIANT}.toml"
+export starship_precmd_user_func=envenido_starship_precmd
 eval "$(starship init bash)"
 export ENVENIDO_PS1="$PS1"
 

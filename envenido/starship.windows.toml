@@ -1,0 +1,37 @@
+format = """
+${custom.envenido_userhost} ${env_var.envenido_prompt} ${custom.cyg_directory} $git_branch
+\\$ 
+"""
+
+[directory]
+disabled = true
+truncation_length = 0
+truncate_to_repo = false
+style='green'
+read_only = ''
+
+[custom.cyg_directory]
+command = "echo ${PWD/#$HOME/\\~}"
+# command = "c:/msys64/usr/bin/bash.exe -c 'p=`/usr/bin/pwd`; echo ${p/#$HOME/\\~}'"
+# command = "bash -c 'pwd'"
+format = "[$output]($style)"
+when = "true"
+style = "green"
+
+[git_branch]
+format = "[$symbol$branch]($style)"
+# symbol = ''
+
+[custom.envenido_userhost]
+command = 'echo "${ENVENIDO_PS1_CONTEXT}${ENVENIDO_USER}@${ENVENIDO_HOST}"'
+format = "[$output](green)"
+when = "true"
+
+[env_var.envenido_prompt]
+variable = 'ENVENIDO_PS1_PROMPT'
+format = "[$env_value](purple)"
+
+# [env_var.envenido_title]
+# variable = 'ENVENIDO_FULL_TITLE'
+# format = "[$env_value](red)"
+

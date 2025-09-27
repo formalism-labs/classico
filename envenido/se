@@ -8,11 +8,14 @@ from pathlib import Path
 from typing import Optional, List
 
 HERE = os.path.dirname(__file__)
-CLASSICO = os.path.abspath(os.path.join(HERE, ".."))
-ENVENIDO = HERE
+CLASSICO = os.path.join(HERE, "..")
 # CLASSICO = os.getenv('CLASSICO')
 sys.path.insert(0, CLASSICO)
 import paella  # noqa: F401
+
+HERE = PP(HERE)
+CLASSICO = PP(CLASSICO)
+ENVENIDO = HERE
 
 #----------------------------------------------------------------------------------------------
 
@@ -119,7 +122,10 @@ class Environment:
             if ENV['DEBUG'] == "1":
                 os.system(f"bashdb {ENVENIDO}/mixenv {mix}")
             else:
-                os.execv("/usr/bin/env", ["env", "bash", "-i"])
+                if WINDOWS:
+                    os.system(f"{PP("/usr/bin/env")} bash -i")
+                else:
+                    os.execv("/usr/bin/env", ["env", "bash", "-i"])
 
 #----------------------------------------------------------------------------------------------
 

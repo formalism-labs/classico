@@ -8,7 +8,7 @@ get_profile_d() {
 setup_profile_d() {
 	local profile="$HOME/.bash_profile"
 	[[ ! -f $profile ]] && touch $profile
-	if grep -q 'read_profile_d' $profile 2>/dev/null; then return; fi
+	if grep -q 'classico.sh' $profile 2>/dev/null; then return; fi
 
 	local d="$HOME/.profile.d"
 	[[ ! -d $d ]] && mkdir -p "$d"

@@ -45,7 +45,7 @@ runn $CLASSICO/bin/getpy
 rearm
 
 if [[ $os == windows ]]; then
-	runn $CLASSICO/bin/getnode --modern
+	runn $CLASSICO/bin/getnode --modern --ts
 else
 	runn $CLASSICO/bin/getnode --modern --bun
 fi

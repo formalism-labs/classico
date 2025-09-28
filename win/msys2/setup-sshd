@@ -14,3 +14,7 @@ fi
 
 pacman --noconfirm --needed -S openssh cygrunsrv mingw-w64-x86_64-editrights
 $HERE/msys2-sshd-setup.sh
+mkdir -p ~/.ssh
+if [[ -n $PUBKEY ]]; then
+	echo "$PUBKEY" >> ~/.ssh/authorized_keys
+fi

@@ -1,5 +1,6 @@
 param (
-    [switch]$NOP
+    [switch] $nop,
+    [switch] $NoClassico = $false
 )
 
 $ROOT = Resolve-Path([System.IO.Path]::Combine($PSScriptRoot, ".."))
@@ -25,10 +26,12 @@ try {
 	op { & setx MSYS "winsymlinks:native" /m }
 
 	$env:HOME = "/home/" + $env:USERNAME
-	$env:TZ = "Asia/Tel_Aviv"
+	$env:TZ = Get-IanaTimeZone
 
 	op { & c:\msys64\usr\bin\bash.exe -l -c true }
-	op { & c:\msys64\usr\bin\bash.exe -l -c "mkdir -p ~/.local; cd ~/.local; ln -s `$(cygpath '$CLASSICO') ~/.local/classico" }
+	if ($NoClassico -eq $true) {
+		op { & c:\msys64\usr\bin\bash.exe -l -c "mkdir -p ~/.local; cd ~/.local; ln -s `$(cygpath '$CLASSICO') ~/.local/classico" }
+	}
 } catch {
 	Print-Error "Error occured during msys2 installation: $($_.Exception.Message)"
 	exit 1

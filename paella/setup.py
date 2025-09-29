@@ -61,7 +61,7 @@ class PackageManager(object):
     def has_command(self, cmd):
         return Runner.is_command(cmd)
 
-    def install(self, packs, group=False, output="on_error", _try=False):
+    def install(self, packs, group=False, output="on_error", _try=False, **kwargs):
         return False
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
@@ -278,16 +278,50 @@ class Alpine(PackageManager):
 
 #----------------------------------------------------------------------------------------------
 
-# A virtual package manager, aggregate of winget, choco, and scoop
+# A virtual package manager, aggregate of pacman (msys2), apt-cyg (cygwin), winget, choco, and scoop
 class WinInstaller(PackageManager):
     def __init__(self, runner):
         super(WinInstaller, self).__init__(runner)
 
-    def install(self, packs, group=False, output="on_error", _try=False):
-        return self.run(f"choco install {packs} --yes", output=output, _try=_try, sudo=True)
+    def install(self, packs, group=False, output="on_error", _try=False, variant=None):
+        if variant is None or variant == 'native':
+            variant = 'choco'
+        elif variant == 'sh':
+            variant = platform_shell()
 
-    def uninstall(self, packs, group=False, output="on_error", _try=False):
-        return self.run(f"choco uninstall {packs} --yes", output=output, _try=_try, sudo=True)
+        if variant == 'msys2':
+            return self.run(f"pacman --noconfirm -S {packs}", output=output, _try=_try, sudo=True)
+        elif variant == 'cygwin':
+            return self.run(f"apt-cyg install {packs}", output=output, _try=_try, sudo=True)
+        elif variant == 'winget':
+            for pack in packs:
+                if not self.run(f"winget install {pack} --accept-package-agreements --silent", output=output, _try=_try, sudo=True):
+                    return False
+            return True
+        elif variant == 'choco':
+            return self.run(f"choco install {packs} -y --noprogress", output=output, _try=_try, sudo=True)
+        elif variant == 'scoop':
+            return self.run(f"scoop install {packs} --yes", output=output, _try=_try, sudo=True)
+
+    def uninstall(self, packs, group=False, output="on_error", _try=False, variant=None):
+        if variant is None or variant == 'native':
+            variant = 'choco'
+        elif variant == 'sh':
+            variant = platform_shell()
+
+        if variant == 'msys2':
+            return self.run(f"pacman --noconfirm -R {packs}", output=output, _try=_try, sudo=True)
+        elif variant == 'cygwin':
+            return self.run(f"apt-cyg uninstall {packs}", output=output, _try=_try, sudo=True)
+        elif variant == 'winget':
+            for pack in packs:
+                if not self.run(f"winget uninstall {pack} --accept-package-agreements --silent", output=output, _try=_try, sudo=True):
+                    return False
+            return True
+        elif variant == 'choco':
+            return self.run(f"choco uninstall {packs} -y --noprogress", output=output, _try=_try, sudo=True)
+        elif variant == 'scoop':
+            return self.run(f"scoop uninstall {packs} --yes", output=output, _try=_try, sudo=True)
     
 #----------------------------------------------------------------------------------------------
 

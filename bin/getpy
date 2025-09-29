@@ -70,6 +70,8 @@ fi
 
 if [[ -d $VENV_DIR ]]; then
 	eprint "Python already installed"
+	runn uv pip uninstall paella
+	runn uv pip install -e $CLASSICO
 	exit 0
 fi
 

@@ -521,6 +521,7 @@ class Platform:
     strict: bool
     brand_mode: bool
     dist: str
+    shell: str
     linux_dist: Optional[LinuxDist] = None
     osnick: OSNick
     os_ver: str
@@ -780,6 +781,11 @@ class OnPlatform:
             elif _os == 'freebsd':
                 self.freebsd()
             elif _os == 'windows':
+                shell = self.platform.dist
+                if shell == 'msys2':
+                    self.msys2()
+                elif shell == 'cygwin':
+                    self.cygwin()
                 self.windows()
 
         self.common_last()
@@ -836,6 +842,12 @@ class OnPlatform:
         pass
 
     def windows(self):
+        pass
+
+    def msys2(self):
+        pass
+    
+    def cygwin(self):
         pass
 
     def bsd_compat(self):

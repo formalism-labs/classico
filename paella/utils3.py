@@ -17,11 +17,13 @@ class ShError(Exception):
 
 def sh(cmd, join=False, lines=False, fail=True, classico=False):
     shell = isinstance(cmd, str)
+    cmd_file = None
     try:
         if shell:
             # Popen with shell=True defaults to /bin/sh so in order to use bash and
             # avoid quoting problems we write cmd into a temp file
-            fd, cmd_file = PP(tempfile.mkstemp(prefix=tempfile.gettempdir() + '/sh.'))
+            fd, cmd_file = tempfile.mkstemp(prefix=tempfile.gettempdir() + '/sh.')
+            cmd_file = PP(cmd_file)
             with open(cmd_file, 'w') as file:
                 file.write(cmd)
             os.close(fd)
@@ -48,5 +50,5 @@ def sh(cmd, join=False, lines=False, fail=True, classico=False):
     except Exception as x:
         raise ShError(f"error executing: {cmd} [{x}]")
     finally:
-        if shell and cmd_file:
+        if cmd_file:
             os.unlink(cmd_file)

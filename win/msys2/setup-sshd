@@ -20,3 +20,5 @@ ln -sf "$ssh_dir" ~/.ssh
 if [[ -n $PUBKEY ]]; then
 	echo "$PUBKEY" >> ~/.ssh/authorized_keys
 fi
+
+posh "& New-FirewallRule -Name "OpenSSH" -Port 22 -DisplayName "OpenSSH (Port 22)""

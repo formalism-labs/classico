@@ -19,6 +19,7 @@ class SystemSetup(paella.Setup):
     def common_first(self):
         self.install_downloaders()
         self.setup_dotlocal()
+        self.install("jq moreutils")
 
     def linux_first(self):
         pass
@@ -40,6 +41,9 @@ class SystemSetup(paella.Setup):
 
     def macos(self):
         self.install_gnu_utils()
+
+    def windows(self):
+        pass
 
     def common_last(self):
         pass

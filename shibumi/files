@@ -75,3 +75,12 @@ heredoc() {
 	cat > $FILE
 	declare -g "$var=$FILE"
 }
+
+#----------------------------------------------------------------------------------------------
+
+win_homedir() {
+    if [[ $(platform_os) != 'windows' ]]; then
+        echo $HOME
+	fi
+    cygpath -m $USERPROFILE
+}

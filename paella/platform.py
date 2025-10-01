@@ -605,7 +605,7 @@ class Platform:
         # major = v[0]
         build = int(v[2])
 
-        dist = sh("reg query 'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion' //v InstallationType | grep InstallationType | awk '{print $3}'")
+        dist = sh("reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\" //v InstallationType | grep InstallationType | awk '{print $3}'")
         if dist == 'Client':
             self.dist = "windows"
         elif dist == 'Server':

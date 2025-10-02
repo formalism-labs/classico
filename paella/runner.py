@@ -50,9 +50,10 @@ class Runner:
             self.is_root = os.geteuid() == 0
         self.has_sudo = sh('command -v sudo', fail=False) != ''
         self.output = OutputMode(output)
+        self.rearm = False
 
     # sudo: True/False/'file'
-    def run(self, cmd, at=None, output=None, nop=None, _try=False, sudo=False, echo=True, classico=False):
+    def run(self, cmd, at=None, output=None, nop=None, _try=False, sudo=False, echo=True, classico=False, setx=False, **kwargs):
         # We're running cmd(s) with a login shell ("bash -l") in order to run profile.d
         # scripts (installation commands may add such scripts and subsequent installation
         # commands may rely on them).
@@ -85,7 +86,9 @@ class Runner:
             cmds = list(filter(lambda s: str.lstrip(s) != '', cmds1.split("\n")))
             if venv != '':
                 cmds = [f". {activate}"] + cmds
-            cmd = "; ".join(cmds)
+            if self.rearm:
+                cmds = ['rearm'] + cmds
+            cmd =  "; ".join(cmds)
             cmd_for_log = cmd
             if sudo is not False:
                 cmd_file = paella.tempfilepath()
@@ -93,8 +96,12 @@ class Runner:
                 cmd = f"bash -l {cmd_file}"
                 cmd_for_log = f"sudo {cmd_for_log}"
         else:
+            cmds = [cmd]
             if venv != '':
-                cmd = f"{{ . {activate}; {cmd}; }}"
+                cmds = [f". {activate}"] + cmds
+            if self.rearm:
+                cmds = ['rearm'] + cmds
+            cmd = '{ ' + '; '.join(cmds) + '; }'
             cmd_for_log = cmd
 
         if sudo is not False:
@@ -121,11 +128,13 @@ class Runner:
             fd, temppath = tempfile.mkstemp()
             os.close(fd)
             cmd = f"{{ {cmd}; }} >{temppath} 2>&1"
+
+        setx_opt = ['-x'] if setx else []
         if at is None:
-            rc = subprocess.call(bash.split(' ') + ["-l", "-e", "-c", cmd])
+            rc = subprocess.call(bash.split(' ') + setx_opt + ["-l", "-e", "-c", cmd])
         else:
             with cwd(at):
-                rc = subprocess.call(bash.split(' ') + ["-l", "-e", "-c", cmd])
+                rc = subprocess.call(bash.split(' ') + setx_opt +  ["-l", "-e", "-c", cmd])
         if rc > 0:
             if not output:
                 if output.on_error():

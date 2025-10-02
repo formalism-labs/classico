@@ -55,8 +55,8 @@ class PackageManager(object):
         else:
             raise Error(f"Cannot determine package manager for OS {platform.os}")
 
-    def run(self, cmd, at=None, output="on_error", nop=None, _try=False, sudo=False, echo=True):
-        return self.runner.run(cmd, at=at, output=output, nop=nop, _try=_try, sudo=sudo)
+    def run(self, cmd, at=None, output="on_error", nop=None, _try=False, sudo=False, echo=True, **kwargs):
+        return self.runner.run(cmd, at=at, output=output, nop=nop, _try=_try, sudo=sudo, **kwargs)
 
     def has_command(self, cmd):
         return Runner.is_command(cmd)
@@ -358,8 +358,11 @@ class Setup(OnPlatform):
 
         self.invoke()
 
-    def run(self, cmd, at=None, output="on_error", nop=None, _try=False, sudo=False, echo=True):
-        return self.runner.run(cmd, at=at, output=output, nop=nop, _try=_try, sudo=sudo, echo=echo)
+    def run(self, cmd, at=None, output="on_error", nop=None, _try=False, sudo=False, echo=True, **kwargs):
+        return self.runner.run(cmd, at=at, output=output, nop=nop, _try=_try, sudo=sudo, echo=echo, **kwargs)
+
+    def rearm(self):
+        self.runner.rearm = True
 
     @staticmethod
     def is_command(cmd):

@@ -45,12 +45,12 @@ class ModernSetup(paella.Setup):
             prepend_to_path "{paella.ux_homedir()}/.fnm"
             eval "$(fnm env)"
             ''', "node.sh")
+        self.rearm()
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")
         self.run("corepack enable; corepack prepare yarn@stable --activate")
         self.run("npm install -g --force pnpm@latest")
         if self.typescript:
             self.run("npm install typescript -g --save-dev")
-
 
 #----------------------------------------------------------------------------------------------
 
@@ -67,6 +67,7 @@ class BunSetup(paella.Setup):
             export BUN_INSTALL="{home}/.bun"
             prepend_to_path $BUN_INSTALL/bin
             ''', "bun.sh")
+        self.rearm()
         jasmine_dir = f"{home}/.jasmine/"
         paella.mkdir_p(jasmine_dir)
         shutil.copy(f"{ROOT}/jasmine/package.json", jasmine_dir)
@@ -88,6 +89,7 @@ class VoltaSetup(paella.Setup):
             export VOLTA_HOME="{home}/.volta"
             prepend_to_path $VOLTA_HOME/bin
             ''', "volta.sh")
+        self.rearm()
         self.run(f"volta install node@{NODE_VERSION}")
         self.run("volta install yarn")
         if self.typescript:

@@ -36,6 +36,7 @@ if [[ -z $ENVENIDO_USER ]]; then
 	fi
 	# lowercase
 	export ENVENIDO_USER="${ENVENIDO_USER,,}"
+	export ENVENIDO_HOME
 fi
 
 if [[ -n $ENVENIDO_CONTAINER ]]; then

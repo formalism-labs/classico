@@ -17,9 +17,9 @@ class SystemSetup(paella.Setup):
         paella.Setup.__init__(self, args.nop)
 
     def common_first(self):
-        self.install_downloaders()
-        self.setup_dotlocal()
-        self.install("jq moreutils")
+        # self.install_downloaders()
+        # self.setup_dotlocal()
+        self.install("jq moreutils", variant="msys2")
 
     def linux_first(self):
         pass

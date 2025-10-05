@@ -5,6 +5,11 @@ HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
 CLASSICO=$(cd $HERE/../.. && pwd)
 . $CLASSICO/shibumi/defs
 
+settings="$(cygpath -m $LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json)"
+if grep -q MINGW64 $settings; then
+ 	exit 0
+fi
+
 termfile=$(mktemp /tmp/term.json.XXXXXX)
 uuid=$(uuidgen)
 cat <<-END > $termfile
@@ -22,6 +27,6 @@ cat <<-END > $termfile
 		"hidden": false
 	}
 	END
-settings="$(cygpath -m $LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json)"
+
 jq --slurpfile frag $termfile '.profiles.list += $frag' $settings | sponge $settings
 rm $termfile

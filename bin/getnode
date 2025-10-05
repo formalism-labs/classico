@@ -44,7 +44,7 @@ class ModernSetup(paella.Setup):
         self.cat_to_profile_d(f'''
             prepend_to_path "{paella.ux_homedir()}/.fnm"
             eval "$(fnm env)"
-            ''', "node.sh")
+            ''', "node.sh", force=True)
         self.rearm()
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")
         self.run("corepack enable; corepack prepare yarn@stable --activate")

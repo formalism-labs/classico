@@ -33,7 +33,7 @@ def detect_windows_system_shell():
     proc = Popen("cat /proc/version", shell=True, stdout=PIPE, stderr=PIPE)
     out, err = proc.communicate()
     out = out.decode('utf-8').strip()    
-    if 'MINGW64' in out:
+    if 'MINGW' in out or 'MSYS' in out:
         return 'msys2'
     if 'CYGWIN' in out:
         return 'cygwin'

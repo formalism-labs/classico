@@ -354,7 +354,7 @@ class Setup(OnPlatform):
     def setup(self):
         if self.repo_refresh:
             self.package_manager.update()
-            self.python = paella.sh(f"command -v python{sys.version_info.major}")
+            self.python = "python"  # paella.sh(f"command -v python")
 
         self.invoke()
 
@@ -382,12 +382,12 @@ class Setup(OnPlatform):
             self.run(f'mkdir -p "{d}"')
         self.run(f'cp "{file}" "{os.path.join(d, as_file)}"')
 
-    def cat_to_profile_d(self, text: str, as_file: str):
+    def cat_to_profile_d(self, text: str, as_file: str, force: bool):
         d = self.profile_d
         if not os.path.isdir(d):
             self.run(f'mkdir -p "{d}"')
         file = os.path.join(d, as_file)
-        if os.path.exists(file):
+        if not force and os.path.exists(file):
             raise Error(f"{file} exists - not overwriting")
         paella.fwrite(file, textwrap.dedent(text))
 

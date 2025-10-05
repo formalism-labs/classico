@@ -87,7 +87,7 @@ def tempfilepath(prefix=None, suffix=None):
             suffix = ''
     fd, path = tempfile.mkstemp(prefix=prefix, suffix=suffix)
     os.close(fd)
-    return path
+    return PP(path)
 
 #----------------------------------------------------------------------------------------------
 

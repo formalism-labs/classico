@@ -14,7 +14,7 @@ import paella
 class OutputMode:
     def __init__(self, x):
         lx = str(x).lower()
-        if x or x == 1 or lx == "yes" or lx == "true":
+        if x == True or x == 1 or lx == "yes" or lx == "true":
             self.mode = "True"
         elif not x or x == 0 or lx == "no" or lx == "false":
             self.mode = "False"
@@ -127,6 +127,7 @@ class Runner:
         if not output:
             fd, temppath = tempfile.mkstemp()
             os.close(fd)
+            temppath = PP(temppath)
             cmd = f"{{ {cmd}; }} >{temppath} 2>&1"
 
         setx_opt = ['-x'] if setx else []

@@ -16,6 +16,10 @@ prepend_to_path() {
     local DIR="$1"
     [[ -z $DIR ]] && return 1
 
+    if [[ $(platform_os) == windows ]]; then
+        DIR="$(cygpath -u "$DIR")"
+    fi
+
     # Remove all existing occurrences of $DIR (as a full path element)
     local NEWPATH=":$PATH:"
     NEWPATH="${NEWPATH//:$DIR:/:}"
@@ -33,14 +37,14 @@ prepend_to_path() {
 }
 
 append_to_path() {
-	local DIR="$1"
-	if [[ $(platform_os) == windows ]]; then
-		DIR="$(cygpath -u "$DIR")"
-	fi
+    local DIR="$1"
+    if [[ $(platform_os) == windows ]]; then
+        DIR="$(cygpath -u "$DIR")"
+    fi
     if [[ -z $PATH ]]; then
-    	export PATH=$DIR
+        export PATH=$DIR
     else
-	    [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$PATH:$DIR"
+        [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$PATH:$DIR"
     fi
     return 0
 }

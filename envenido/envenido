@@ -80,6 +80,11 @@ _debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 
 #----------------------------------------------------------------------------------------- Core
 
+if [[ $OSTYPE == cygwin && $ENVENIDO_LOGIN == 1 ]]; then
+	# reconstruct_path
+	[[ -n $__PATH ]] && export PATH="$__PATH"
+fi
+
 . $ENVENIDO/core
 
 #---------------------------------------------------------------------------------- Interactive
@@ -101,5 +106,7 @@ if [[ -n $ENVENIDO_MIXENV ]]; then
 fi
 
 #----------------------------------------------------------------------------------------------
+
+[[ $OSTYPE == cygwin ]] && export __PATH="$PATH"
 
 _debug "envenido: done"

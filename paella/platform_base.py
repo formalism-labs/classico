@@ -1,7 +1,9 @@
 
 import sys
 import os
+import platform
 from subprocess import Popen, PIPE
+from .meta import Lazy
 
 #----------------------------------------------------------------------------------------------
 
@@ -9,20 +11,26 @@ def platform_os():
     specs = {
         "linux": ["linux"],
         "macos": ["darwin"],
-        "solaris": ["solaris"],
-        "bsd": ["bsd"],
-        "windows": ["cygwin", "msys"]
+        "bsd": ["bsd", "freebsd", "openbsd", "netbsd"],
+        "solaris": ["sunos", "solaris", "illumos"],
+        "windows": ["cygwin", "msys", "windows"]
     }
 
-    ostype = os.getenv("OSTYPE")
-    if ostype is None:
+    def find_spec(ostype):
+        for os_, prefixes in specs.items():
+            p = next((prefix for prefix in prefixes if ostype.startswith(prefix)), None)
+            if p is not None:
+                return os_
+
+    ostype = platform.system().lower()
+    os_ = find_spec(ostype)
+    if os_ is None:
+        ostype = sh('echo $OSTYPE')
+        os_ = find_spec(ostype)
+    if os_ is None:
         windir = os.getenv("WINDIR")
         if windir is not None and os.path.isdir(windir):
             return "windows"
-    for os_, prefixes in specs.items():
-        p = next((prefix for prefix in prefixes if ostype.startswith(prefix)), None)
-        if p is not None:
-            return os_
     return None
 
 # one could possibly condier using MSYSTEM on msys2, however this pseudo environment
@@ -48,25 +56,31 @@ def platform_shell():
 
 def platform_arch():
     specs = {
-        "x86_64": ["x86_64", "amd64"],
+        "x64": ["x86_64", "amd64"],
         "x86": ["i386", "i686"],
         "arm64v8": ["aarch64"],
         "arm32v7": ["armv7hl", "armv7l"],
         "arm32v6": ["armv6l"],
         "ppc": ["ppc64"],
-        "s390_31": ["s390"],
         "s390x": ["s390x"],
+        "s390_31": ["s390"],
     }
+
+    def find_spec(mach):
+        for arch, prefixes in specs.items():
+            p = next((prefix for prefix in prefixes if mach.startswith(prefix)), None)
+            if p is not None:
+                return arch
     
-    mach = sh("uname -m")
-    for arch, prefixes in specs.items():
-        p = next((prefix for prefix in prefixes if mach.startswith(prefix)), None)
-        if p is not None:
-            return arch
-    return None
+    mach = platform.machine().lower()
+    spec = find_spec(mach)
+    if spec is None:
+        mach = sh("uname -m").lower()
+        spec = find_spec(mach)
+    return spec
 
 if platform_os() == "windows":
-    WINDOWS_SYSTEM_SHELL = detect_windows_system_shell()
+    WINDOWS_SYSTEM_SHELL = Lazy(detect_windows_system_shell)
 
 def platform_root():
     if platform_os() != 'windows':
@@ -78,4 +92,4 @@ def platform_root():
         return "c:/cygwin64/"
     return "/"
 
-WINDOWS = platform_os() == 'windows'
+WINDOWS = Lazy(lambda: platform_os() == 'windows')

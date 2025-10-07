@@ -31,7 +31,7 @@ def platform_os():
         windir = os.getenv("WINDIR")
         if windir is not None and os.path.isdir(windir):
             return "windows"
-    return None
+    return os_
 
 # one could possibly condier using MSYSTEM on msys2, however this pseudo environment
 # varialbe only exists in bash

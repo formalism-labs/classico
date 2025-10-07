@@ -1,14 +1,34 @@
 
+# prepend_to_path() {
+# 	local DIR="$1"
+# 	if [[ $(platform_os) == windows ]]; then
+# 		DIR="$(cygpath -u "$DIR")"
+# 	fi
+#     if [[ -z $PATH ]]; then
+#     	export PATH=$DIR
+#     else
+# 	    [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$DIR:$PATH" 
+#     fi
+#     return 0
+# }
+
 prepend_to_path() {
-	local DIR="$1"
-	if [[ $(platform_os) == windows ]]; then
-		DIR="$(cygpath -u "$DIR")"
-	fi
-    if [[ -z $PATH ]]; then
-    	export PATH=$DIR
+    local DIR="$1"
+    [[ -z $DIR ]] && return 1
+
+    # Remove all existing occurrences of $DIR (as a full path element)
+    local NEWPATH=":$PATH:"
+    NEWPATH="${NEWPATH//:$DIR:/:}"
+    NEWPATH="${NEWPATH#:}"  # strip leading colon
+    NEWPATH="${NEWPATH%:}"  # strip trailing colon
+
+    # Prepend $DIR
+    if [[ -z $NEWPATH ]]; then
+        export PATH="$DIR"
     else
-	    [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$DIR:$PATH" 
+        export PATH="$DIR:$NEWPATH"
     fi
+
     return 0
 }
 
@@ -25,20 +45,51 @@ append_to_path() {
     return 0
 }
 
+# prepend_to_var() {
+#     local VAR="$1"
+#     local DIR="$2"
+# 	local SEP
+# 	if [[ $(platform_os) == windows ]]; then
+# 		SEP=';'
+# 	else
+# 		SEP=':'
+# 	fi
+#     if [[ -z ${!VAR} ]]; then
+#     	export $VAR=$DIR
+#     else
+# 	    [[ "${SEP}${!VAR}${SEP}" != *"${SEP}$DIR${SEP}"* ]] && export $VAR="${DIR}${SEP}${!VAR}"
+#     fi
+#     return 0
+# }
+
 prepend_to_var() {
     local VAR="$1"
     local DIR="$2"
-	local SEP
-	if [[ $(platform_os) == windows ]]; then
-		SEP=';'
-	else
-		SEP=':'
-	fi
-    if [[ -z ${!VAR} ]]; then
-    	export $VAR=$DIR
+    local SEP
+
+    [[ -z $VAR || -z $DIR ]] && return 0
+
+    if [[ $(platform_os) == windows ]]; then
+        SEP=';'
     else
-	    [[ "${SEP}${!VAR}${SEP}" != *"${SEP}$DIR${SEP}"* ]] && export $VAR="${DIR}${SEP}${!VAR}"
+        SEP=':'
     fi
+
+    local VALUE="${!VAR}"
+    local NEWVALUE="${SEP}${VALUE}${SEP}"
+
+    # Remove all existing occurrences of DIR (as full path elements)
+    NEWVALUE="${NEWVALUE//${SEP}${DIR}${SEP}/${SEP}}"
+    NEWVALUE="${NEWVALUE#$SEP}"  # strip leading separator
+    NEWVALUE="${NEWVALUE%$SEP}"  # strip trailing separator
+
+    # Prepend DIR
+    if [[ -z $NEWVALUE ]]; then
+        export "$VAR=$DIR"
+    else
+        export "$VAR=${DIR}${SEP}${NEWVALUE}"
+    fi
+
     return 0
 }
 
@@ -61,4 +112,18 @@ append_to_var() {
 
 #----------------------------------------------------------------------------------------------
 
-export -f prepend_to_path append_to_path prepend_to_var append_to_var
+reconstruct_path() {
+    local dir
+    local sys_path="$PATH"
+    PATH="$__PATH"
+
+    # Prepend directories from system PATH in reverse
+    IFS=':' read -r -a dirs <<< "$sys_path"
+    for (( i=${#dirs[@]}-1; i>=0; i-- )); do
+        [[ -n "${dirs[i]}" ]] && prepend_to_path "${dirs[i]}"
+    done
+}
+
+#----------------------------------------------------------------------------------------------
+
+export -f prepend_to_path append_to_path prepend_to_var append_to_var reconstruct_path

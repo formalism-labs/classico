@@ -16,8 +16,8 @@ function New-FirewallRule {
         [string] $Action = 'Allow'
     )
 
-    $progress = $ProgressPreference
-    $ProgressPreference = 'SilentlyContinue'
+    $progress = $Global:ProgressPreference
+    $Global:ProgressPreference = 'SilentlyContinue'
     try {
     	$rule = Get-NetFirewallRule -Enabled True -Direction Inbound -Action $Action |
 		Get-NetFirewallPortFilter |
@@ -32,7 +32,7 @@ function New-FirewallRule {
 		-Profile Any
     }
     finally {
-        $ProgressPreference = $progress
+        $Global:ProgressPreference = $progress
     }
 }
 

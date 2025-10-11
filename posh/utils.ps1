@@ -16,6 +16,15 @@ Set-Alias -Name EPrint -Value Print-Error
 
 #----------------------------------------------------------------------------------------------
 
+function is_windows() {
+	if ($PSVersionTable.PSVersion.Major -lt 6) {
+		return $true
+	}
+	return $IsWindows
+}
+
+#----------------------------------------------------------------------------------------------
+
 class SpinnerRunspace : RunspaceJob {
 	SpinnerRunspace() : base({
 			$Delay = 100  # ms per frame

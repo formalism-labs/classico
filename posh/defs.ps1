@@ -7,6 +7,6 @@
 . $PSScriptRoot\versions.ps1
 . $PSScriptRoot\class1.ps1
 
-if ($PSVersionTable.OS.OSType -eq "Win32NT") {
+if (is_windows) {
 	. $PSScriptRoot\firewall.ps1
 }

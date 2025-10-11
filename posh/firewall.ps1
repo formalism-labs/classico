@@ -19,15 +19,17 @@ function New-FirewallRule {
     $progress = $ProgressPreference
     $ProgressPreference = 'SilentlyContinue'
     try {
-        if (Get-NetFirewallRule -Enabled True -Direction Inbound -Action $Action |
-            Get-NetFirewallPortFilter |
-            Where-Object { $_.Protocol -eq $Protocol -and $_.LocalPort -eq "$Port" }) {
+    	$rule = Get-NetFirewallRule -Enabled True -Direction Inbound -Action $Action |
+		Get-NetFirewallPortFilter |
+		Where-Object { $_.Protocol -eq $Protocol -and $_.LocalPort -eq "$Port" }
+        if ($rule) {
             return
         }
 
-		New-NetFirewallRule -Name $Name -DisplayName $DisplayName `
-			-Enabled True -Direction Inbound -Protocol $Protocol `
-			-Action $Action -LocalPort $Port
+	New-NetFirewallRule -Name $Name -DisplayName $DisplayName `
+		-Enabled True -Action $Action `
+		-Direction Inbound -Protocol $Protocol -LocalPort $Port `
+		-Profile Any
     }
     finally {
         $ProgressPreference = $progress

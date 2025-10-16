@@ -8,6 +8,10 @@ ifeq ($(CACHE),0)
 DOCKER_BUILD_ARGS += --no-cache
 endif
 
+ifneq ($(DOCKER_CTX),)
+DOCKER_ARGS += -c $(DOCKER_CTX)
+endif
+
 ifneq ($(FAST),1)
 export BUILDKIT_MAX_PARALLELISM=1
 DOCKER_BUILD_ARGS += --progress=plain

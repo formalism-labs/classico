@@ -14,7 +14,7 @@ format = "[$symbol$branch]($style)"
 # symbol = ''
 
 [custom.envenido_userhost]
-command = 'echo "${ENVENIDO_PS1_CONTEXT}${ENVENIDO_USER}@${ENVENIDO_HOST}"'
+command = 'echo "${ENVENIDO_PS1_CONTEXT}${ENVENIDO_USER}@${ENVENIDO_PS1_HOST}"'
 format = "[$output](green)"
 when = "true"
 

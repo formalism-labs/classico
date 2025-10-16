@@ -283,44 +283,44 @@ class WinInstaller(PackageManager):
     def __init__(self, runner):
         super(WinInstaller, self).__init__(runner)
 
-    def install(self, packs, group=False, output="on_error", _try=False, variant=None):
-        if variant is None or variant == 'native':
-            variant = 'choco'
-        elif variant == 'sh':
-            variant = platform_shell()
+    def install(self, packs, group=False, output="on_error", _try=False, _with=None):
+        if _with is None or _with == 'native':
+            _with = 'choco'
+        elif _with == 'sh':
+            _with = platform_shell()
 
-        if variant == 'msys2':
+        if _with == 'msys2':
             return self.run(f"pacman --noconfirm -S {packs}", output=output, _try=_try, sudo=True)
-        elif variant == 'cygwin':
+        elif _with == 'cygwin':
             return self.run(f"apt-cyg install {packs}", output=output, _try=_try, sudo=True)
-        elif variant == 'winget':
+        elif _with == 'winget':
             for pack in packs:
                 if not self.run(f"winget install {pack} --accept-package-agreements --silent", output=output, _try=_try, sudo=True):
                     return False
             return True
-        elif variant == 'choco':
+        elif _with == 'choco':
             return self.run(f"choco install {packs} -y --noprogress", output=output, _try=_try, sudo=True)
-        elif variant == 'scoop':
+        elif _with == 'scoop':
             return self.run(f"scoop install {packs} --yes", output=output, _try=_try, sudo=True)
 
-    def uninstall(self, packs, group=False, output="on_error", _try=False, variant=None):
-        if variant is None or variant == 'native':
-            variant = 'choco'
-        elif variant == 'sh':
-            variant = platform_shell()
+    def uninstall(self, packs, group=False, output="on_error", _try=False, _with=None):
+        if _with is None or _with == 'native':
+            _with = 'choco'
+        elif _with == 'sh':
+            _with = platform_shell()
 
-        if variant == 'msys2':
+        if _with == 'msys2':
             return self.run(f"pacman --noconfirm -R {packs}", output=output, _try=_try, sudo=True)
-        elif variant == 'cygwin':
+        elif _with == 'cygwin':
             return self.run(f"apt-cyg uninstall {packs}", output=output, _try=_try, sudo=True)
-        elif variant == 'winget':
+        elif _with == 'winget':
             for pack in packs:
                 if not self.run(f"winget uninstall {pack} --accept-package-agreements --silent", output=output, _try=_try, sudo=True):
                     return False
             return True
-        elif variant == 'choco':
+        elif _with == 'choco':
             return self.run(f"choco uninstall {packs} -y --noprogress", output=output, _try=_try, sudo=True)
-        elif variant == 'scoop':
+        elif _with == 'scoop':
             return self.run(f"scoop uninstall {packs} --yes", output=output, _try=_try, sudo=True)
     
 #----------------------------------------------------------------------------------------------
@@ -382,7 +382,7 @@ class Setup(OnPlatform):
             self.run(f'mkdir -p "{d}"')
         self.run(f'cp "{file}" "{os.path.join(d, as_file)}"')
 
-    def cat_to_profile_d(self, text: str, as_file: str, force: bool):
+    def cat_to_profile_d(self, text: str, as_file: str, force: bool = False):
         d = self.profile_d
         if not os.path.isdir(d):
             self.run(f'mkdir -p "{d}"')
@@ -502,4 +502,4 @@ class Setup(OnPlatform):
     def setup_dotlocal(self):
         self.cat_to_profile_d(f'''
                 prepend_to_path {Path.home()}/.local/bin
-            ''', "dotlocal.sh")
+            ''', "dotlocal.sh", force=True)

@@ -17,9 +17,8 @@ class SystemSetup(paella.Setup):
         paella.Setup.__init__(self, args.nop)
 
     def common_first(self):
-        # self.install_downloaders()
-        # self.setup_dotlocal()
-        self.install("jq moreutils", variant="msys2")
+        if self.os != 'windows':
+            self.install("jq moreutils")
 
     def linux_first(self):
         pass
@@ -43,7 +42,7 @@ class SystemSetup(paella.Setup):
         self.install_gnu_utils()
 
     def windows(self):
-        pass
+        self.install("jq moreutils", _with="msys2")
 
     def common_last(self):
         pass

@@ -6,6 +6,7 @@ import re
 import shutil
 import sys
 import tempfile
+from pathlib import Path
 try:
     from urllib2 import urlopen  # type: ignore[import-not-found]
 except:

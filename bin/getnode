@@ -66,7 +66,7 @@ class BunSetup(paella.Setup):
         self.cat_to_profile_d(f'''
             export BUN_INSTALL="{home}/.bun"
             prepend_to_path $BUN_INSTALL/bin
-            ''', "bun.sh")
+            ''', "bun.sh", force=True)
         self.rearm()
         jasmine_dir = f"{home}/.jasmine/"
         paella.mkdir_p(jasmine_dir)
@@ -88,7 +88,7 @@ class VoltaSetup(paella.Setup):
         self.cat_to_profile_d(f'''
             export VOLTA_HOME="{home}/.volta"
             prepend_to_path $VOLTA_HOME/bin
-            ''', "volta.sh")
+            ''', "volta.sh", force=True)
         self.rearm()
         self.run(f"volta install node@{NODE_VERSION}")
         self.run("volta install yarn")

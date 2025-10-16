@@ -134,7 +134,7 @@ class CLangSetup(paella.Setup):
         llvm_prefix = sh("brew --prefix llvm@19")
         self.cat_to_profile_d(f'''
             prepend_to_path "{llvm_prefix}/bin"
-            ''', "llvm-19.sh")
+            ''', "llvm-19.sh", force=True)
 
     def common_last(self):
         pass
@@ -187,7 +187,7 @@ class CLangSetup(paella.Setup):
                 '''.format(tar=tar))
         self.cat_to_profile_d(r'''
             prepend_to_path /opt/llvm-13/bin
-            ''', "llvm-13.sh")
+            ''', "llvm-13.sh", force=True)
 
     def install_latest_from_github(self):
         ver = "19.1.0"
@@ -215,7 +215,7 @@ class CLangSetup(paella.Setup):
             '''.format(tar=tar), sudo=True)
         self.cat_to_profile_d(r'''
             prepend_to_path /opt/llvm-19/bin
-            ''', "llvm-19.sh")
+            ''', "llvm-19.sh", force=True)
 
 #----------------------------------------------------------------------------------------------
 

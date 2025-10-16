@@ -16,6 +16,7 @@ from .range_dict import *
 #----------------------------------------------------------------------------------------------
 
 OSNICKS = {
+    "questing": { "docker": "ubuntu:questing" },
     "plucky":   { "docker": "ubuntu:plucky" },
     "oracular": { "docker": "ubuntu:oracular" },
 	"noble":    { "docker": "ubuntu:noble" },
@@ -140,22 +141,23 @@ DEBIAN_VERSIONS = {
 }
 
 UBUNTU_VERSIONS = {
-    'trusty':  '14.04',
-    'xenial':  '16.04',
-    'bionic':  '18.04',
-    'disco':   '19.04',
-    'eoan':    '19.10',
-    'focal':   '20.04',
-    'groovy':  '20.10',
-    'hirsute': '21.04',
-    'impish':  '21.10',
-    'jammy':   '22.04',
-    'kinetic': '22.10',
-    'lunar':   '23.04',
-    'mantic':  '23.10',
-    'noble':   '24.04',
+    'trusty':   '14.04',
+    'xenial':   '16.04',
+    'bionic':   '18.04',
+    'disco':    '19.04',
+    'eoan':     '19.10',
+    'focal':    '20.04',
+    'groovy':   '20.10',
+    'hirsute':  '21.04',
+    'impish':   '21.10',
+    'jammy':    '22.04',
+    'kinetic':  '22.10',
+    'lunar':    '23.04',
+    'mantic':   '23.10',
+    'noble':    '24.04',
     'oracular': '24.10',
-    'plucky':  '25.04',
+    'plucky':   '25.04',
+    'questing': '25.10',
 }
 
 #----------------------------------------------------------------------------------------------

@@ -11,6 +11,7 @@ OS.fedora37=fedora:37
 OS.fedora33=fedora:33
 OS.fedora27=fedora:27
 OS.plucky=ubuntu:plucky
+OS.questing=ubuntu:questing
 OS.oracular=ubuntu:oracular
 OS.noble=ubuntu:noble
 OS.jammy=ubuntu:jammy

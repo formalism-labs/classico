@@ -1,0 +1,35 @@
+
+# Compare two versions: major.minor.patch (each optional)
+# Returns:
+# -1 if v1 < v2
+#  0 if v1 == v2
+#  1 if v1 > v2
+compare_versions() {
+    local v1="$1" v2="$2"
+
+    IFS=. read -r v1_major v1_minor v1_patch <<< "$v1"
+    IFS=. read -r v2_major v2_minor v2_patch <<< "$v2"
+
+    v1_minor=${v1_minor:-0}; v1_patch=${v1_patch:-0}
+    v2_minor=${v2_minor:-0}; v2_patch=${v2_patch:-0}
+
+    if (( v1_major > v2_major )); then
+        echo 1; return
+    elif (( v1_major < v2_major )); then
+        echo -1; return
+    fi
+
+    if (( v1_minor > v2_minor )); then
+        echo 1; return
+    elif (( v1_minor < v2_minor )); then
+        echo -1; return
+    fi
+
+    if (( v1_patch > v2_patch )); then
+        echo 1; return
+    elif (( v1_patch < v2_patch )); then
+        echo -1; return
+    fi
+
+    echo 0
+}

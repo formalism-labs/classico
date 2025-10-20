@@ -32,8 +32,10 @@ userdefs() {
 		export ENVENIDO_CACHE=$(mktemp /tmp/envenido.XXXXXX)
 		chmod 644 $ENVENIDO_CACHE
 	fi
-	$ENVENIDO/userdefs $ENVENIDO_USER_DEFS > $ENVENIDO_CACHE
-	. $ENVENIDO_CACHE
+	if [[ -n $ENVENIDO_USER_DEFS ]]; then
+		$ENVENIDO/userdefs $ENVENIDO_USER_DEFS > $ENVENIDO_CACHE
+		. $ENVENIDO_CACHE
+	fi
 }
 
 export -f userdefs
@@ -51,7 +53,9 @@ export -f sush
 envenido_rearm() {
 	. $ENVENIDO/functions
 	read_profile_d "$ENVENIDO_HOME/.profile.d"
-	read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
+	if [[ -n $ENVENIDO_USER_DEFS ]]; then
+		read_profile_d "$ENVENIDO_USER_DEFS/profile.d"
+	fi
 	userdefs
 }
 

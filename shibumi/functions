@@ -14,6 +14,7 @@ if [[ -d $CLASSICO ]]; then
 	. $CLASSICO/shibumi/types
 	. $CLASSICO/shibumi/profile
 	. $CLASSICO/shibumi/xinstall
+	. $CLASSICO/shibumi/versions
 	
 	if [[ -n $PS1 || $IACT == 1 ]]; then
 		. $CLASSICO/shibumi/interactive

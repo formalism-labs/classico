@@ -32,6 +32,7 @@
 venv/
 __pycache__/
 *\.egg-info/
+*\.cache/
 *.pyc
 *.pyo
 

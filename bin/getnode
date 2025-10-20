@@ -37,7 +37,7 @@ class ModernSetup(paella.Setup):
         self.typescript = args.ts
 
     def common_first(self):
-        self.install_downloaders()
+#        self.install_downloaders()
         
         self.run("mkdir -p $HOME/.fnm")
         self.run("curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell")
@@ -59,7 +59,7 @@ class BunSetup(paella.Setup):
         paella.Setup.__init__(self, nop=args.nop)
 
     def common_first(self):
-        self.install_downloaders()
+#        self.install_downloaders()
 
         self.run("curl -fsSL https://bun.sh/install | SHELL=none bash")
         home = Path.home()
@@ -81,7 +81,7 @@ class VoltaSetup(paella.Setup):
         paella.Setup.__init__(self, nop=args.nop)
 
     def common_first(self):
-        self.install_downloaders()
+#        self.install_downloaders()
 
         self.run("curl https://get.volta.sh | bash -s -- --skip-setup")
         home = Path.home()
@@ -99,17 +99,21 @@ class VoltaSetup(paella.Setup):
 
 parser = argparse.ArgumentParser(description='Install node.js and related software')
 parser.add_argument('-n', '--nop', action="store_true", help='No operation')
-parser.add_argument('--modern', action="store_true", help='Install latest node.js')
+parser.add_argument('--modern', action="store_true", help='Install latest node.js (via fnm)')
 parser.add_argument('--ts', action="store_true", help='Install TypeScript')
 parser.add_argument('--volta', action="store_true", help='Install Volta')
 parser.add_argument('--bun', action="store_true", help='Install Bun')
 args = parser.parse_args()
 
+default = True
 if args.volta:
     VoltaSetup(args).setup()
-elif args.bun:
+    default = False
+if args.bun:
     BunSetup(args).setup()
-elif args.modern:
+    default = False
+if args.modern:
     ModernSetup(args).setup()
-else:
+    default = False
+if default:
     NodeSetup(args).setup()

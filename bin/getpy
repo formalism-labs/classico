@@ -6,7 +6,6 @@ CLASSICO="$(cd $HERE/.. && pwd)"
 . $CLASSICO/shibumi/defs
 
 export DEBIAN_FRONTEND=noninteractive
-export HOMEBREW_NO_AUTO_UPDATE=1
 
 #----------------------------------------------------------------------------------------------
 
@@ -35,6 +34,20 @@ note() {
 
 #----------------------------------------------------------------------------------------------
 
+install_uv() {
+	mkdir -p "$UV_DIR"
+	if [[ ! -f $UV_DIR/uv ]]; then
+		runn "curl -LsSf https://astral.sh/uv/install.sh | env INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$UV_DIR" sh"
+	fi
+	append_to_path "$UV_DIR"
+}
+
+py_rearm() {
+	runn uv pip install --upgrade -e $CLASSICO
+}
+
+#----------------------------------------------------------------------------------------------
+
 OP=""
 [[ $NOP == 1 ]] && OP=echo
 
@@ -55,7 +68,7 @@ fi
 
 #----------------------------------------------------------------------------------------------
 
-PYTHON_VER="${VERSION:-3.13}"
+PYTHON_VER="${VERSION:-3.14}"
 UV_DIR="$HOME/.local/opt/uv"
 VENV_DIR="${VENV:-$HOME/.venv}"
 
@@ -68,20 +81,26 @@ if [[ $FORCE == 1 ]]; then
 	rm -rf $UV_DIR $VENV_DIR
 fi
 
+install_uv
+
+if is_command python; then
+	pyver="$(python --version | cut -f2 -d" ")"
+	pyvercmp="$(compare_versions "$pyver" "$PYTHON_VER")"
+	if (( pyvercmp < 0 )); then
+		if [[ -d $VENV_DIR ]]; then
+			rm -rf $VENV_DIR
+		fi
+	fi
+fi
+
 if [[ -d $VENV_DIR ]]; then
-	eprint "Python already installed"
-	runn uv pip uninstall paella
-	runn uv pip install -e $CLASSICO
+	eprint "Python already installed. Rearming."
+	py_rearm
 	exit 0
 fi
 
-mkdir -p "$UV_DIR"
-if [[ ! -f $UV_DIR/uv ]]; then
-	runn "curl -LsSf https://astral.sh/uv/install.sh | env INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$UV_DIR" sh"
-fi
-append_to_path "$UV_DIR"
 runn uv python install $PYTHON_VER
-profile_d=$(get_profile_d)
+profile_d="$(get_profile_d)"
 if [[ ! -d $VENV_DIR ]]; then
 	runn uv venv --python $PYTHON_VER $VENV_DIR $UV_VENV_ARGS
 fi

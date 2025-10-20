@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO="$(cd $HERE/.. && pwd)"
+. $CLASSICO/shibumi/defs
+
+if [[ $FORCE == 1 ]]; then
+	runn rm -rf $HOME/.venv $HOME/.jasmine
+fi
+
+if [[ ! -d $HOME/.venv ]]; then
+	runn $CLASSICO/bin/getpy
+else
+	runn uv pip install --upgrade -e $CLASSICO
+fi
+
+if [[ ! -d $HOME/.jasmine ]]; then
+	if [[ $os == windows ]]; then
+		runn $CLASSICO/bin/getnode --modern --ts
+	else
+		runn $CLASSICO/bin/getnode --modern --bun
+	fi
+else
+	cd $HOME/.jasmine
+	if is_command bun; then
+		runn cp -f $CLASSICO/jasmine/package.json .
+		runn cp -f $CLASSICO/jasmine/bun.lock .
+		runn bun install
+	else
+		runn cp -f $CLASSICO/jasmine/package.json .
+		runn npm install
+	fi
+fi

@@ -53,9 +53,19 @@ read_profile_d() {
 
 #----------------------------------------------------------------------------------------------
 
+classico_rearm() {
+	read_profile_d
+}
+
 rearm() {
+	if [[ $1 == -F ]]; then
+		FORCE=1 $CLASSICO/sbin/hard-rearm
+	elif [[ $1 == -f ]]; then
+		$CLASSICO/sbin/hard-rearm
+	fi
+
 	if [[ -z $ENVENIDO ]]; then
-		read_profile_d
+		classico_rearm
 	else
 		envenido_rearm
 	fi

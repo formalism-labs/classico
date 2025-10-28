@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import subprocess
 import tempfile
+import textwrap
 
 from .platform import OnPlatform, Platform, platform_os, platform_shell, platform_root
 from .error import *  # noqa: F403

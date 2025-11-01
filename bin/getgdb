@@ -14,7 +14,7 @@ sys.path.insert(0, ROOT)
 import paella
 
 GDB_RELEASES_URL = "https://sourceware.org/pub/gdb/releases"
-GDB_VERSION = "15.1"
+GDB_VERSION = "16.3"
 
 #----------------------------------------------------------------------------------------------
 

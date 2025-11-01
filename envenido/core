@@ -29,7 +29,7 @@ if [[ -z $ENVENIDO_USER ]]; then
 		ENVENIDO_HOME="$HOME"
 	elif [[ -n $SUDO_USER ]]; then
 		ENVENIDO_USER="$SUDO_USER"
-		ENVENIDO_HOME="/home/$ENVENIDO_USER"
+		ENVENIDO_HOME="$(eval echo ~$ENVENIDO_USER)"
 	else
 		ENVENIDO_USER="$(id -un)"
 		ENVENIDO_HOME="$HOME"

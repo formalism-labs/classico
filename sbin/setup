@@ -28,7 +28,7 @@ $CLASSICO/bin/getgnu
 
 profile_d="$(get_profile_d)"
 
-cat <<-'END' > $profile_d/dotlocal.sh
+cat <<-END > $profile_d/dotlocal.sh
 	prepend_to_path $HOME/.local/bin
 	END
 

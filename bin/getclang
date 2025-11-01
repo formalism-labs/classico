@@ -14,10 +14,10 @@ import paella  # noqa: F401
 
 os.environ["PYTHONWARNINGS"] = 'ignore:DEPRECATION::pip._internal.cli.base_command'
 
-CLANG_COMMON_VER="19"
-CLANG_FORMAT_VER="19"
-CLANG_FORMAT_MASTER_COMMIT="46b8640"
-ARM_CLANG_FORMAT_VER="12"
+CLANG_COMMON_VER="21"
+CLANG_FORMAT_VER="20"
+CLANG_FORMAT_MASTER_COMMIT="796e77c"
+ARM_CLANG_FORMAT_VER="20"
 
 #----------------------------------------------------------------------------------------------
 
@@ -190,7 +190,7 @@ class CLangSetup(paella.Setup):
             ''', "llvm-13.sh", force=True)
 
     def install_latest_from_github(self):
-        ver = "19.1.0"
+        ver = "21.1.4"
         if self.os == "macos":
             os = 'macOS'
         elif self.os == 'linux':
@@ -211,11 +211,11 @@ class CLangSetup(paella.Setup):
                           tempdir=True)
         self.run(r'''
             tar -C /opt -xJf {tar}
-            ln -s /opt/`basename {tar} .tar.xz` /opt/llvm-19
+            ln -s /opt/`basename {tar} .tar.xz` /opt/llvm-21
             '''.format(tar=tar), sudo=True)
         self.cat_to_profile_d(r'''
-            prepend_to_path /opt/llvm-19/bin
-            ''', "llvm-19.sh", force=True)
+            prepend_to_path /opt/llvm-21/bin
+            ''', "llvm-21.sh", force=True)
 
 #----------------------------------------------------------------------------------------------
 

@@ -352,9 +352,9 @@ class Setup(OnPlatform):
         self.sudoIf(sudo)
 
     def setup(self):
-        if self.repo_refresh:
+        self.python = "python"  # paella.sh(f"command -v python")
+        if self.repo_refresh and ENV['PAELLA_SETUP_SKIP_PREAMBLE'] != '1':
             self.package_manager.update()
-            self.python = "python"  # paella.sh(f"command -v python")
 
         self.invoke()
 
@@ -433,13 +433,8 @@ class Setup(OnPlatform):
     #------------------------------------------------------------------------------------------
 
     def install_downloaders(self, _try=False):
-        self.run(f"{CLASSICO}/bin/getget")
-        #if self.os == 'linux':
-        #    self.install("ca-certificates", _try=_try)
-        #if not (self.platform.is_redhat_compat() and self.platform.os_version[0] >= 9):
-        #    # has curl-minimal which conflicts with curl
-        #    self.install("curl", _try=_try)
-        #self.install("wget unzip", _try=_try)
+        if ENV['PAELLA_SETUP_SKIP_PREAMBLE'] != '1':
+            self.run(f"{CLASSICO}/bin/getget")
 
     def install_git_lfs_on_linux(self, _try=False):
         if self.arch == 'x64':

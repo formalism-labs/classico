@@ -33,13 +33,13 @@ class CLangFormatSetup(paella.Setup):
         self.install_downloaders()
 
         if self.arch == 'x64':
-            self.run(f"wget -q -O /usr/local/bin/clang-format-{self.version} {CLANG_FORMAT_URL}", sudo=True)
-            self.run(f"chmod +x /usr/local/bin/clang-format-{self.version}", sudo=True)
-            self.run(f"ln -sf /usr/local/bin/clang-format-{self.version} /usr/local/bin/clang-format", sudo=True)
+            self.run(f"wget -q -O ~/.local/bin/clang-format-{self.version} {CLANG_FORMAT_URL}")
+            self.run(f"chmod +x ~/.local/bin/clang-format-{self.version}")
+            self.run(f"ln -sf ~/.local/bin/clang-format-{self.version} ~/.local/bin/clang-format")
         elif self.platform.is_arm():
             self.version = ARM_CLANG_FORMAT_VER
             self.install(f"clang-format-{self.version}")
-            self.run(f"ln -sf `command -v clang-format-{self.version}` /usr/local/bin/clang-format", sudo=True)
+            self.run(f"ln -sf `command -v clang-format-{self.version}` ~/.local/bin/clang-format")
         else:
             try:
                 self.install(f"clang-format")

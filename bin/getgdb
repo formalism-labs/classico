@@ -32,7 +32,7 @@ class GDBSetupModern(paella.Setup):
         paella.Setup.__init__(self, nop=args.nop)
         self.modern = args.modern
         self.keep = args.keep
-        self.prefix = "/usr/local"
+        self.prefix = os.path.abspath(os.path.expanduser("~/.local"))
 
         if self.os == 'macos' and self.arch == 'arm64v8':
             fatal("GDB is not supported on macOS/M1")
@@ -67,7 +67,6 @@ class GDBSetupModern(paella.Setup):
         self.install("make gmp expat guile libiconv xz mpfr zlib flex bison texinfo ncurses")
 
     def macos(self):
-        self.prefix = os.path.abspath(os.path.expanduser("~/.local"))
         self.run(f"{HERE}/getgcc")
         self.install("make gmp expat guile libiconv xz mpfr zlib flex bison texinfo ncurses")
 

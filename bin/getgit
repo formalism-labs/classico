@@ -30,7 +30,7 @@ class GitSetupModern(paella.Setup):
         paella.Setup.__init__(self, nop=args.nop)
         self.install_git_docs = args.docs
         self.git_version = args.version or self.git_latest_ver()
-        self.prefix = "/usr/local"
+        self.prefix = os.path.abspath(os.path.expanduser("~/.local"))
 
     def git_latest_ver(self):
         response = urllib.request.urlopen(self.SCM_GIT_BASE_URL)
@@ -40,9 +40,6 @@ class GitSetupModern(paella.Setup):
 
     def common_first(self):
         self.install_downloaders()
-
-    def macos(self):
-        self.prefix = "~/.local"
 
     def debian_compat(self):
         self.run(f"{HERE}/getgcc")
@@ -57,7 +54,7 @@ class GitSetupModern(paella.Setup):
                       gettext-devel openssl-devel perl-devel zlib-devel getopt")
         if self.install_git_docs:
             self.install("asciidoc xmlto docbook2X")
-            self.run("ln -s /usr/bin/db2x_docbook2texi /usr/bin/docbook2x-texi", sudo=True)
+            self.run("ln -s /usr/bin/db2x_docbook2texi ~/.local/bin/docbook2x-texi")
 
     def common_last(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -84,9 +81,7 @@ class GitSetupModern(paella.Setup):
                     tmp_dir=tmpdirname,
                     git_ver=self.git_version,
                     prefix=self.prefix,
-                    docs="install-doc install-html install-info" if self.install_git_docs else ""),
-                sudo=True)
-
+                    docs="install-doc install-html install-info" if self.install_git_docs else ""))
 
 #----------------------------------------------------------------------------------------------
 

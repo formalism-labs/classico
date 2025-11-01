@@ -21,10 +21,10 @@ _debug "reading core"
 #------------------------------------------------------------------------------------ User/Host
 
 if [[ -z $ENVENIDO_USER ]]; then
-	if [[ $ENVENIDO_CONTAINER == 1 ]]; then
-		ENVENIDO_USER="$(id -un)"
-		ENVENIDO_HOME="$HOME"
-	elif [[ $(id -un) != root ]]; then
+#	if [[ $ENVENIDO_CONTAINER == 1 ]]; then
+#		ENVENIDO_USER="$(id -un)"
+#		ENVENIDO_HOME="$HOME"
+	if [[ $(id -un) != root ]]; then
 		ENVENIDO_USER="$(basename $HOME)"
 		ENVENIDO_HOME="$HOME"
 	elif [[ -n $SUDO_USER ]]; then

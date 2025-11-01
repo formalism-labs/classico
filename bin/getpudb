@@ -8,7 +8,7 @@ CLASSICO=$(cd $HERE/.. && pwd)
 OP=""
 [[ $NOP == 1 ]] && OP=echo
 
-if ! is_command python3; then
+if ! is_command python; then
 	eprint "Python is not installed"
 	exit 1
 fi
@@ -27,7 +27,7 @@ if ! LOG=0 pip_install pudb; then
 		PIP_USER=
 		[[ -z $VIRTUAL_ENV ]] && PIP_USER=--user
 		# --prefix= is required for install to succeed
-		runn python3 setup.py install $PIP_USER --prefix=
+		runn python setup.py install $PIP_USER --prefix=
 		cd /tmp
 		$OP rm -rf $tmpdir
 	fi
@@ -40,7 +40,7 @@ if ! is_command pudb; then
 		cat <<-'EOF' > $pudb
 			#!/usr/bin/env bash
 
-			python3 -m pudb "$@"
+			python -m pudb "$@"
 			EOF
 		chmod +x $pudb
 	fi

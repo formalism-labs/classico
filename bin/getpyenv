@@ -61,10 +61,10 @@ if [[ $USER_ENV == 1 ]]; then
 	# export PATH="$PYENV_ROOT/bin:$PATH"
 	# this will print a rehash warning (due to lack of permissions) - can be ignored
 	eval "$(pyenv init --path)" > /dev/null 2>&1 || true
-	runn python3 -m virtualenv $VENV
+	runn python -m virtualenv $VENV
 	. $VENV/bin/activate
-	runn python3 -m pip install --upgrade pip
-	runn python3 -m pip install -r $CLASSICO/paella/requirements.txt 
+	runn python -m pip install --upgrade pip
+	runn python -m pip install -r $CLASSICO/paella/requirements.txt 
 
 	profile_d="$(get_profile_d)"
 	cat <<-'END' > $profile_d/pyenv.sh
@@ -78,7 +78,7 @@ if [[ $USER_ENV == 1 ]]; then
 		fi
 		END
 
-	cat <<-END > $profile_d/python3-std-venv.sh
+	cat <<-END > $profile_d/python-std-venv.sh
 		if [[ -f $VENV/bin/activate ]]; then
 		    VIRTUAL_ENV_DISABLE_PROMPT=1
 		    . $VENV/bin/activate
@@ -182,7 +182,7 @@ if [[ -n $VERSION ]]; then
 fi
 
 if [[ $SYSTEM == 1 ]]; then
-	runn python3 -m pip install virtualenv
+	runn python -m pip install virtualenv
 fi
 
 if [[ -n $VENV ]]; then
@@ -192,7 +192,7 @@ if [[ -n $VENV ]]; then
 	fi
     echo "# Installing virtualenv ..."
 	$OP export PYENV_VERSION="$VERSION"
-	runn python3 -m pip install virtualenv
-	runn python3 -m virtualenv $VENV
+	runn python -m pip install virtualenv
+	runn python -m virtualenv $VENV
 	echo "# virtualenv installed in $VENV"
 fi

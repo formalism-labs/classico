@@ -73,9 +73,9 @@ install_s3cmd() {
 	if [[ -z $VIRTUAL_ENV ]]; then
 		PIP_USER="--user"
 	fi
-	runn python3 -m pip install $PIP_USER s3cmd
+	runn python -m pip install $PIP_USER s3cmd
 	if [[ $OS == Darwin ]]; then
-		SITE=`python3 -m site --user-base`
+		SITE=`python -m site --user-base`
 		runn ln -sf $SITE/bin/s3cmd $HOME/.local/bin/s3cmd
 	else
 		runn $SUDO ln -sf $HOME/.local/bin/s3cmd /usr/local/bin/s3cmd

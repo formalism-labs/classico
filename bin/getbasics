@@ -5,4 +5,4 @@ HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
 CLASSICO="$(cd $HERE/.. && pwd)"
 . $CLASSICO/shibumi/defs
 
-xinstall mc vim htop btop tmux ack jq
+xinstall mc vim htop btop tmux ripgrep jq

@@ -40,6 +40,7 @@ OSNICKS = {
 	"leap15.6":   { "docker": "opensuse/leap:15.6" },
 	"tumbleweed": { "docker": "opensuse/tumbleweed" },
 
+	"arch":      { "docker": "archlinux:latest" },
 	"archlinux": { "docker": "archlinux:latest" },
 	"manjaro":   { "docker": "manjarolinux/base:latest" },
 
@@ -245,7 +246,7 @@ WINDOWS_BUILDS = RangeDict({
     22621:  { "version": "11",    "internal": "10.0", "code": "22H2" },
     22631:  { "version": "11",    "internal": "10.0", "code": "23H2" },
     26100:  { "version": "11",    "internal": "10.0", "code": "24H2" },
-    26200:  { "version": "11",    "internal": "10.0", "code": "24H2" }, # dev
+    26200:  { "version": "11",    "internal": "10.0", "code": "25H2" },
     27928:  { "version": "11",    "internal": "10.0", "code": "25H2" }, # canary
     })
 

@@ -45,7 +45,7 @@ class ModernSetup(paella.Setup):
             prepend_to_path "{paella.ux_homedir()}/.fnm"
             if [[ -z $FNM_ENV_FILE ]]; then
                 export FNM_ENV_FILE="$(mktemp /tmp/fnm-env-XXXXXX.sh)"
-                fnm env > $FNM_ENV_FILE
+                fnm env --shell $SHELL > $FNM_ENV_FILE
             fi
             . $FNM_ENV_FILE
             # eval "$(fnm env)"

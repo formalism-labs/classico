@@ -21,6 +21,7 @@ include $(MK)/configure.defs
 endif
 
 ifneq ($(MK.docker),)
+include $(MK)/osnick.defs
 include $(MK)/docker.defs
 endif
 

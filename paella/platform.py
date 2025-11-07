@@ -762,7 +762,6 @@ class OnPlatform:
                 elif dist == 'suse':
                     self.suse()
                 elif dist == 'arch':
-                    self.arch()
                     self.archlinux()
                 elif dist == 'linuxmint':
                     self.linuxmint()
@@ -810,9 +809,6 @@ class OnPlatform:
         pass
 
     def linux_last(self):
-        pass
-
-    def arch(self):
         pass
 
     def archlinux(self):

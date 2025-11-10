@@ -93,6 +93,7 @@ class Runner:
                 cmds = ['rearm'] + cmds
             cmd =  "; ".join(cmds)
             cmd_for_log = cmd
+            if sudo is not False:
                 cmd_file = paella.tempfilepath()
                 paella.fwrite(cmd_file, cmd)
                 cmd = f"bash -l {cmd_file}"

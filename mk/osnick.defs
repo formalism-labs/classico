@@ -4,6 +4,7 @@ OSNICK=$(call cached-shell,OSNICK,$(CLASSICO)/bin/platform --osnick)
 DOS.centos7=centos:7
 DOS.centos8=quay.io/centos/centos:stream8
 DOS.centos9=quay.io/centos/centos:stream9
+DOS.centos10=quay.io/centos/centos:stream10
 
 DOS.fedora=fedora:latest
 DOS.fedora37=fedora:37
@@ -45,9 +46,12 @@ DOS.ol8=oraclelinux:8
 DOS.ol9=oraclelinux:9
 DOS.alma8=almalinux:8
 DOS.alma9=almalinux:9
+DOS.alma10=almalinux:10
 DOS.rocky8=rockylinux:8
 DOS.rocky9=rockylinux:9
+DOS.rocky10=rockylinux:10
 DOS.rhel9=redhat/ubi9:latest
+DOS.rhel10=redhat/ubi10:latest
 
 DOS.amzn2=amazonlinux:2
 DOS.amzn22=amazonlinux:2022

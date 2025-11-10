@@ -16,7 +16,7 @@ import paella
 
 class GitSetup(paella.Setup):
     def __init__(self, args):
-        paella.Setup.__init__(self, nop=args.nop)
+        paella.Setup.__init__(self, nop=args.nop, verbose=args.verbose)
 
     def common_first(self):
         self.install("git")
@@ -27,7 +27,7 @@ class GitSetupModern(paella.Setup):
     SCM_GIT_BASE_URL = "https://kernel.org/pub/software/scm/git/"
 
     def __init__(self, args):
-        paella.Setup.__init__(self, nop=args.nop)
+        paella.Setup.__init__(self, nop=args.nop, verbose=args.verbose)
         self.install_git_docs = args.docs
         self.git_version = args.version or self.git_latest_ver()
         self.prefix = os.path.abspath(os.path.expanduser("~/.local"))
@@ -56,6 +56,10 @@ class GitSetupModern(paella.Setup):
             self.install("asciidoc xmlto docbook2X")
             self.run("ln -s /usr/bin/db2x_docbook2texi ~/.local/bin/docbook2x-texi")
 
+    def archlinux(self):
+        self.install("make autoconf diffutils")
+        self.run(f"{HERE}/getgcc")
+        
     def common_last(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             self.run("""
@@ -66,7 +70,7 @@ class GitSetupModern(paella.Setup):
                 export LDFLAGS=-L/usr/local/lib64
                 make configure
                 ./configure --prefix={prefix}
-                make all {docs}
+                make -j all {docs}
                 """.format(
                     base_url=self.SCM_GIT_BASE_URL, 
                     git_ver=self.git_version,
@@ -87,7 +91,7 @@ class GitSetupModern(paella.Setup):
 
 class GitHubCLISetup(paella.Setup):
     def __init__(self, args):
-        paella.Setup.__init__(self, nop=args.nop)
+        paella.Setup.__init__(self, nop=args.nop, verbose=args.verbose)
 
     def debian_compat(self):
         self.run("""
@@ -109,7 +113,7 @@ class GitHubCLISetup(paella.Setup):
 
 class GitExtSetup(paella.Setup):
     def __init__(self, args):
-        paella.Setup.__init__(self, nop=args.nop)
+        paella.Setup.__init__(self, nop=args.nop, verbose=args.verbose)
 
     def common_first(self):
         self.install("tig git-delta")
@@ -118,10 +122,13 @@ class GitExtSetup(paella.Setup):
 
 parser = argparse.ArgumentParser(description='Install Git')
 parser.add_argument('-n', '--nop', action="store_true", help='no operation')
+parser.add_argument('-V', '--verbose', action="store_true", help="Verbose operation")
 parser.add_argument('-v', '--version', metavar='VER', type=str, default=None, help="git version to install")
-parser.add_argument('--classic', action="store_true", help='install git from system repo')
+parser.add_argument('--classic', action="store_true", help='install git from system repo (default)')
 parser.add_argument('--modern', action="store_true", help='install latest git')
+parser.add_argument('--just', action="store_true", help='install specified items only')
 parser.add_argument('--github', action="store_true", help='install GitHub CLI (gh)')
+parser.add_argument('--lfs', action="store_true", help='install Git LFS')
 parser.add_argument('--docs', action="store_true", help='install Git documentation')
 parser.add_argument('--ext', action="store_true", help='install extra utilities')
 parser.add_argument('--no-ext', action="store_true", help='skip extra utilities')

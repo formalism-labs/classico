@@ -63,6 +63,7 @@ OSNICKS = {
 	"alma10": { "docker": "almalinux:10" },
 	"rocky8": { "docker": "rockylinux:8" },
 	"rocky9": { "docker": "rockylinux:9" },
+	"rocky10": { "docker": "rockylinux:10" },
 	"rhel9":  { "docker": "redhat/ubi9:latest" },
 	"rhel10": { "docker": "redhat/ubi10:latest" },
 	"amzn2":  { "docker": "amazonlinux:2" },
@@ -464,6 +465,8 @@ class OSNick:
                 osnick = versions_nicks.get(os_release.version_id(), "")
             if osnick == 'ubuntu14.04':
                 osnick = 'trusty'
+        elif dist == 'arch':
+            osnick = dist
         elif dist == 'ol':
             osnick = dist + str(os_release.version_id().split('.')[0])
         if osnick is None:
@@ -691,7 +694,7 @@ class Platform:
             raise Error("unknown RHEL version")
 
     def is_arch_compat(self):
-        return self.dist == 'arch'
+        return self.dist in ['arch', 'manjaro']
 
     def is_arm(self):
         return self.arch == 'arm64v8' or self.arch == 'arm32v7'
@@ -744,8 +747,7 @@ class OnPlatform:
                 if self.platform.is_redhat_compat():
                     self.redhat_compat()
                 if self.platform.is_arch_compat():
-                    if getattr(self, "archlinux", None) is not None:
-                        self.archlinux()
+                    self.archlinux()
 
                 if dist == 'fedora':
                     self.fedora()
@@ -761,8 +763,6 @@ class OnPlatform:
                     self.oracle()
                 elif dist == 'suse':
                     self.suse()
-                elif dist == 'arch':
-                    self.archlinux()
                 elif dist == 'linuxmint':
                     self.linuxmint()
                 elif dist == 'amzn':

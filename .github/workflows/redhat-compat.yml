@@ -6,8 +6,8 @@ on:
       platforms:
         description: 'Platforms'
         default: '["centos:7", "quay.io/centos/centos:stream8", "quay.io/centos/centos:stream9",
-                   "redhat/ubi9:latest",
-                   "rockylinux:8", "rockylinux:9",
+                   "redhat/ubi9:latest", "redhat/ubi10:latest",
+                   "rockylinux:8", "rockylinux:9", "almalinux:10",
                    "oraclelinux:7", "oraclelinux:8", "oraclelinux:9",
                    "amazonlinux:2", "amazonlinux:2022", "amazonlinux:2023",
                    "fedora:latest"]'

@@ -39,7 +39,7 @@ class OutputMode:
 #----------------------------------------------------------------------------------------------
 
 class Runner:
-    def __init__(self, nop=False, output='on_error'):
+    def __init__(self, nop=False, output='on_error', verbose=False):
         self.nop = nop
         if platform_os() == 'windows':
             try:
@@ -52,6 +52,7 @@ class Runner:
         self.has_sudo = sh('command -v sudo', fail=False) != ''
         self.output = OutputMode(output)
         self.rearm = False
+        self.verbose = verbose
 
     # sudo: True/False/'file'
     def run(self, cmd, at=None, output=None, nop=None, _try=False, sudo=False, echo=True, classico=False, setx=False, **kwargs):
@@ -61,6 +62,7 @@ class Runner:
         # Howerver, "bash -l" will wreck PATH of active virtualenvs, thus python scripts will
         # fail. So if we're in one (i.e. VIRTUAL_ENV is not empty) PATH sould be restored
         # by re-invoking the activation script.
+
         if self.is_root or not self.has_sudo:
             sudo = False
 
@@ -78,8 +80,8 @@ class Runner:
             activate = f"{venv}/bin/activate"
             if not os.path.exists(activate):
                 activate = activate = f"{venv}/Scripts/activate"
-                if not os.path.exists(activate):
-                    raise Error(f"cannot find activate script for venv {venv}")
+            if not os.path.exists(activate):
+                raise Error(f"cannot find activate script for venv {venv}")
 
         cmd_file = None        
         if cmd.find('\n') > -1:
@@ -91,7 +93,6 @@ class Runner:
                 cmds = ['rearm'] + cmds
             cmd =  "; ".join(cmds)
             cmd_for_log = cmd
-            if sudo is not False:
                 cmd_file = paella.tempfilepath()
                 paella.fwrite(cmd_file, cmd)
                 cmd = f"bash -l {cmd_file}"
@@ -129,7 +130,10 @@ class Runner:
             fd, temppath = tempfile.mkstemp()
             os.close(fd)
             temppath = PP(temppath)
-            cmd = f"{{ {cmd}; }} >{temppath} 2>&1"
+            if not self.verbose:
+                cmd = f"{{ {cmd}; }} >{temppath} 2>&1"
+            else:
+                cmd = f"{{ {cmd}; }} 2>&1 | tee {temppath}"
 
         setx_opt = ['-x'] if setx else []
         if at is None:
@@ -139,7 +143,7 @@ class Runner:
                 rc = subprocess.call(bash.split(' ') + setx_opt +  ["-l", "-e", "-c", cmd])
         if rc > 0:
             if not output:
-                if output.on_error():
+                if output.on_error() and not self.verbose:
                     os.system(f"cat {temppath}")
                 eprint("command failed: " + cmd_for_log)
                 sys.stderr.flush()

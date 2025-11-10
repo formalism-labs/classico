@@ -18,6 +18,9 @@ class SystemSetup(paella.Setup):
         self.update_libstdcxx = args.update_libstdcxx
         self.os_ver = self.os_version[0]
 
+    def common_first(self):
+        self.install("make")
+
     def ubuntu(self):
         self.install("build-essential")
         if self.modern:

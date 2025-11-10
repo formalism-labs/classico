@@ -331,7 +331,7 @@ class Setup(OnPlatform):
         self.verbose = verbose
         self.nop = nop
         if verbose:
-            self.runner = Runner(nop=nop, output=True)
+            self.runner = Runner(nop=nop, output=True, verbose=verbose)
         else:
             self.runner = Runner(nop=nop)
         self.stages = [0]

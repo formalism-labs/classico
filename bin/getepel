@@ -23,16 +23,17 @@ CLASSICO=$(cd $HERE/.. && pwd)
 #               https://developers.redhat.com/products/red-hat-software-collections/overview
 # SCL/ol        https://docs.oracle.com/en/operating-systems/oracle-linux/scl-user/#Oracle-Linux
 
-#             centos7  centos8  centos9  rocky8  rocky9  ubi9  ol7  ol8  ol9  amzn2  amzn2022  amzn2023
-# EPEL        v        v        v        v       v       v     v    v    v    v      -         -
-# raven       -        v        v        v       v       v     -    v    v    -      v         v
-# powertools  v        v        -        v       -       -     -    -    -    -      -         -
-# crb         -        -        v        -       v       v*    -    -    -    -      -         -
-# REMI        v        v        v        v       v       v     v    v    v    v      -         -
-# SCL         v        -        -        -       -       -     v*   -    -    v      -         -
+#             centos7  centos8  centos9  rocky8  rocky9  alma10  ubi9  ubi10  ol7  ol8  ol9  amzn2  amzn2022  amzn2023
+# EPEL        v        v        v        v       v       ?       v     v      v    v    v    v      -         -
+# raven       -        v        v        v       v       v       v     ?      -    v    v    -      v         v
+# powertools  v        v        -        v       -       -       -     -      -    -    -    -      -         -
+# crb         -        -        v        -       v       v       v*    v*     -    -    -    -      -         -
+# REMI        v        v        v        v       v       v       v     v      v    v    v    v      -         -
+# SCL         v        -        -        -       -       -       -     -      v*   -    -    v      -         -
 
 # Notes:
 # - rockylinux and almalinux are compatible
+# - rocky10 & EPEL10 not yet available
 # - Rocky Linux repos (https://wiki.rockylinux.org/rocky/repo):
 #   baseos, appstream, powertools(8), crb(9), highavailibility, resilientstorage
 # - for Oracle Linux 7. SCL/ol should be used instead of SCL
@@ -52,9 +53,12 @@ install_raven() {
 	if (( EPEL < 8 )) || [[ $arch != x86_64 ]] || (( NO_RAVEN == 1 )); then
 		return
 	fi
+	if (( EPEL > 9 )); then
+		EPEL=9
+	fi
 
 	# the following may be broken due to CA certificates problems:
-	xinstall https://pkgs.dyn.su/el${EPEL}/base/x86_64/raven-release.el${EPEL}.noarch.rpm
+	xinstall https://pkgs.sysadmins.ws/el${EPEL}/base/x86_64/raven-release.el${EPEL}.noarch.rpm
 	
 	# jun-2023: workaround for raven CA certificates problems - remove when resolved
 	# $CLASSICO/bin/getget
@@ -124,7 +128,7 @@ install_remi() {
 # Repo signature file is also taken from rockylinux:9.
 
 install_rocky_repos() {
-	if [[ $osver != rhel9* ]]; then
+	if [[ $osver != rhel9* && $osver != rhel10* ]]; then
 		return
 	fi
 	# check whether rhel repos are in place
@@ -289,7 +293,8 @@ fi
 [[ $EPEL == 7* ]] && EPEL=7
 [[ $EPEL == 8* ]] && EPEL=8
 [[ $EPEL == 9* ]] && EPEL=9
-if [[ $EPEL != 7 && $EPEL != 8 && $EPEL != 9 ]]; then
+[[ $EPEL == 10* ]] && EPEL=9  # EPEL 10 is broken
+if [[ $EPEL != 7 && $EPEL != 8 && $EPEL != 9 && $EPEL != 10 ]]; then
 	eprint "Cannot determine EPEL version."
 	exit 1
 fi
@@ -342,8 +347,8 @@ if is_command dnf; then
 		if [[ $os == rhel* ]]; then
 			install_rocky_repos
 		fi
-		xinstall epel-release
-		# xinstall --allowerasing https://dl.fedoraproject.org/pub/epel/epel-release-latest-${EPEL}.noarch.rpm
+		# xinstall epel-release
+		xinstall --allowerasing https://dl.fedoraproject.org/pub/epel/epel-release-latest-${EPEL}.noarch.rpm
 	fi
 
 	install_raven

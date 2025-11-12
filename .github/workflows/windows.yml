@@ -5,14 +5,14 @@ on:
     inputs:
       platforms:
         description: 'Platforms'
-        default: '["macos-14", "macos-15-arm64", "macos-26-arm4"]' # "macos-14-arm64", "macos-15"
+        default: '["windows-2022", "windows-2025"]'
 
 jobs:
   macos-matrix:
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l -eo pipefail {0}
+#    defaults:
+#      run:
+#        shell: bash -l -eo pipefail {0}
     strategy:
       matrix:
         os: ${{ fromJson(inputs.platforms) }}

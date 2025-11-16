@@ -759,6 +759,8 @@ class OnPlatform:
                     self.centos()
                 elif dist in ['redhat', 'rhel']:
                     self.redhat()
+                elif dist == 'arch':
+                    pass
                 elif dist == 'ol':
                     self.oracle()
                 elif dist == 'suse':

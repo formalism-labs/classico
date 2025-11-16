@@ -1,0 +1,19 @@
+source 'http://rubygems.org'
+gem 'rake'
+
+gem 'concurrent-ruby', require: 'concurrent'
+gem 'docopt'
+gem 'inifile'
+gem 'linguistics'
+gem 'net-ssh'
+gem 'os'
+gem 'rubyzip'
+gem 'rufus-mnemo'
+gem 'sqlite3'
+gem 'uuid'
+
+gem 'minitest'
+
+# gem 'debug'
+gem 'pry'
+# gem 'pry-debug'

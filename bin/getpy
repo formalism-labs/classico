@@ -38,6 +38,8 @@ install_uv() {
 	mkdir -p "$UV_DIR"
 	if [[ ! -f $UV_DIR/uv ]]; then
 		runn "curl -LsSf https://astral.sh/uv/install.sh | env INSTALLER_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$UV_DIR" sh"
+	else
+		runn uv self update
 	fi
 	append_to_path "$UV_DIR"
 }

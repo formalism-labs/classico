@@ -30,7 +30,7 @@ class SystemSetup(paella.Setup):
                     ''', sudo=True)
                 self.add_repo("ppa:ubuntu-toolchain-r/test")
             if self.os_ver >= 22 or self.platform.is_arm64():
-                gcc_ver = 14
+                gcc_ver = 15
             else:
                 gcc_ver = 10
             if self.install(f"gcc-{gcc_ver} g++-{gcc_ver}", output=False, _try=True) != 0:
@@ -40,7 +40,7 @@ class SystemSetup(paella.Setup):
 
     def debian(self):
         if self.modern and self.os_ver < 11:
-            eprint("cannot install modern gcc for {}".format(self.osnick))
+            eprint(f"cannot install modern gcc for {self.osnick}")
             sys.exit(1)
         self.install("build-essential")
 
@@ -49,7 +49,12 @@ class SystemSetup(paella.Setup):
         if not self.modern:
             return
         self.run(f"{ROOT}/bin/getepel")
-        if self.os_ver == 9:
+        if self.os_ver == 10:
+            self.install("gcc-toolset-14")
+            self.install("gcc-toolset-14-libatomic-devel")
+            self.run(f"rm -f {self.profile_d}/gcc-devtoolset-*.sh", sudo=True)
+            self.cp_to_profile_d("/opt/rh/gcc-toolset-14/enable", "gcc-devtoolset-14.sh")
+        elif self.os_ver == 9:
             self.install("gcc-toolset-13")
             self.install("gcc-toolset-13-libatomic-devel")
             self.run(f"rm -f {self.profile_d}/gcc-devtoolset-*.sh", sudo=True)
@@ -94,7 +99,7 @@ class SystemSetup(paella.Setup):
             self.cp_to_profile_d("/opt/rh/devtoolset-11/enable", "scl-devtoolset-11.sh")
 
     def fedora(self):
-        self.group_install("'C Development Tools and Libraries'")
+        self.group_install("development-tools c-development")
 
     def archlinux(self):
         self.install("gcc")
@@ -104,7 +109,7 @@ class SystemSetup(paella.Setup):
 
     def macos(self):
         if self.modern:
-            gcc_ver = 11
+            gcc_ver = 15
             self.install(f"gcc@{gcc_ver}")
             gccdir = sh(f"brew --prefix gcc@{gcc_ver}")
             self.run(f"ln -sf {gccdir}/bin/gcc-{gcc_ver} $HOME/.local/bin/gcc-{gcc_ver}")

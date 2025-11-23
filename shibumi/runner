@@ -98,6 +98,7 @@ posh() {
 	PREFIX=posh SUFFIX=.ps1 heredoc <<-'END'; local cmd="$FILE"
 		$ErrorActionPreference = 'Stop'
 		END
+	cmd="$(cygpath -m "$cmd")"
 
 	if [[ $(platform_os) == windows ]]; then
 		W_CLASSICO="$(cygpath -m $CLASSICO)"
@@ -113,11 +114,17 @@ posh() {
 	[[ $NOP == 1 ]] && return
 	if (( V < 2 )); then
 		mk_temp log; local log="$FILE"
-		{ "$ps_exe" -File "$cmd" > "$log" 2>&1 ; E=$?; } || true
+		{ "$ps_exe" -File "$cmd" > "$log" 2>&1 ; local E=$?; } || true
 		[[ $E != 0 && $LOG != 0 ]] && cat "$log"
+		rm -f "$log"
 	else
-		{ "$ps_exe" -File $(cygpath -m "$cmd"); E=$?; } || true
+		if [[ $UTF16 == 1 || $UTF8 != 1 ]]; then
+			{ "$ps_exe" -File "$cmd"; local E=$?; } || true
+		elif [[ $UTF8 == 1 ]]; then
+			{ "$ps_exe" -File "$cmd" 2>&1 | iconv -f UTF-16LE -t UTF-8; local E=$?; } || true
+		fi
 	fi
+	rm -f "$cmd"
 	return $E
 }
 

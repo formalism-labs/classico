@@ -106,7 +106,7 @@ class Dnf(PackageManager):
         if not group:
             return self.run(f"dnf install -q -y {packs}", output=output, _try=_try, sudo=True)
         else:
-            return self.run(f"dnf groupinstall -y {packs}", output=output, _try=_try, sudo=True)
+            return self.run(f"dnf group install -y {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
         if not group:
@@ -126,10 +126,7 @@ class TDnf(PackageManager):
         super(TDnf, self).__init__(runner)
 
     def install(self, packs, group=False, output="on_error", _try=False):
-        if not group:
-            return self.run(f"tdnf install -q -y {packs}", output=output, _try=_try, sudo=True)
-        else:
-            return self.run(f"tdnf groupinstall -y {packs}", output=output, _try=_try, sudo=True)
+        return self.run(f"tdnf install -q -y {packs}", output=output, _try=_try, sudo=True)
 
     def uninstall(self, packs, group=False, output="on_error", _try=False):
         if not group:

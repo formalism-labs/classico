@@ -2,7 +2,6 @@
 require 'fileutils'
 require 'pathname'
 require 'find'
-require 'binding_of_caller'
 
 module Bento
 
@@ -172,7 +171,10 @@ end
 #----------------------------------------------------------------------------------------------
 
 def self.mold(erb_template, binding_ = nil, trim: ">")
-	binding_ = binding.of_caller(1) if binding_ == nil
+	if binding_ == nil
+		require 'binding_of_caller'
+		binding_ = binding.of_caller(1)
+	end
 	ERB.new(erb_template, 0, trim).result(binding_)
 end
 

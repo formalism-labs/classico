@@ -1,5 +1,5 @@
 
-require 'binding_of_caller'
+require 'debug'
 
 module Bento
 
@@ -18,7 +18,10 @@ module Class
 	#------------------------------------------------------------------------------------------
 
 	def flags(bind = nil, flagsyms = [], optsym: :opt, withdefaults: [], locals: [])
-		bind = binding.of_caller(1) if bind == nil
+		if bind == nil
+			require 'binding_of_caller'
+			bind = binding.of_caller(1)
+		end
 		opt = eval("#{optsym}", bind)
 		
 		withdefaults.each do |n|
@@ -300,8 +303,31 @@ end
 #----------------------------------------------------------------------------------------------
 
 module Kernel
-	if Kernel.methods.include?(:byebug)
-		alias_method :bb, :byebug
+	if ENV['BB'] == '1'
+		def bb
+			loc = caller_locations(1, 1).first
+			file = loc.absolute_path || loc.path
+			line = loc.lineno + 1
+			
+			if defined?(DEBUGGER__::SESSION)
+				session = DEBUGGER__::SESSION
+			else
+				if defined?(DEBUGGER__)
+					begin
+						DEBUGGER__.console
+					rescue StandardError
+						return
+					end
+				else
+					return
+				end
+				session = DEBUGGER__::SESSION rescue nil
+				return unless session
+			end
+			
+			session.add_line_breakpoint(file, line, oneshot: true)
+			nil
+		end
 	else
 		def bb; end
 	end

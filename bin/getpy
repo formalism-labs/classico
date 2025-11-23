@@ -41,7 +41,7 @@ install_uv() {
 	else
 		runn uv self update
 	fi
-	append_to_path "$UV_DIR"
+	prepend_to_path "$UV_DIR"
 }
 
 py_rearm() {
@@ -85,12 +85,14 @@ fi
 
 install_uv
 
-if is_command python; then
-	pyver="$(python --version | cut -f2 -d" ")"
-	pyvercmp="$(compare_versions "$pyver" "$PYTHON_VER")"
-	if (( pyvercmp < 0 )); then
-		if [[ -d $VENV_DIR ]]; then
-			rm -rf $VENV_DIR
+if [[ $FORCE != 1 ]]; then
+	if is_command python; then
+		pyver="$(python --version | cut -f2 -d" ")"
+		pyvercmp="$(compare_versions "$pyver" "$PYTHON_VER")"
+		if (( pyvercmp < 0 )); then
+			if [[ -d $VENV_DIR ]]; then
+				rm -rf $VENV_DIR
+			fi
 		fi
 	fi
 fi

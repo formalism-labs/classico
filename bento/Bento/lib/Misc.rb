@@ -6,7 +6,6 @@ require 'ipaddr'
 require 'rufus/mnemo'
 require 'zip'
 require 'securerandom'
-require 'uuid'
 
 module Bento
 
@@ -65,7 +64,8 @@ end
 #----------------------------------------------------------------------------------------------
 
 def self.uuid
-	UUID.new.generate
+	# UUID.new.generate
+	SecureRandom.uuid
 end
 
 #----------------------------------------------------------------------------------------------

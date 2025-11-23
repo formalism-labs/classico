@@ -1,5 +1,5 @@
 
-require_relative '../contrib/docopt/docopt.rb'
+require 'docopt'
 require 'pp'
 
 module Bento

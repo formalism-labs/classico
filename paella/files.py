@@ -178,7 +178,7 @@ def win_homedir():
 def cygpath_m(path: str) -> str:
     r'''
     Convert Windows path to cygpath -m style:
-    - Drive letter: C:\Users\Admin -> /c/Users/Admin
+    - Drive letter: C:\Users\Admin -> c:/Users/Admin
     - UNC path: \\server\share\folder -> //server/share/folder
     - POSIX-like paths are returned unchanged
     '''
@@ -204,6 +204,9 @@ def cygpath_m(path: str) -> str:
     return path
 
 def cygpath_am(path):
+    r'''
+    Convert Windows path to absolute cygpath -m style
+    '''
     if not WINDOWS:
         return os.path.abspath(path)
     if path.startswith('/') and not path[1:].startswith('/'):
@@ -211,6 +214,12 @@ def cygpath_am(path):
     return cygpath_m(os.path.abspath(path))
 
 def cygpath_u(path):
+    r'''
+    Convert Windows path to cygpath -u style:
+    - Drive letter: C:\Users\Admin -> /c/Users/Admin
+    - UNC path: \\server\share\folder -> //server/share/folder
+    - POSIX-like paths are returned unchanged
+    '''
     if not WINDOWS:
         return path
     path = cygpath_m(path)

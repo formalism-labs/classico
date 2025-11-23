@@ -10,7 +10,6 @@ gem 'os'
 gem 'rubyzip'
 gem 'rufus-mnemo'
 gem 'sqlite3'
-gem 'uuid'
 
 gem 'minitest'
 

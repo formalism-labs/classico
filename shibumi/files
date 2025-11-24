@@ -52,10 +52,12 @@ cleanup_temp_files() {
 		eprint "temporary files are retained: ${temp_files[@]}"
 		return
 	fi
-    for f in "${temp_files[@]}"; do
-        [[ -f $f ]] && rm -f "$f"
+	for f in "${temp_files[@]}"; do
+    		if [[ -f $f ]]; then
+			rm -f "$f"
+		fi
 		# echo "removed $f"
-    done
+	done
 }
 
 add_exit_trap cleanup_temp_files

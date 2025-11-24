@@ -82,7 +82,7 @@ _debug "USER=$(id -un); SUDO_USER=$SUDO_USER"
 
 if [[ $OSTYPE == cygwin && $ENVENIDO_LOGIN == 1 ]]; then
 	# reconstruct_path
-	[[ -n $__PATH ]] && export PATH="$__PATH"
+	[[ -n $__PATH ]] && export PATH="$(cygpath -u -p "$__PATH")"
 fi
 
 . $ENVENIDO/core
@@ -107,6 +107,6 @@ fi
 
 #----------------------------------------------------------------------------------------------
 
-[[ $OSTYPE == cygwin ]] && export __PATH="$PATH"
+[[ $OSTYPE == cygwin ]] && export __PATH="$(cygpath -u -p "$PATH")"
 
 _debug "envenido: done"

@@ -117,6 +117,7 @@ class Environment:
         ENV['ENVENIDO'] = ENVENIDO
         ENV['ENVENIDO_MIXENV'] = mix
         ENV['ENVENIDO_SHLVL'] = str(int(ENV['SHLVL']) + 1)
+        ENV['ENV_ROOT'] = self.path
 
         if not NOP:
             if ENV['DEBUG'] == "1":

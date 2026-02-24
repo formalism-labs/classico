@@ -124,7 +124,7 @@ class Environment:
                 os.system(f"bashdb {ENVENIDO}/mixenv {mix}")
             else:
                 if WINDOWS:
-                    os.system(f"{PP("/usr/bin/env")} bash -i")
+                    os.system(f"{PP('/usr/bin/env')} bash -i")
                 else:
                     os.execv("/usr/bin/env", ["env", "bash", "-i"])
 

@@ -7,3 +7,4 @@ virtualenv
 dataclasses
 click
 typer
+typing_extensions

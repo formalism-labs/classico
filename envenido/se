@@ -117,13 +117,14 @@ class Environment:
         ENV['ENVENIDO'] = ENVENIDO
         ENV['ENVENIDO_MIXENV'] = mix
         ENV['ENVENIDO_SHLVL'] = str(int(ENV['SHLVL']) + 1)
+        ENV['ENV_ROOT'] = self.path
 
         if not NOP:
             if ENV['DEBUG'] == "1":
                 os.system(f"bashdb {ENVENIDO}/mixenv {mix}")
             else:
                 if WINDOWS:
-                    os.system(f"{PP("/usr/bin/env")} bash -i")
+                    os.system(f"{PP('/usr/bin/env')} bash -i")
                 else:
                     os.execv("/usr/bin/env", ["env", "bash", "-i"])
 

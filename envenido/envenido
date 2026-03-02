@@ -48,7 +48,7 @@ if [[ $IACT == 1 ]]; then
 	export ENVENIDO_IACT=1
 else
 	unset ENVENIDO_IACT
-	[[ -n $PS1 ]] && export ENVENIDO_IACT=1
+	[[ $- == *i* ]] && export ENVENIDO_IACT=1
 fi
 
 shopt -q login_shell && ENVENIDO_LOGIN=1

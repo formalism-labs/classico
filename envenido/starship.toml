@@ -12,6 +12,7 @@ read_only = ''
 [git_branch]
 format = "[$symbol$branch]($style)"
 # symbol = ''
+only_attached = true
 
 [custom.envenido_userhost]
 command = 'echo "${ENVENIDO_PS1_CONTEXT}${ENVENIDO_USER}@${ENVENIDO_PS1_HOST}"'
@@ -26,3 +27,7 @@ format = "[$env_value](purple)"
 # variable = 'ENVENIDO_FULL_TITLE'
 # format = "[$env_value](red)"
 
+[git_status]
+disabled = false
+ignore_submodules = true
+timeout = 300

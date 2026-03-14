@@ -78,7 +78,8 @@ class SystemSetup(paella.Setup):
                 self.cp_to_profile_d("/opt/rh/devtoolset-11/enable", "scl-devtoolset-11.sh")
                 if self.dist != "centos":
                     return
-                tar = paella.wget(f"s3.tebi.io/classico/gnu/libstdc%2B%2B.so.6.0.25-linux-{self.arch}.tgz",
+                b2_url = "https://formalism-classico.s3.eu-central-003.backblazeb2.com"
+                tar = paella.wget(f"{b2_url}/classico/gnu/libstdc%2B%2B.so.6.0.25-linux-{self.arch}.tgz",
                                   dest='libstdcxx.tgz', tempdir=True)
                 dir = os.path.dirname(tar)
                 self.run(f'''

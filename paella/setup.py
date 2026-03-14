@@ -485,9 +485,11 @@ class Setup(OnPlatform):
             return
         if self.arch != 'x64':
             raise Error("Cannot install gnu tar on non-x64 platform")
+        b2_url = "https://formalism-classico.s3.eu-central-003.backblazeb2.com"
         self.run("""
             dir=$(mktemp -d /tmp/tar.XXXXXX)
-            (cd $dir; wget --no-verbose -O tar.tgz  https://s3.tebi.io/classico/gnu/gnu-tar-1.32-x64-centos7.tgz; tar -xzf tar.tgz -C /; )
+            b2_url="https://formalism-classico.s3.eu-central-003.backblazeb2.com"
+            (cd $dir; wget --no-verbose -O tar.tgz $b2_url/gnu/gnu-tar-1.32-x64-centos7.tgz; tar -xzf tar.tgz -C /; )
             rm -rf $dir
             """, sudo=True)
 

@@ -10,11 +10,12 @@ OP=""
 
 OS="$(platform_os)"
 url=""
+B2_URL="https://formalism-classico.s3.eu-central-003.backblazeb2.com"
 if [[ $OS == linux || $OS == windows ]]; then
 	if (( BASH_VERSINFO >= 4 )); then
-		url="https://s3.tebi.io/classico/bashdb/bashdb-5.0-1.1.2-linux-bin.tgz"
+		url="$B2_URL/classico/bashdb/bashdb-5.0-1.1.2-linux-bin.tgz"
 	elif (( BASH_VERSINFO == 4 )); then
-		url="https://s3.tebi.io/classico/bashdb/bashdb-4.4-1.0.1-linux-bin.tgz"
+		url="$B2_URL/classico/bashdb/bashdb-4.4-1.0.1-linux-bin.tgz"
 	else
 		eprint "Unsupported bash version: $BASH_VERSINFO"
 		exit 1
@@ -23,7 +24,7 @@ elif [[ $OS == macos ]]; then
 	if (( BASH_VERSINFO == 5 )); then
 		xinstall bashdb
 	elif (( BASH_VERSINFO == 3 )); then
-		url="https://s3.tebi.io/classico/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
+		url="$B2_URL/classico/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
 	fi
 else
 	eprint "Unsupported OS"

@@ -4,7 +4,7 @@ import sys
 from subprocess import Popen, PIPE
 import tempfile
 
-from .platform import platform_os, platform_shell
+from .platform_base import platform_os, platform_shell
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)

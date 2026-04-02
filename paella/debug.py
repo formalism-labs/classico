@@ -1,6 +1,6 @@
 
 import os
-from .platform import platform_os
+from .platform_base import platform_os
 
 #----------------------------------------------------------------------------------------------
 

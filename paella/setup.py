@@ -7,7 +7,7 @@ import tempfile
 import textwrap
 from typing import Optional
 
-from .platform import OnPlatform, Platform, platform_os, platform_shell
+from .platform_info import OnPlatform, Platform, platform_os, platform_shell
 from .error import *  # noqa: F403
 from .runner import Runner, OutputMode
 from .files import cygpath_m, homedir

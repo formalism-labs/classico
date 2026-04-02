@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 import textwrap
 
-from .platform import OnPlatform, Platform, platform_os, platform_shell, platform_root
+from .platform_info import OnPlatform, Platform, platform_os, platform_shell, platform_root
 from .error import *  # noqa: F403
 import paella
 

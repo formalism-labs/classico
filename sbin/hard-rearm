@@ -5,6 +5,8 @@ HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
 CLASSICO="$(cd $HERE/.. && pwd)"
 . $CLASSICO/shibumi/defs
 
+os="$(platform_os)"
+
 if [[ $FORCE == 1 ]]; then
 	runn rm -rf $HOME/.venv $HOME/.jasmine
 fi

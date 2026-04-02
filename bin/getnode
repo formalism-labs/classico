@@ -23,6 +23,7 @@ class NodeSetup(paella.Setup):
 
     def common_first(self):
         self.install("nodejs npm")
+        self.run("npm install -g npm@latest")
         self.run("npm install -g corepack@latest")
         self.run("corepack enable; corepack prepare yarn@stable --activate")
         self.run("npm install -g --force pnpm@latest-10")
@@ -53,6 +54,7 @@ class ModernSetup(paella.Setup):
         self.rearm()
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")
         self.run("corepack enable; corepack prepare yarn@stable --activate")
+        self.run("npm install -g npm@latest")
         self.run("npm install -g --force pnpm@latest")
         if self.typescript:
             self.run("npm install typescript -g --save-dev")

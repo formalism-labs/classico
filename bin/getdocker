@@ -11,19 +11,24 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, ROOT)
 import paella
 
+DOCKER_CLI_VER = '29.3.0'
+
 #----------------------------------------------------------------------------------------------
 
 class DockerSetup(paella.Setup):
     def __init__(self, args):
         paella.Setup.__init__(self, nop=args.nop)
         self.no_exp = args.no_exp
+        self.just_client = args.just_client
 
         if args.remote_host:
-            if not args.remote_user or not args.remote_key:
-                raise paella.Error("remote host requires remote user and remote key")
+            #if not args.remote_user or not args.remote_key:
+            #    raise paella.Error("remote host requires remote user and remote key")
+            if not args.remote_user:
+                raise paella.Error("remote host requires remote user")
 
-            if not Path(args.remote_key).exists():
-                raise paella.Error(f"remote key file not found: {args.remote_key}")
+            #if not Path(args.remote_key).exists():
+            #    raise paella.Error(f"remote key file not found: {args.remote_key}")
 
             self.remote_host = args.remote_host
             self.remote_user = args.remote_user
@@ -82,16 +87,37 @@ class DockerSetup(paella.Setup):
         else:
             self.run("service docker restart", sudo=True)
 
-    def setup_remote_host(self):
-        if (Path.home()/".ssh/docker/id_rsa").exists():
-            raise paella.Error("remote docker key (~/.ssh/docker/id_rsa) exists, not overwriting it.")
-        
-        self.run("mkdir -p ~/.ssh/docker")
-        self.run(f'cp "{self.remote_key}" ~/.ssh/docker/id_rsa')
-        self.run("chmod 400 ~/.ssh/docker/id_rsa")
+    def windows(self):
+        if not self.just_client:
+            return
 
-        paella.mkdir_p(Path.home()/".ssh/config.d")
-        docker_config = Path.home()/".ssh/config.d/docker.conf"
+        docker_exe = f"$HOME/.local/bin/docker.exe"
+        if not Path(docker_exe).exists():
+            url = f"https://download.docker.com/win/static/stable/x86_64/docker-{DOCKER_CLI_VER}.zip"
+            self.run(f"""
+                dir=$(mktemp -d /tmp/docker-cli.XXXXXX)
+                curl -fsSL -o $dir/docker.zip {url}
+                unzip -q -o $dir/docker.zip docker/docker.exe -d $dir
+                mkdir -p $HOME/.local/bin
+                cp $dir/docker/docker.exe {docker_exe}
+                rm -rf $dir
+                """)
+
+        # remote context
+        if self.remote_host:
+            self.setup_remote_host()
+
+    def setup_remote_host(self):
+        home = paella.homedir()
+        if (home/".ssh/docker/id_rsa").exists():
+            print("remote docker key (~/.ssh/docker/id_rsa) exists, not overwriting it.")
+        else:
+            self.run("mkdir -p ~/.ssh/docker")
+            self.run(f'cp "{self.remote_key}" ~/.ssh/docker/id_rsa')
+            self.run("chmod 400 ~/.ssh/docker/id_rsa")
+
+        paella.mkdir_p(home/".ssh/config.d")
+        docker_config = home/".ssh/config.d/docker.conf"
         if not docker_config.exists():
             paella.fwrite(docker_config, HH(f"""
                 Host {self.remote_host}
@@ -102,7 +128,7 @@ class DockerSetup(paella.Setup):
         self.run(f"chmod 400 {docker_config}")
 
         found_include = False
-        ssh_config = Path.home()/".ssh/config"
+        ssh_config = home/".ssh/config"
         try:
             with open(ssh_config, "r") as f:
                 for line in f:
@@ -137,10 +163,12 @@ parser.add_argument('--just-enable-exp', action="store_true", help='no install, 
 parser.add_argument('--no-exp', action="store_true", help="don't enable experimental features")
 parser.add_argument('--compose', action="store_true", help='install Docker Compose')
 parser.add_argument('--just-compose', action="store_true", help='just install Docker Compose')
+parser.add_argument('--just-client', action="store_true", help='Install docker CLI client only (no daemon)')
 parser.add_argument('--remote-host', type=str, help='Remote docker host')
 parser.add_argument('--remote-user', type=str, help='Username for remote docker host SSH access')
 parser.add_argument('--remote-key', type=str, help='Private key file for remote docker host SSH access')
 
+h = paella.homedir()
 args = parser.parse_args()
 
 if not args.just_compose:

@@ -161,17 +161,17 @@ def homedir():
     shell = platform_shell()
     if shell in ['msys2', 'cygwin', 'wsl']:
         return platform_root() + f"home/{os.getenv('USERNAME')}"
-    return cygpath_m(Path.home())
+    return Path(cygpath_m(Path.home()))
         
 def ux_homedir():
     if platform_os() != 'windows':
         return Path.home()
-    return f"/home/{os.getenv('USERNAME')}"
+    return Path(f"/home/{os.getenv('USERNAME')}")
 
 def win_homedir():
     if platform_os() != 'windows':
         return homedir()
-    return cygpath_m(os.getenv('USERPROFILE'))
+    return Path(cygpath_m(os.getenv('USERPROFILE')))
 
 #----------------------------------------------------------------------------------------------
 

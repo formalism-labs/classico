@@ -3,7 +3,6 @@ import sys
 import inspect
 import os.path
 from collections import namedtuple
-import dataclasses
 
 if sys.version_info > (3, 0):
     from .utils3 import *
@@ -56,5 +55,6 @@ def to_dataclass(name, d):
         d = {}
     elif type(d) is not dict:
         raise TypeError("Not a dict")
+    import dataclasses
     D = dataclasses.make_dataclass(name, d)
     return D(**d)

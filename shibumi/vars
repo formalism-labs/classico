@@ -4,19 +4,19 @@
 # 	if [[ $(platform_os) == windows ]]; then
 # 		DIR="$(cygpath -u "$DIR")"
 # 	fi
-#     if [[ -z $PATH ]]; then
-#     	export PATH=$DIR
-#     else
-# 	    [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$DIR:$PATH" 
-#     fi
-#     return 0
+#   if [[ -z $PATH ]]; then
+#   	export PATH=$DIR
+#   else
+# 	  [[ ":$PATH:" != *":$DIR:"* ]] && export PATH="$DIR:$PATH" 
+#   fi
+#   return 0
 # }
 
 prepend_to_path() {
     local DIR="$1"
     [[ -z $DIR ]] && return 1
 
-    if [[ $(platform_os) == windows ]]; then
+    if [[ $(platform_os) == windows && $CYGPATH != 1 ]]; then
         DIR="$(cygpath -u "$DIR")"
     fi
 
@@ -38,7 +38,7 @@ prepend_to_path() {
 
 append_to_path() {
     local DIR="$1"
-    if [[ $(platform_os) == windows ]]; then
+    if [[ $(platform_os) == windows && $CYGPATH != 1 ]]; then
         DIR="$(cygpath -u "$DIR")"
     fi
     if [[ -z $PATH ]]; then
@@ -58,12 +58,12 @@ append_to_path() {
 # 	else
 # 		SEP=':'
 # 	fi
-#     if [[ -z ${!VAR} ]]; then
-#     	export $VAR=$DIR
-#     else
-# 	    [[ "${SEP}${!VAR}${SEP}" != *"${SEP}$DIR${SEP}"* ]] && export $VAR="${DIR}${SEP}${!VAR}"
-#     fi
-#     return 0
+#   if [[ -z ${!VAR} ]]; then
+#   	export $VAR=$DIR
+#   else
+# 	  [[ "${SEP}${!VAR}${SEP}" != *"${SEP}$DIR${SEP}"* ]] && export $VAR="${DIR}${SEP}${!VAR}"
+#   fi
+#   return 0
 # }
 
 prepend_to_var() {

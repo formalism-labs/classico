@@ -69,7 +69,7 @@ class BunSetup(paella.Setup):
 #        self.install_downloaders()
 
         self.run("curl -fsSL https://bun.sh/install | SHELL=none bash")
-        home = Path.home()
+        home = paella.homedir()
         self.cat_to_profile_d(f'''
             export BUN_INSTALL="{home}/.bun"
             prepend_to_path $BUN_INSTALL/bin
@@ -91,7 +91,7 @@ class VoltaSetup(paella.Setup):
 #        self.install_downloaders()
 
         self.run("curl https://get.volta.sh | bash -s -- --skip-setup")
-        home = Path.home()
+        home = paella.homedir()
         self.cat_to_profile_d(f'''
             export VOLTA_HOME="{home}/.volta"
             prepend_to_path $VOLTA_HOME/bin

@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import argparse
+
+HERE = os.path.dirname(__file__)
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
+sys.path.insert(0, ROOT)
+import paella
+
+#----------------------------------------------------------------------------------------------
+
+VS_BUILDTOOLS_ID = "Microsoft.VisualStudio.2022.BuildTools"
+VCTOOLS_WORKLOAD = "Microsoft.VisualStudio.Workload.VCTools"
+
+WIN_SDKS = {
+    18362: "Microsoft.VisualStudio.Component.Windows10SDK.18362",
+    19041: "Microsoft.VisualStudio.Component.Windows10SDK.19041",
+    20348: "Microsoft.VisualStudio.Component.Windows10SDK.20348",
+    22000: "Microsoft.VisualStudio.Component.Windows11SDK.22000",
+    22621: "Microsoft.VisualStudio.Component.Windows11SDK.22621",
+    26100: "Microsoft.VisualStudio.Component.Windows11SDK.26100",
+}
+
+DEFAULT_WIN_SDK = 26100
+
+VSWHERE = os.path.join(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
+                       r"Microsoft Visual Studio\Installer\vswhere.exe")
+
+VS2022_LINK = "c:/root/dev/vs2022"
+WINSDK_LINK = "c:/root/dev/libs/winsdk/10"
+WINSDK_DIR = "c:/Program Files (x86)/Windows Kits/10"
+
+#----------------------------------------------------------------------------------------------
+
+class MSVCSetup(paella.Setup):
+    def __init__(self, args):
+        paella.Setup.__init__(self, nop=args.nop, verbose=args.verbose)
+        self.sdk = args.sdk
+        self.no_sdk = args.no_sdk
+        self.force = args.force
+
+    def windows(self):
+        if not self.force and self.is_installed():
+            vermsg = self.get_vs_info()
+            eprint(f"MSVC Build Tools are present:\n{vermsg}")
+            return
+
+        components = [f"--add {VCTOOLS_WORKLOAD}"]
+        if not self.no_sdk:
+            sdk_build = self.sdk
+            if sdk_build not in WIN_SDKS:
+                eprint(f"Unknown SDK build number: {sdk_build}")
+                eprint(f"Available: {', '.join(str(k) for k in WIN_SDKS)}")
+                sys.exit(1)
+            components.append(f"--add {WIN_SDKS[sdk_build]}")
+        components.append("--includeRecommended --passive --norestart")
+        override = " ".join(components)
+
+        self.run(f'winget.exe install --id {VS_BUILDTOOLS_ID} --silent --accept-source-agreements --accept-package-agreements --override "{override}"',
+                 sudo=False, output=True)
+
+        self.create_symlinks()
+
+    def create_symlinks(self):
+        vs_path = self.get_vs_path()
+        if vs_path is None:
+            eprint("Cannot find VS installation path - skipping symlinks")
+            return
+
+        self.run(f'mkdir -p "$(dirname "{VS2022_LINK}")"')
+        self.run(f'ln -s "{vs_path}" "{VS2022_LINK}"', sudo=True)
+
+        self.run(f'mkdir -p "$(dirname "{WINSDK_LINK}")"')
+        self.run(f'ln -s "{WINSDK_DIR}" "{WINSDK_LINK}"', sudo=True)
+
+    def get_vs_path(self):
+        try:
+            vswhere = sh(f'cygpath -u "{VSWHERE}"').strip()
+            return sh(f'"{vswhere}" -products \\* -requires {VCTOOLS_WORKLOAD} -property installationPath').strip()
+        except:
+            return None
+
+    def is_installed(self):
+        try:
+            vswhere = sh(f'cygpath -u "{VSWHERE}"').strip()
+            sh(f'"{vswhere}" -products \\* -requires {VCTOOLS_WORKLOAD} -property installationPath')
+            return True
+        except:
+            return False
+
+    def get_vs_info(self):
+        try:
+            vswhere = sh(f'cygpath -u "{VSWHERE}"').strip()
+            return sh(f'"{vswhere}" -products \\* -requires {VCTOOLS_WORKLOAD} -property installationVersion')
+        except:
+            return "(unknown version)"
+
+#----------------------------------------------------------------------------------------------
+
+parser = argparse.ArgumentParser(description='Install Microsoft Visual C++ Build Tools and Windows SDK.')
+parser.add_argument('-n', '--nop', action="store_true", help='No operation')
+parser.add_argument('-V', '--verbose', action="store_true", help='Verbose operation')
+parser.add_argument('--force', action="store_true", default=False, help='Install even if already present')
+parser.add_argument('--sdk', type=int, default=DEFAULT_WIN_SDK, metavar='BUILD',
+                    help=f'Windows SDK build number (default: {DEFAULT_WIN_SDK}). Available: {", ".join(str(k) for k in WIN_SDKS)}')
+parser.add_argument('--no-sdk', action="store_true", default=False, help='Do not include any Windows SDK')
+
+args = parser.parse_args()
+
+if paella.platform_os() != 'windows':
+    eprint("getmsvc: this script is for Windows only.")
+    sys.exit(1)
+
+try:
+    MSVCSetup(args).setup()
+except Exception as x:
+    eprint(str(x))
+    sys.exit(1)

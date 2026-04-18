@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+PROGNAME="${BASH_SOURCE[0]}"
+HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
+CLASSICO=$(cd $HERE/.. && pwd)
+. $CLASSICO/shibumi/defs
+
+os=$(platform_os)
+
+#----------------------------------------------------------------------------------------------
+
+if [[ $1 == --help || $1 == help || $HELP == 1 ]]; then
+	cat <<-'END'
+		[ARGVARS...] getwsl [--help|help]
+
+		Install and configure Windows Subsystem for Linux (WSL)
+
+		Argument variables:
+		DISTRO=name   Install specific Linux distribution (default: Ubuntu)
+		FORCE=1       Force reinstall even if WSL is present
+		VERBOSE=n     Verbosity level (1: print commands, 2: print results)
+		NOP=1         Print commands, don't execute
+		HELP=1        Print help
+
+	END
+	exit 0
+fi
+
+#----------------------------------------------------------------------------------------------
+
+if [[ $os != windows ]]; then
+    eprint "WSL is only available on Windows"
+    exit 1
+fi
+
+DISTRO="${DISTRO:-Ubuntu}"
+
+# Check if WSL is already installed and working (unless FORCE=1)
+if [[ $FORCE != 1 ]]; then
+	if ! posh wsl --status | grep -q "is not installed"; then
+		eprint "WSL already installed. Use FORCE=1 to reinstall."
+        exit 0
+    fi
+fi
+
+#----------------------------------------------------------------------------------------------
+
+# Pre-flight system compatibility checks
+eprint "Checking WSL system requirements..."
+
+build=$(posh '(Get-CimInstance Win32_OperatingSystem).BuildNumber')
+if (( build < 19041 )); then
+	eprint "WSL 2 requires Windows 10 version 2004 (build 19041) or later. Current build: $build"
+	exit 1
+fi
+
+if [[ $(posh '([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)') != True ]]; then
+	eprint "WSL installation requires Administrator privileges. Please run as Administrator."
+	exit 1
+fi
+
+{ posh <<-'END'; E=$?; } || true
+    
+    # Check virtualization support using systeminfo
+    $systemInfo = systeminfo /fo csv | ConvertFrom-Csv
+    $hyperVRequirements = $systemInfo.'Hyper-V Requirements'
+    
+    if ($hyperVRequirements -match "VM Monitor Mode Extensions: No" -or 
+        $hyperVRequirements -match "Virtualization Enabled In Firmware: No") {
+        Print-Error "Hardware virtualization is not enabled in BIOS/UEFI. Please enable Intel VT-x or AMD-V in your system BIOS."
+        exit 1
+    }
+    
+    # Check available memory (minimum 4GB recommended)
+    $totalMemoryGB = [Math]::Round($osInfo.TotalVisibleMemorySize / 1024 / 1024, 2)
+    if ($totalMemoryGB -lt 4) {
+        Write-Warning "Less than 4GB RAM detected ($totalMemoryGB GB). WSL may run slowly."
+    }
+    
+    # Check available disk space (minimum 8GB recommended)
+    $systemDrive = Get-CimInstance Win32_LogicalDisk | Where-Object DeviceID -eq $env:SystemDrive
+    $freeSpaceGB = [Math]::Round($systemDrive.FreeSpace / 1024 / 1024 / 1024, 2)
+    if ($freeSpaceGB -lt 8) {
+        Write-Warning "Less than 8GB free disk space ($freeSpaceGB GB). Consider freeing up space."
+    }
+    
+    Write-Host "System requirements verified" -ForegroundColor Green
+END
+
+#----------------------------------------------------------------------------------------------
+
+# Install WSL
+eprint "Installing WSL..."
+
+posh <<-END
+    # Enable WSL feature
+    Write-Host "Enabling WSL features..." -ForegroundColor Yellow
+    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+    
+    # Download and install WSL 2 Linux kernel update
+    Write-Host "Installing WSL 2 kernel update..." -ForegroundColor Yellow
+    \$kernelUrl = "https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi"
+    \$kernelMsi = "\$env:TEMP\wsl_update_x64.msi"
+    
+    try {
+        Invoke-WebRequest -Uri \$kernelUrl -OutFile \$kernelMsi -UseBasicParsing
+        Start-Process msiexec.exe -Wait -ArgumentList "/i", \$kernelMsi, "/quiet", "/norestart"
+        Remove-Item \$kernelMsi -Force
+    } catch {
+        Write-Warning "Could not download kernel update automatically. You may need to install it manually."
+    }
+    
+    # Set WSL 2 as default
+    Write-Host "Setting WSL 2 as default version..." -ForegroundColor Yellow
+    wsl --set-default-version 2
+    
+    # Install specified distribution
+    Write-Host "Installing $DISTRO distribution..." -ForegroundColor Yellow
+    wsl --install -d $DISTRO
+    
+    Write-Host "WSL installation completed successfully!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Next steps:" -ForegroundColor Yellow
+    Write-Host "1. Reboot your system if prompted"
+    Write-Host "2. Launch $DISTRO from Start menu to complete setup"
+    Write-Host "3. Create a user account when prompted"
+    Write-Host ""
+    Write-Host "Useful commands:" -ForegroundColor Cyan
+    Write-Host "  wsl --list --verbose    # List installed distributions"
+    Write-Host "  wsl --shutdown          # Shutdown all WSL instances"
+    Write-Host "  wsl -d $DISTRO          # Launch $DISTRO"
+END
+
+exit 0

@@ -41,6 +41,14 @@ fi
 
 rearm
 
+if [[ $os == windows ]]; then
+	NATIVE=1 CHOCO=1 xinstall gsudo
+	if [[ -f /c/tools/gsudo/Current/gsudo.exe ]]; then
+		cp /c/tools/gsudo/Current/gsudo.exe ~/.local/bin
+		ln -s ~/.local/bin/gsudo.exe ~/.local/bin/sudo
+	fi
+fi
+
 runn $CLASSICO/bin/getpy
 rearm
 

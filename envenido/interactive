@@ -66,6 +66,9 @@ export ENVENIDO_PS1="$PS1"
 if [[ -n $ENVENIDO_CACHE && -e $ENVENIDO_CACHE ]]; then
 	_debug "read cache"
 	. $ENVENIDO_CACHE
+elif [[ -n $ENVENIDO_USER_DEFS ]]; then
+	_debug "cache missing (cleaned up by a previous shell), regenerating"
+	userdefs
 fi
 
 #----------------------------------------------------------------------------------------------

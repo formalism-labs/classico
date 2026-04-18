@@ -18,7 +18,7 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 $CLASSICO/shibumi/setup
 
 if [[ $os == windows ]]; then
-	posh <<-'END'
+	poshhh <<-'END'
 		. $CLASSICO/bin/getget.ps1
 		END
 fi

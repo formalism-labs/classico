@@ -54,6 +54,6 @@ if [[ $missing == 1 ]]; then
 fi
 
 if [[ $os == windows ]]; then
-    posh "& \$CLASSICO/bin/getget.ps1"
+    poshhh "& \$CLASSICO/bin/getget.ps1"
 fi
 exit 0

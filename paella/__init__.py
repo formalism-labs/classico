@@ -6,6 +6,7 @@ from .classes import *
 from .meta import *
 from .debug import *
 from .utils import *
+from .path import *
 from .files import *
 from .func import *
 from .text import *

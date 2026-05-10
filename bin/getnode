@@ -3,7 +3,6 @@
 import sys
 import os
 import argparse
-from pathlib import Path
 import re
 import tempfile
 import shutil

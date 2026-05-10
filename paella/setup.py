@@ -1,7 +1,6 @@
 
 import os
 import sys
-from pathlib import Path
 import subprocess
 import tempfile
 import textwrap
@@ -10,7 +9,7 @@ from typing import Optional
 from .platform_info import OnPlatform, Platform, platform_os, platform_shell
 from .error import *  # noqa: F403
 from .runner import Runner, OutputMode
-from .files import cygpath_m, homedir
+from .path import cygpath_m, homedir
 import paella
 
 HERE = os.path.dirname(__file__)
@@ -495,5 +494,5 @@ class Setup(OnPlatform):
 
     def setup_dotlocal(self):
         self.cat_to_profile_d(f'''
-                prepend_to_path {Path.home()}/.local/bin
+                prepend_to_path {homedir()}/.local/bin
             ''', "dotlocal.sh", force=True)

@@ -81,8 +81,8 @@ heredoc() {
 #----------------------------------------------------------------------------------------------
 
 win_homedir() {
-    if [[ $(platform_os) != 'windows' ]]; then
-        echo $HOME
+	if [[ $(platform_os) != 'windows' ]]; then
+		echo $HOME
 	fi
-    cygpath -m $USERPROFILE
+	cygpath -m $USERPROFILE
 }

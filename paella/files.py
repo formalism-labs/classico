@@ -6,13 +6,11 @@ import re
 import shutil
 import sys
 import tempfile
-from pathlib import Path
+
 try:
     from urllib2 import urlopen  # type: ignore[import-not-found]
 except:
     from urllib.request import urlopen
-
-from .platform_base import platform_os, platform_shell, platform_root, WINDOWS
 
 #----------------------------------------------------------------------------------------------
 
@@ -40,7 +38,7 @@ def fappend(fname, text, mode='a', encode=True):
         return file.write(text)
 
 #----------------------------------------------------------------------------------------------
-
+  
 def freplace(fname, between, text, all=False, append_if_missing=True, mode='r+', encode=True):
     """
     Replace text between two patterns (including the pattern lines) with the provided text.
@@ -147,87 +145,3 @@ def rm_rf(path, careful=True):
         shutil.rmtree(path)
     elif os.path.islink(path) or os.path.exists(path):
         os.remove(path)
-
-#----------------------------------------------------------------------------------------------
-
-def relpath(dir, rel):
-    return os.path.abspath(os.path.join(dir, rel))
-
-#----------------------------------------------------------------------------------------------
-
-def homedir():
-    if platform_os() != 'windows':
-        return Path.home()
-    shell = platform_shell()
-    if shell in ['msys2', 'cygwin', 'wsl']:
-        return platform_root() + f"home/{os.getenv('USERNAME')}"
-    return Path(cygpath_m(Path.home()))
-        
-def ux_homedir():
-    if platform_os() != 'windows':
-        return Path.home()
-    return Path(f"/home/{os.getenv('USERNAME')}")
-
-def win_homedir():
-    if platform_os() != 'windows':
-        return homedir()
-    return Path(cygpath_m(os.getenv('USERPROFILE')))
-
-#----------------------------------------------------------------------------------------------
-
-def cygpath_m(path: str) -> str:
-    r'''
-    Convert Windows path to cygpath -m style:
-    - Drive letter: C:\Users\Admin -> c:/Users/Admin
-    - UNC path: \\server\share\folder -> //server/share/folder
-    - POSIX-like paths are returned unchanged
-    '''
-    path = path.replace('\\', '/')
-
-    # Windows drive letter
-    if len(path) >= 2 and path[1] == ':' and path[0].isalpha():
-        drive = path[0].lower()
-        rest = path[2:].lstrip('/')
-        return f'{drive}:/{rest}'
-
-    # UNC paths
-    if path.startswith('//') or path.startswith('\\\\'):
-        # Remove leading slashes
-        path = path.lstrip('/').lstrip('\\')
-        parts = path.split('/', 2)  # server, share, rest
-        if len(parts) >= 2:
-            server, share = parts[0], parts[1]
-            rest = parts[2] if len(parts) == 3 else ''
-            return f'//{server}/{share}/{rest}'.rstrip('/')
-        return f'//{path}'
-
-    return path
-
-def cygpath_am(path):
-    r'''
-    Convert Windows path to absolute cygpath -m style
-    '''
-    if not WINDOWS:
-        return os.path.abspath(path)
-    if path.startswith('/') and not path[1:].startswith('/'):
-        path = platform_root() + path[1:]
-    return cygpath_m(os.path.abspath(path))
-
-def cygpath_u(path):
-    r'''
-    Convert Windows path to cygpath -u style:
-    - Drive letter: C:\Users\Admin -> /c/Users/Admin
-    - UNC path: \\server\share\folder -> //server/share/folder
-    - POSIX-like paths are returned unchanged
-    '''
-    if not WINDOWS:
-        return path
-    path = cygpath_m(path)
-    root = platform_root()
-    if path.startswith(root):
-        return path[len(root)-1:]
-    if len(path) >= 2 and path[1] == ':' and path[0].isalpha():
-        drive = path[0].lower()
-        rest = path[2:].lstrip('/')
-        return f'/{drive}/{rest}'
-    return path

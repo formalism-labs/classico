@@ -3,7 +3,6 @@
 import sys
 import os
 import argparse
-from pathlib import Path
 import re
 import tempfile
 import urllib.request
@@ -12,6 +11,7 @@ HERE = os.path.dirname(__file__)
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, ROOT)
 import paella
+from paella import Path
 
 GDB_RELEASES_URL = "https://sourceware.org/pub/gdb/releases"
 GDB_VERSION = "16.3"
@@ -85,8 +85,8 @@ class GDBSetupModern(paella.Setup):
         if not self.keep:
             paella.rm_rf(self.base_dir)
 
-        gdbinit = f"{Path.home()}/.gdbinit"
-        if os.path.exists(gdbinit):
+        gdbinit = Path.home()/".gdbinit"
+        if gdbinit.exists():
             gdbinit += ".classico"
         paella.fwrite(gdbinit, HH(r"""
             set print demangle on

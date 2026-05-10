@@ -4,12 +4,12 @@ import sys
 import os
 import argparse
 import getpass
-from pathlib import Path
 
 HERE = os.path.dirname(__file__)
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, ROOT)
 import paella
+from paella import Path
 
 DOCKER_CLI_VER = '29.3.0'
 
@@ -108,7 +108,7 @@ class DockerSetup(paella.Setup):
             self.setup_remote_host()
 
     def setup_remote_host(self):
-        home = paella.homedir()
+        home = Path.home()
         if (home/".ssh/docker/id_rsa").exists():
             print("remote docker key (~/.ssh/docker/id_rsa) exists, not overwriting it.")
         else:

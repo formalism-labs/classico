@@ -23,6 +23,7 @@ if [[ $OS == linux || $OS == windows ]]; then
 elif [[ $OS == macos ]]; then
 	if (( BASH_VERSINFO == 5 )); then
 		xinstall bashdb
+		exit 0
 	elif (( BASH_VERSINFO == 3 )); then
 		url="$B2_URL/classico/bashdb/bashdb-3.1-0.09-macosx-bin.tgz"
 	fi

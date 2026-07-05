@@ -40,7 +40,7 @@ error_trap() {
 	local LINE="${BASH_LINENO[0]}"
 	>&2 echo
 	>&2 echo "In $__PROGNAME:"
-	>&2 awk 'NR>L-4 && NR<L+4 { printf "%-5d%4s%s\n",NR,(NR==L?">>> ":""),$__PROGNAME }' L=$LINE $__PROGNAME
+	>&2 gawk 'NR>L-4 && NR<L+4 { printf "%-5d%4s%s\n",NR,(NR==L?">>> ":""),$__PROGNAME }' L=$LINE $__PROGNAME
 	>&2 echo
 	exit $exit_code
 }

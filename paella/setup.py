@@ -226,7 +226,7 @@ class Brew(PackageManager):
         # brew will fail if package is already installed
         rc = True
         for pack in packs.split():
-            rc = self.run(f"brew list {PACK} &>/dev/null || brew install {pack}",
+            rc = self.run(f"brew list {pack} &>/dev/null || brew install {pack}",
                      output=output, _try=_try, sudo=False) and rc
         return rc
 

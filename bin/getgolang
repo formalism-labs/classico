@@ -32,7 +32,7 @@ else
 	exit 1
 fi
 
-tar=$(mktemp /tmp/golang.XXXXX.tag.gz)
+tar=$(mktemp /tmp/golang.tag.gz.XXXXX)
 runn wget --no-verbose -O $tar https://dl.google.com/go/go${GOLANG_VER}.${GOLANG_OS}-${GOLANG_ARCH}.tar.gz
 if [[ $OS == Darwin ]]; then
     local_dir=/usr/local/opt

@@ -31,4 +31,5 @@ for x in make find xargs sed tar mktemp du; do
 		ln -s $src $dest
 	fi
 done
+(cd $BINDIR; ln -s gmktemp mktemp)
 exit 0

@@ -22,9 +22,10 @@ if [[ $os == windows ]]; then
 		. $CLASSICO/bin/getget.ps1
 		END
 fi
-$CLASSICO/bin/getget
-$CLASSICO/bin/getbashdb
-$CLASSICO/bin/getgnu
+runn $CLASSICO/bin/getget
+runn $CLASSICO/bin/getbashdb
+runn $CLASSICO/bin/getgnu
+runn $CLASSICO/bin/getpy
 
 profile_d="$(get_profile_d)"
 
@@ -49,7 +50,6 @@ if [[ $os == windows ]]; then
 	fi
 fi
 
-runn $CLASSICO/bin/getpy
 rearm
 
 if [[ $os == windows ]]; then

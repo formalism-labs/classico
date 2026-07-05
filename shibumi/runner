@@ -172,13 +172,13 @@ poshhh() {
 
 	if [[ $V == 2 ]]; then
 		if [[ $UTF8 == 1 ]]; then
-			{ "$ps_exe" -File "$cmd" 2>&1 | iconv -f UTF-16LE -t UTF-8; local E=$?; } || true
+			{ "$ps_exe" -ExecutionPolicy Bypass -File "$cmd" 2>&1 | iconv -f UTF-16LE -t UTF-8; local E=$?; } || true
 		else
-			{ "$ps_exe" -File "$cmd"; local E=$?; } || true
+			{ "$ps_exe" -ExecutionPolicy Bypass -File "$cmd"; local E=$?; } || true
 		fi
 	else
 		mk_temp log; local log="$FILE"
-		{ "$ps_exe" -File "$cmd" > "$log" 2>&1 ; local E=$?; } || true
+		{ "$ps_exe" -ExecutionPolicy Bypass -File "$cmd" > "$log" 2>&1 ; local E=$?; } || true
 		if [[ $E != 0 && $LOG != 0 ]]; then
 			if [[ $UTF8 == 1 ]]; then
 				cat "$log" | iconv -f UTF-16LE -t UTF-8

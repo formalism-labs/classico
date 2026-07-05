@@ -9,7 +9,8 @@ dir=$(mktemp -d /tmp/starfish.XXXXXX)
 wget -q -O $dir/install.sh https://starship.rs/install.sh
 cd $dir
 mkdir -p $HOME/.local/bin
-runn sh ./install.sh --bin-dir $HOME/.local/bin --force
+[[ $(platform_os) == windows ]] && SUDO=
+runn sudo=$SUDO sh ./install.sh --bin-dir $HOME/.local/bin --force
 cd $HERE
 rm -rf $dir
 

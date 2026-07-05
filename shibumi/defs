@@ -1,5 +1,6 @@
 
 # Typically invoked with:
+#
 # PROGNAME="${BASH_SOURCE[0]}"
 # HERE="$(cd "$(dirname "$PROGNAME")" &>/dev/null && pwd)"
 # ROOT=$(cd $HERE/... && pwd)
@@ -22,13 +23,19 @@ OP=""
 [[ $SUDO == 1 ]] && _SUDO="$SUDO"
 
 SUDO=
-if [[ $(id -u) != 0 ]]; then
+if [[ $OSTYPE == msys* || $OSTYPE == cygwin* ]]; then
+	if fsutil dirty query $SYSTEMDRIVE &> /dev/null; then
+		if command -v gsudo; then
+			SUDO=gsudo
+		fi
+	fi
+elif [[ $(id -u) != 0 ]]; then
 	if command -v sudo &> /dev/null; then
 		SUDO=sudo
 	fi
-fi
-if [[ $_SUDO == 1 && -n $SUDO ]]; then
-	$SUDO echo -n
+	if [[ $_SUDO == 1 && -n $SUDO ]]; then
+		$SUDO true
+	fi
 fi
 
 error_trap() {

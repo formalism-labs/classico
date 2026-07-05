@@ -59,10 +59,18 @@ xinstall() {
 }
 
 SUDO=
-if [[ $(id -u) != 0 ]]; then
-	if is_command sudo; then
+if [[ $OSTYPE == msys* || $OSTYPE == cygwin* ]]; then
+	if fsutil dirty query $SYSTEMDRIVE &> /dev/null; then
+		if command -v gsudo; then
+			SUDO=gsudo
+		fi
+	fi
+elif [[ $(id -u) != 0 ]]; then
+	if command -v sudo &> /dev/null; then
 		SUDO=sudo
-		sudo true
+	fi
+	if [[ $_SUDO == 1 && -n $SUDO ]]; then
+		$SUDO true
 	fi
 fi
 

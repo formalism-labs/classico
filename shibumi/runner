@@ -117,9 +117,9 @@ posh() {
 	fi
 
 	if [[ $UTF8 == 1 ]]; then
-		{ "$ps_exe" -File "$cmd" 2>&1 | iconv -f UTF-16LE -t UTF-8; local E=$?; } || true
+		{ "$ps_exe" -ExecutionPolicy Bypass -File "$cmd" 2>&1 | iconv -f UTF-16LE -t UTF-8; local E=$?; } || true
 	else
-		{ "$ps_exe" -File "$cmd"; local E=$?; } || true
+		{ "$ps_exe" -ExecutionPolicy Bypass -File "$cmd"; local E=$?; } || true
 	fi
 
 	rm -f "$cmd"

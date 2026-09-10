@@ -11,6 +11,7 @@ DOS.fedora37=fedora:37
 DOS.fedora33=fedora:33
 DOS.fedora27=fedora:27
 
+DOS.resolute=ubuntu:resolute
 DOS.plucky=ubuntu:plucky
 DOS.questing=ubuntu:questing
 DOS.oracular=ubuntu:oracular

@@ -41,15 +41,16 @@ class ModernSetup(paella.Setup):
         
         self.run("mkdir -p $HOME/.fnm")
         self.run("curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell")
+        # modification of the original fnm shell configuration is needed in order for it
+        # not to override other PATH components like ~/.local/bin
         self.cat_to_profile_d(f'''
-            prepend_to_path "{paella.ux_homedir()}/.fnm"
-            if [[ -z $FNM_ENV_FILE ]]; then
-                export FNM_ENV_FILE="$(mktemp /tmp/fnm-env.sh.XXXXXX)"
-                # fnm env --shell $(basename $SHELL) > $FNM_ENV_FILE
-                fnm env --shell bash > $FNM_ENV_FILE
+            append_to_path "/home/talon/.fnm"
+            if [[ ! -f $FNM_ENV_FILE ]]; then
+                export FNM_ENV_FILE="$(mktemp /tmp/fnm-env-XXXXXX.sh)"
+                fnm env --shell $(basename $SHELL) | grep -vw PATH | gsed 's|\\\\|/|g' > $FNM_ENV_FILE
+                echo 'append_to_path $(cygpath -u $FNM_MULTISHELL_PATH)' >> $FNM_ENV_FILE
             fi
             . $FNM_ENV_FILE
-            # eval "$(fnm env)"
             ''', "node.sh", force=True)
         self.rearm()
         self.run(f"fnm use --install-if-missing {NODE_VERSION}")

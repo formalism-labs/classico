@@ -80,6 +80,8 @@ spin_while() {
 
 #----------------------------------------------------------------------------------------------
 
+# Use posh when you just want to run PowerShell and see all its output
+#
 # usage:
 # posh command...
 # or:
@@ -128,6 +130,9 @@ posh() {
 
 #----------------------------------------------------------------------------------------------
 
+# Use poshhh when you want to suppress output on success but reveal it on failure, 
+# do dry-runs (NOP), or control verbosity
+#
 # usage:
 # poshhh command...
 # or:
